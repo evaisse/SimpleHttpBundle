@@ -1,0 +1,33 @@
+
+{% set connection_percent = (100 * time.connection) / time.total %}
+{% set process_percent = (100 * (time.total - time.connection)) / time.total %}
+
+<table>
+    <tbody>
+        <tr>
+            <th>
+
+                {% if debugLink %}
+                    <a style="float: right;display: inline-block" href="{{ debugLink }}" target="_blank">
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAgElEQVQYV5XQMQpCQQxF0fNX4G60stFGdyBYuSE3InwQBG20URDclPKKkSAfxXST3FxepvO9nm3c/QDHOGAU8IxZWXhggkB7bHAMGP0clwI3aN36DawRAvVY4VYzxljBHba444pp4CFjve8t+Rtc4vTxVYtc22LFmEeaQ5XlSLwAJVAaAqoDe/cAAAAASUVORK5CYII=" />
+                        External debug link
+                    </a>
+                {% endif %}
+
+                Duration total {{ (time.total * 1000)|number_format(0, '', '') }} ms,
+        
+                wait {{ (time.connection * 1000)|number_format(0, '', '') }} ms - {{ connection_percent|number_format(0, '', '') }}%,
+                process {{ ((time.total - time.connection) * 1000)|number_format(0, '', '') }} ms - {{ process_percent|number_format(0, '', '') }}%
+
+            </th>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <div class="progress">
+                    <div class="progress-bar warning" style="width: {{ connection_percent|number_format(0) }}%;">wait {{ connection_percent|number_format(0) }} %</div>
+                    <div class="progress-bar {% if error %}error{% else %}success{% endif %}" style="width: {{ process_percent|number_format(0) }}%;">process {{ process_percent|number_format(0) }} %</div>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>

@@ -1,0 +1,37 @@
+services:
+
+    simple_http.logger:
+        class: Symfony\Bridge\Monolog\Logger
+        arguments: [simple_http]
+        calls:
+            - [pushHandler, [@simple_http.logger.handler]]
+
+    simple_http.logger.handler:
+        class: Monolog\Handler\StreamHandler
+        arguments: [%kernel.root_dir%/logs/%kernel.environment%.log, 0]
+
+    simple_http:
+        class:      evaisse\SimpleHttpBundle\Service\Facade
+        arguments:  [@service_container]
+
+    simple_http.service:
+        class:      evaisse\SimpleHttpBundle\Http\Service
+
+    simple_http.request:
+        class:      evaisse\SimpleHttpBundle\Http\ServiceRequest
+
+    simple_http.proxy:
+        class:      evaisse\SimpleHttpBundle\Http\Kernel
+        arguments:  [@service_container]
+
+    simple_http.profiler.data_collector:
+        class: evaisse\SimpleHttpBundle\DataCollector\ProfilerDataCollector
+        calls:
+            - [ setStopWatch, [ @debug.stopwatch ] ]
+        tags:
+            - { name: data_collector, template: "SimpleHttpBundle:Collector:profiler", id: "profiler" }
+
+    simple_http.twig.extension:
+        class: evaisse\SimpleHttpBundle\Twig\Extension
+        tags:
+            - { name: twig.extension }

@@ -1,0 +1,57 @@
+
+<div id="call-{{ index }}" class="http-call http-call--{{ call.request.method | lower }} {{ call.request.schemeAndHttpHost | simple_http_md5 }}">
+    
+    <h3 class="http-call__title">
+        <span class="http-call__title__method">{{ call.request.method }}</span>
+        <span class="http-call__title__webhost">{{ call.request.schemeAndHttpHost }}</span><span class="http-call__path">{{ call.request.requestUri }}</span>
+    </h3>
+
+    <div class="http-call__details tabs">
+        <ul class="tabs-nav">
+            <li>
+                <a href="javascript://" class="active">Summary</a>
+            </li>
+            <li>
+                <a href="javascript://">Request</a>
+            </li>
+            {% if call.response %}
+            <li>
+                <a href="javascript://">Response {{ call.response.statusCode | simple_http_format_http_code }}</a>
+            </li>
+            {% endif %}
+            {% if call.error %}
+            <li>
+                <a href="javascript://">Error</a>
+            </li>
+            {% endif %}
+            <li>
+                <a href="javascript://">Raw</a>
+            </li>
+        </ul>
+
+        <div class="tabs-content">
+            <div class="active">
+                {% include 'SimpleHttpBundle:Collector:partials/summary.html.twig' with { 'time': call.time, 'response': call.response, 'error': call.error, 'debugLink': call.debugLink } only %}
+            </div>
+            <div>
+                {% include 'SimpleHttpBundle:Collector:partials/request.html.twig' with {'index':index, 'request': call.request, 'time': call.time} %}
+            </div>
+
+            {% if call.response %}
+                <div>
+                    {% include 'SimpleHttpBundle:Collector:partials/response.html.twig' with {'index':index, 'response': call.response} %}
+                </div>
+            {% endif %}
+            {% if call.error %}
+                <div>
+                    {% include 'SimpleHttpBundle:Collector:partials/error.html.twig' with {'index':index, 'error': call.error} %}
+                </div>
+            {% endif %}
+            <div>
+                {{ dump(call) }}
+            </div>
+
+        </div>
+
+    </div>
+</div>

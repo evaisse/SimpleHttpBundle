@@ -1,0 +1,64 @@
+{% macro display_array_recursive(array, separator = ', ', opening_char = '[', closing_char = ']') -%}
+{{ opening_char }}
+{%- for key, value in array -%}
+    {%- if value is iterable -%}
+        {{ key }} => {{ _self.display_array_recursive(value, separator, opening_char, closing_char) }}
+    {%- else -%}
+        {{ key }} => {{ value }}
+        {%- if not loop.last %}{{ separator }}{% endif -%}
+    {%- endif -%}
+{%- endfor -%}
+{{ closing_char }}
+{%- endmacro %}
+
+
+
+{% if request.query %}
+<h5>Query Parameters</h5>
+
+<table>
+    <tbody>
+        {% for name,parameter in request.query %}
+        <tr>
+            <th>{{ name }}</th>
+            <td>
+                {% if parameter is iterable %}
+                    {{ _self.display_array_recursive(parameter) }}
+                {% else %}
+                    {{ parameter }}
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+
+{% if request.content %}
+<h5>Body</h5>
+
+<table>
+    <tbody>
+        <tr>
+            <td style="padding:0">
+                {{ request.content | simple_http_beautify(request.contentType) }}
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endif %}
+
+<h5>Headers</h5>
+<table>
+    <tbody>
+    {% for header in request.headers %}
+        <tr>
+            <td>{{ header|join('<strong>, </strong>') }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+
+
