@@ -1,6 +1,8 @@
 <?php
 /**
- * Created by PhpStorm.
+ * A statement that prepare a request and execute them.
+ * The statement contains request, response and errors
+ *
  * User: evaisse
  * Date: 29/05/15
  * Time: 14:21
@@ -11,8 +13,12 @@ namespace evaisse\SimpleHttpBundle\Http;
 use React\Promise\Deferred;
 use React\Promise\Promise;
 
-class Transaction
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+
+class Statement
 {
+
+    use ContainerAwareTrait;
 
     /**
      * $request : Service Request
@@ -52,11 +58,22 @@ class Transaction
     protected $deffered;
 
 
-    public $container;
+    /**
+     * timeout in milliseconds
+     * @var integer timeout in milliseconds
+     */
+    protected $timeout;
+
 
     /**
-     * [__construct description]
-     * @param Request $request [description]
+     * true if request has already been sent, false otherwsie
+     * @var boolean true if request has already been sent, false otherwsie
+     */
+    protected $sent;
+
+    /**
+     *
+     * @param Request $request An http request object to send
      */
     public function __construct(Request $request)
     {
@@ -66,7 +83,26 @@ class Transaction
     }
 
 
+    /**
+     * @return int timeout in milliseconds
+     */
+    public function getTimeout()
+    {
+        return $this->timeout;
+    }
 
+    /**
+     * @param int $timeout timeout in milliseconds
+     */
+    public function setTimeout($timeout)
+    {
+        $this->timeout = (int)$timeout;
+    }
+
+
+    /**
+     * @return Promise A promise object that allow to decouple your execution from async execution
+     */
     public function getPromise()
     {
         return $this->promise;
@@ -151,6 +187,22 @@ class Transaction
     }
 
     /**
+     * @param string $json a json string, if omitted, request params will be used to built json string
+     * @return self
+     */
+    public function json($json = null)
+    {
+        $this->request->headers->set('content-type', 'application/json');
+        $this->request->headers->set('charset', 'utf-8');
+        $this->request->headers->set('accept', 'application/json');
+        if ($this->request->getMethod() !== "GET") {
+            $json = $json === null ? json_encode($this->request->request->all()) : (string)$json;
+            $this->request->setContent($json);
+        }
+        return $this;
+    }
+
+    /**
      * Get value for $response
      * @return Response Service response
      */
@@ -193,13 +245,6 @@ class Transaction
         return (bool)$this->error;
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->getUid();
-    }
 
     /**
      * Get unique id for this service
@@ -211,10 +256,58 @@ class Transaction
     }
 
 
-    public function execute()
+    /**
+     * @param Kernel $httpKernel
+     * @return mixed
+     * @throws Error
+     * @throws Exception
+     */
+    public function execute(Kernel $httpKernel = null)
     {
-        $this->container->get('simple_http')->execute([$this]);
-        return $this->getResult();
+        $this->sent = true;
+        $http = $httpKernel ? $httpKernel : $this->container->get('simple_http.helper');
+        $http->execute([$this]);
+
+        if ($this->hasError()) {
+            throw $this->getError();
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * @return boolean
+     */
+    public function isSent()
+    {
+        return $this->sent;
+    }
+
+    /**
+     * @param boolean $sent
+     */
+    public function setSent($sent)
+    {
+        $this->sent = $sent;
+    }
+
+
+    /**
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        if (!$this->isSent()) {
+            $this->execute();
+        }
+
+        if ($this->hasError()) {
+            return '';
+        }
+
+        return $this->response->getContent();
     }
 
 }

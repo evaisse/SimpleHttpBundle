@@ -12,9 +12,12 @@
     "suggest": {
     },
     "license": "MIT",
-        "autoload": {
-        "psr-0": { "evaisse\\SimpleHttpBundle": "" }
+    "autoload": {
+        "psr-0": {
+            "evaisse\\SimpleHttpBundle": ""
+        }
     },
+    "target-dir": "evaisse/SimpleHttpBundle",
     "authors": [
         {
             "name": "Emmanuel VAÏSSE",

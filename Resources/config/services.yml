@@ -1,5 +1,9 @@
 services:
 
+    http:
+        alias: simple_http.helper
+
+
     simple_http.logger:
         class: Symfony\Bridge\Monolog\Logger
         arguments: [simple_http]
@@ -10,15 +14,9 @@ services:
         class: Monolog\Handler\StreamHandler
         arguments: [%kernel.root_dir%/logs/%kernel.environment%.log, 0]
 
-    simple_http:
-        class:      evaisse\SimpleHttpBundle\Service\Facade
+    simple_http.helper:
+        class:      evaisse\SimpleHttpBundle\Service\Helper
         arguments:  [@service_container]
-
-    simple_http.service:
-        class:      evaisse\SimpleHttpBundle\Http\Service
-
-    simple_http.request:
-        class:      evaisse\SimpleHttpBundle\Http\ServiceRequest
 
     simple_http.proxy:
         class:      evaisse\SimpleHttpBundle\Http\Kernel

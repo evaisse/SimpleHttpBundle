@@ -79,7 +79,10 @@ class Kernel extends RemoteHttpKernel
         $this->setContainer($container);
         $this->generator = $generator;
         $this->setEventDispatcher(new \Symfony\Component\EventDispatcher\EventDispatcher());
-        $this->getEventDispatcher()->addSubscriber($this->container->get('simple_http.profiler.data_collector'));
+
+        if ($this->container->has('simple_http.profiler.data_collector')) {
+            $this->getEventDispatcher()->addSubscriber($this->container->get('simple_http.profiler.data_collector'));
+        }
     }
 
 
@@ -242,7 +245,7 @@ class Kernel extends RemoteHttpKernel
      * @param  HttpRequest $request [description]
      * @return Response http response 
      */
-    private function handleException(\Exception $e, HttpRequest $request) 
+    protected function handleException(\Exception $e, HttpRequest $request) 
     {
         return new Response(
             $e->getMessage(),
@@ -274,7 +277,7 @@ class Kernel extends RemoteHttpKernel
      *
      * @throws CurlErrorException 
      */
-    private function prepareRawCurlHandler(HttpRequest $request) 
+    protected function prepareRawCurlHandler(HttpRequest $request) 
     {
         $curl = $this->lastCurlRequest = $this->getCurlRequest();
 
@@ -327,7 +330,8 @@ class Kernel extends RemoteHttpKernel
      * @param CurlRequest $curl cURL request object
      * @param Request $request the Request object we're populating
      */
-    private function setPostFields(CurlRequest $curl, HttpRequest $request) {
+    protected function setPostFields(CurlRequest $curl, HttpRequest $request)
+    {
         $postfields = null;
         $content = $request->getContent();
 
@@ -338,7 +342,9 @@ class Kernel extends RemoteHttpKernel
             $postfields = http_build_query($request->request->all());
         }
 
-        $curl->setOption(CURLOPT_POSTFIELDS, $postfields);
+        if (is_string($postfields)) {
+            $curl->setOption(CURLOPT_POSTFIELDS, $postfields);
+        }
     }
 
     /**
@@ -346,7 +352,8 @@ class Kernel extends RemoteHttpKernel
      *
      * @return string
      */
-    protected function buildCookieString(ParameterBag $cookiesBag) {
+    protected function buildCookieString(ParameterBag $cookiesBag)
+    {
         $cookies = [];
 
         foreach ($cookiesBag as $key => $value) {
@@ -384,7 +391,8 @@ class Kernel extends RemoteHttpKernel
      *
      * @return array An array of header strings
      */
-    private function buildHeadersArray(HeaderBag $headerBag) {
+    protected function buildHeadersArray(HeaderBag $headerBag) 
+    {
         return explode("\r\n", $headerBag);
     }
 

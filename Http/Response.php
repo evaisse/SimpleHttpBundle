@@ -46,7 +46,6 @@ class Response extends \Symfony\Component\HttpFoundation\Response
      */
     protected function parseResponse()
     {
-        dump($this->headers->get('content-type'));
         if ($this->headers->get('content-type') === "application/json") {
             $this->result = json_decode($this->getContent(), true);
             if (json_last_error()) {

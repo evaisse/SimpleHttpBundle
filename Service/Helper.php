@@ -3,8 +3,12 @@
 namespace evaisse\SimpleHttpBundle\Service;
 
 
+use evaisse\SimpleHttpBundle\Http\Kernel;
 use evaisse\SimpleHttpBundle\Http\Request;
-use evaisse\SimpleHttpBundle\Http\Transaction;
+use evaisse\SimpleHttpBundle\Http\SessionCookieJar;
+use evaisse\SimpleHttpBundle\Http\Statement;
+
+
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -15,7 +19,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 
-class Facade implements ContainerAwareInterface
+class Helper implements ContainerAwareInterface
 {
 
     use ContainerAwareTrait;
@@ -29,22 +33,21 @@ class Facade implements ContainerAwareInterface
      * Send a batch of services request and returns given list with
      * services populated with responses & results
      *
-     *
      * @throws Exception
      *
-     * @param  array  $servicesList A simple array of ServiceInstance
-     * @param  SessionInterface $session      cookie store session
+     * @param  array            $servicesList   A simple array of ServiceInstance
+     * @param  SessionCookieJar $cookieJar      cookie store session
+     * @param  Kernel           $client         http client proxy to use
      * @return array  given service list
      */
-    public function execute(array $servicesList, SessionInterface $session = null, $proxy = null)
+    public function execute(array $servicesList, SessionCookieJar $cookieJar = null, Kernel $client = null)
     {
-        $httpClient = $this->container->get("simple_http.proxy");
+        $httpClient = $client ? $client : $this->container->get("simple_http.proxy");
         
         /*
             Fetch Cookie jar from session
          */
-        $cookieJar = $session ? $session->get('simple_http.cookies', false) : false;
-        $cookieJar =  $cookieJar ? $cookieJar : new CookieJar();
+        $cookieJar =  $cookieJar ? $cookieJar : new SessionCookieJar();
 
         foreach ($servicesList as $service) {
             $sessionCookies = $cookieJar->allValues($service->getRequest()->getUri());
@@ -65,21 +68,20 @@ class Facade implements ContainerAwareInterface
                 continue;
             }
 
-
             $responseCookies = array();
             foreach ($service->getResponse()->headers->getCookies() as $k => $cookie) {
                 $responseCookies[] = (string)$cookie;
             }
 
-            dump($responseCookies);
+//            dump($responseCookies);
 
             $cookieJar->updateFromSetCookie($responseCookies, $service->getRequest()->getUri());
 
-            dump($cookieJar->allValues($service->getRequest()->getUri()));
+//            dump($cookieJar->allValues($service->getRequest()->getUri()));
 
         }
 
-        $this->container->get('session')->set('simple_http.cookies', $cookieJar);
+        $cookieJar->save();
 
         /*
             Throw error if needed
@@ -108,44 +110,79 @@ class Facade implements ContainerAwareInterface
      * @param array $files
      * @param array $server
      * @param null $content
-     * @return Service
+     * @return Transaction
      */
-    public function createService($method, $url, $parameters = array(), $cookies = array(), $files = array(), $server = array(), $content = NULL)
+    public function prepare($method, $url, $parameters = array(), $cookies = array(), $files = array(), $server = array(), $content = NULL)
     {
-        $service = new Transaction(Request::create($url, $method, $parameters, $cookies, $files, array(), $content));
-        $service->container = $this->container;
+        list($url, $parameters) = $this->transformUrl($url, $parameters);
+        $service = new Statement(Request::create($url, $method, $parameters, $cookies, $files, array(), $content));
+        $service->setContainer($this->container);
         return $service;
     }
 
 
+    /**
+     * Transform a given url pattern like /status/:code/fetch with parameters array('code' => 200) into /status/200
+     *
+     * @param string $urlPattern
+     * @param array $parameters
+     *
+     * @return array transformed url and remainings params
+     */
+    public function transformUrl($urlPattern, array $parameters = array())
+    {
+        if (empty($parameters) || !preg_match('/:[a-z]/', $urlPattern)) {
+            return array($urlPattern, $parameters); // no need to transform plain uri
+        }
+
+        foreach ($parameters as $key => $value) {
+            $urlPattern = str_replace(":$key", $value, $urlPattern);
+            unset($parameters[$key]);
+        }
+
+        return array($urlPattern, $parameters);
+    }
+
+
+    protected function fire($method, $url, array $parameters = array())
+    {
+        $transaction = $this->prepare($method, $url, $parameters);
+        $transaction->execute();
+        return $transaction->getResult();
+    }
+
+
+
     public function GET($url, array $parameters = array())
     {
-        return $this->createService('GET', $url, $parameters);
+        return $this->fire('GET', $url, $parameters);
     }
 
     public function POST($url, array $parameters = array())
     {
-        return $this->createService('POST', $url, array(), array(), array(), array(), json_encode($parameters));
+        return $this->fire('POST', $url, $parameters);
     }
 
     public function PUT($url, array $parameters = array())
     {
-        return $this->createService('PUT', $url, $parameters);
+        return $this->fire('PUT', $url, $parameters);
     }
 
     public function PATCH($url, array $parameters = array())
     {
-        return $this->createService('PATCH', $url, $parameters);
+        return $this->fire('PATCH', $url, $parameters);
     }
 
     public function HEAD($url, array $parameters = array())
     {
-        return $this->createService('HEAD', $url, $parameters);
+        return $this->fire('HEAD', $url, $parameters);
     }
 
     public function DELETE($url, array $parameters = array())
     {
-        return $this->createService('DELETE', $url, $parameters);
+        return $this->fire('DELETE', $url, $parameters);
     }
+
+
 
 }
