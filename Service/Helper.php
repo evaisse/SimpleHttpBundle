@@ -56,7 +56,6 @@ class Helper implements ContainerAwareInterface
             }
         }
 
-
         $httpClient->execute($servicesList);
 
         /*
@@ -82,21 +81,6 @@ class Helper implements ContainerAwareInterface
         }
 
         $cookieJar->save();
-
-        /*
-            Throw error if needed
-         */
-        foreach ($servicesList as $service) {
-            if ($service->hasError()) {
-                if ($service->getError() instanceof ServiceAuthenticationException) {
-                    throw new HttpException(302 ,'see other', null, array(
-                        'location' => '/demoapp/logout',
-                    ));
-                } else {
-                    throw $service->getError();
-                }
-            }
-        }
 
         return $this;
     }

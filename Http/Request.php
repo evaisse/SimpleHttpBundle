@@ -13,7 +13,12 @@ class Request extends HttpRequest
      */
     public function setContent($content)
     {
+
         $this->content = $content;
+        if (is_string($content)) {
+            $this->headers->set('Content-Length', strlen($this->content));
+        }
     }
+
 
 }

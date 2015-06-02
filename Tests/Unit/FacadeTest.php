@@ -12,23 +12,14 @@ namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
 use evaisse\SimpleHttpBundle\Http\Kernel;
 use evaisse\SimpleHttpBundle\Http\Request;
-use evaisse\SimpleHttpBundle\Http\Transaction;
+use evaisse\SimpleHttpBundle\Http\Statement;
 use evaisse\SimpleHttpBundle\Service\Helper;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\Container;
 
 
-class FacadeTest extends \PHPUnit_Framework_TestCase
+class FacadeTest extends AbstractTests
 {
-
-
-    protected function createContext()
-    {
-        $container = new Container(new ParameterBag());
-        $helper = new Helper($container);
-        $httpKernel = new Kernel($container);
-        return [$helper, $httpKernel, $container];
-    }
 
 
     public function provideBaseMethods()
@@ -68,55 +59,24 @@ class FacadeTest extends \PHPUnit_Framework_TestCase
 
 
 
+    /**
+     *
+     */
+    public function testPOSTJSON()
+    {
+
+    }
+
 
     /**
      *
      */
-    public function testArgumentsReturns()
+    public function testPUTJSON()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
-
-        $statement = $helper->prepare("GET", 'http://httpbin.org/ip');
-
-        $request = $statement->getRequest();
-        $this->assertTrue($statement instanceof Transaction);
-        $this->assertTrue($request instanceof Request);
-        $statement->execute($httpKernel);
-
-        $res = $statement->getResult();
-
-        $this->assertEquals(array_key_exists('origin', $res), true);
-
-
-        $args = array(
-            'foo' => 'bar',
-        );
-
-
-        $statement = $helper->prepare("GET", 'http://httpbin.org/post', $args);
-        $statement->execute($httpKernel);
-        $res = $statement->getResult();
-
-        var_dump($res);
-
-        $this->assertEquals($res['form'], $args);
-
-
-        $statement = $helper->prepare("POST", 'http://httpbin.org/post', $args);
-        $statement->execute($httpKernel);
-        $res = $statement->getResult();
-
-        $this->assertEquals($res['form'], $args);
-
-        $statement = $helper->prepare("POST", 'http://httpbin.org/post', $args);
-        $statement->jsonify();
-        $statement->execute($httpKernel);
-        $res = $statement->getResult();
-
-
-        $this->assertEquals($res['json'], $args);
 
     }
+
+
 
 
     /**
@@ -154,7 +114,35 @@ class FacadeTest extends \PHPUnit_Framework_TestCase
     }
 
 
+    /**
+     * test using PUT, POST
+     */
+    public function testFilesUpload()
+    {
 
+    }
+
+    /**
+     *
+     */
+    public function testFilesDownload()
+    {
+
+    }
+
+
+    /**
+     *
+     */
+    public function testHttpCode100()
+    {
+
+    }
+
+    public function testCookiePersistance()
+    {
+
+    }
 
 
 
@@ -167,7 +155,7 @@ class FacadeTest extends \PHPUnit_Framework_TestCase
 
         $statement = $helper->prepare($method, $url);
         $request = $statement->getRequest();
-        $this->assertTrue($statement instanceof Transaction);
+        $this->assertTrue($statement instanceof Statement);
         $this->assertTrue($request instanceof Request);
         $statement->execute($httpKernel);
 
@@ -186,7 +174,7 @@ class FacadeTest extends \PHPUnit_Framework_TestCase
         $args = array_slice($_SERVER, 0, 3);
         $statement = $helper->prepare($method, $url, $args);
         $request = $statement->getRequest();
-        $this->assertTrue($statement instanceof Transaction);
+        $this->assertTrue($statement instanceof Statement);
         $this->assertTrue($request instanceof Request);
         $statement->execute($httpKernel);
 
@@ -196,27 +184,6 @@ class FacadeTest extends \PHPUnit_Framework_TestCase
 
 
 
-    /**
-     * @dataProvider provideBaseMethods
-     */
-    public function testCallsWithRouteArguments($method, $url, $code = 200)
-    {
-        list($helper, $httpKernel, $container) = $this->createContext();
-
-        $args = [
-            "code" => 200,
-            "another" => __FILE__
-        ];
-
-        $statement = $helper->prepare($method, 'http://httpbin.org/status/:code', $args);
-        $request = $statement->getRequest();
-        $this->assertTrue($statement instanceof Transaction);
-        $this->assertTrue($request instanceof Request);
-        $statement->execute($httpKernel);
-
-        $this->assertEquals($statement->getResponse()->getStatusCode(), $code);
-
-    }
 
 
 

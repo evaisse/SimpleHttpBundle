@@ -8,6 +8,13 @@
  */
 namespace evaisse\SimpleHttpBundle\Http;
 
+
+use evaisse\SimpleHttpBundle\Http\Exception\CurlTransportException;
+use evaisse\SimpleHttpBundle\Http\Exception\HostNotFoundException;
+use evaisse\SimpleHttpBundle\Http\Exception\SslException;
+use evaisse\SimpleHttpBundle\Http\Exception\TimeoutException;
+use evaisse\SimpleHttpBundle\Http\Exception\TransportException;
+
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -71,7 +78,7 @@ class Kernel extends RemoteHttpKernel
      * [$requests description]
      * @var [type]
      */
-    protected $services;
+    protected $stmts;
 
 
     public function __construct(ContainerInterface $container, RequestGenerator $generator = null) 
@@ -85,36 +92,45 @@ class Kernel extends RemoteHttpKernel
         }
     }
 
-
+    /**
+     * @param MultiInfoEvent $e
+     */
     public function handleMultiInfoEvent(MultiInfoEvent $e)
     {
         $r = $e->getRequest();
 
         foreach ($this->services as $key => $value) {
-
             if ($value[1][0] === $r) {
                 break;
             }
-
         }
+
         $requestType = HttpKernelInterface::SUB_REQUEST;
 
-        $service = $value[0];
-        $request = $service->getRequest();
+        $stmt = $value[0];
+        $request = $stmt->getRequest();
+
         list($curlRequest, $contentCollector, $headersCollector) = $value[1];
 
         $this->updateRequestHeadersFromCurlInfos($request, $e->getRequest()->getInfo());
 
         if (!$headersCollector->getCode()) {
 
-            $e = new CurlErrorException();
+            /*
+             * Here we need to use return code from multi event because curl_errno return invalid results
+             */
+            $error = new CurlTransportException(curl_error($curlRequest->getHandle()),
+                                                $e->getInfo()->getResult());
 
-            $service->setError(new Exception\TransportException("CURL connection error", 1, $e));
-                $event = new Event\GetResponseForExceptionEvent(
-                    $this, 
-                    $request, 
+            $error = $error->transformToGenericTransportException();
+
+            $stmt->setError($error);
+
+            $event = new Event\GetResponseForExceptionEvent(
+                    $this,
+                    $request,
                     $requestType,
-                    $service->getError());
+                    $error);
 
             $this->getEventDispatcher()->dispatch(KernelEvents::EXCEPTION, $event);
 
@@ -130,7 +146,6 @@ class Kernel extends RemoteHttpKernel
                 $response->headers->setCookie($cookie);
             }
 
-
             $response->setProtocolVersion($headersCollector->getVersion());
             $response->setStatusCode($headersCollector->getCode(), $headersCollector->getMessage());
 
@@ -139,11 +154,10 @@ class Kernel extends RemoteHttpKernel
             $event = new Event\FilterResponseEvent($this, $request, $requestType, $response);
             $this->getEventDispatcher()->dispatch(KernelEvents::RESPONSE, $event);
 
-
             /*
                 populate response for service
              */
-            $service->setResponse($response);
+            $stmt->setResponse($response);
 
             $event = new Event\PostResponseEvent($this, $request, $response);
             $this->getEventDispatcher()->dispatch(KernelEvents::TERMINATE);
@@ -154,10 +168,10 @@ class Kernel extends RemoteHttpKernel
 
     /**
      * handle multi curl
-     * @param array $services a list of Service instances
+     * @param array $stmts a list of Service instances
      * @return HttpKernel current httpkernel for method chaining
      */
-    public function execute(array $services)
+    public function execute(array $stmts)
     {
         $dispatcher = new EventDispatcher();
         $dispatcher->addListener(
@@ -169,9 +183,9 @@ class Kernel extends RemoteHttpKernel
 
         $this->services = array();
 
-        foreach ($services as $service) {
+        foreach ($stmts as $stmt) {
 
-            $request = $service->getRequest();
+            $request = $stmt->getRequest();
             $requestType = HttpKernelInterface::SUB_REQUEST;
 
             try {
@@ -179,21 +193,21 @@ class Kernel extends RemoteHttpKernel
                 $event = new Event\GetResponseEvent($this, $request, $requestType);
                 $this->getEventDispatcher()->dispatch(KernelEvents::REQUEST, $event);
 
-                $prepared = $this->prepareRawCurlHandler($request, $requestType, false);
+                list($curlHandler, $contentCollector, $headerCollector) = $this->prepareRawCurlHandler($stmt, $requestType, false);
 
-                $mm->addRequest($prepared[0]);
+                $mm->addRequest($curlHandler);
 
-                $this->services[] = array(
-                    $service,
-                    $prepared,
-                );
+                $this->services[] = [
+                    $stmt,
+                    [$curlHandler, $contentCollector, $headerCollector],
+                ];
 
             } catch (CurlErrorException $e) {
-                $service->setError(new Exception\TransportException("CURL connection error", 1, $e));
+                $stmt->setError(new Exception\TransportException("CURL connection error", 1, $e));
                 $event = new Event\GetResponseForExceptionEvent(
                     $this, $request, 
                     $requestType,
-                    $service->getError());
+                    $stmt->getError());
                 $this->getEventDispatcher()->dispatch(KernelEvents::EXCEPTION, $event);
                 continue;
             }
@@ -238,6 +252,13 @@ class Kernel extends RemoteHttpKernel
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    protected function handleRaw(\Symfony\Component\HttpFoundation\Request $request)
+    {
+        return parent::handleRaw($request);
+    }
     
     /**
      * 
@@ -270,37 +291,64 @@ class Kernel extends RemoteHttpKernel
     /**
      * Execute a Request object via cURL
      *
-     * @param HttpRequest $request the request to execute
-     * @param array $options additional curl options to set/override
+     * @param Statement $stmt the request to execute
      *
      * @return Response
      *
      * @throws CurlErrorException 
      */
-    protected function prepareRawCurlHandler(HttpRequest $request) 
+    protected function prepareRawCurlHandler(Statement $stmt)
     {
+        $request = $stmt->getRequest();
+
         $curl = $this->lastCurlRequest = $this->getCurlRequest();
 
         $curl->setOptionArray(array(
             CURLOPT_URL         => $request->getUri(),
-            CURLOPT_HTTPHEADER  => $this->buildHeadersArray($request->headers),
             CURLOPT_COOKIE      => $this->buildCookieString($request->cookies),
             CURLINFO_HEADER_OUT => true,
         ));
 
-        $curl->setMethod($request->getMethod());
 
-        if ("POST" === $request->getMethod()) {
-            $this->setPostFields($curl, $request);
+        // Set timeout
+        if ($stmt->getTimeout() !== null) {
+            $curl->setOption(CURLOPT_TIMEOUT_MS, $stmt->getTimeout());
         }
 
+        if ($stmt->getIgnoreSslErrors()) {
+            $curl->setOptionArray([
+                CURLOPT_SSL_VERIFYHOST => 0,
+                CURLOPT_SSL_VERIFYPEER => false,
+            ]);
+        }
+
+
         if ("PUT" === $request->getMethod() && count($request->files->all()) > 0) {
+            /*
+             * When only files are sent, here we can set the CURLOPT_PUT option
+             */
+            $curl->setMethod($request->getMethod());
+
             $file = current($request->files->all());
 
             $curl->setOptionArray(array(
-                CURLOPT_INFILE     => '@' . $file->getRealPath(),
+                CURLOPT_INFILE     => fopen($file->getRealPath(), 'r'),
                 CURLOPT_INFILESIZE => $file->getSize(),
             ));
+
+        } else if ($request->getMethod() != "GET") {
+            /*
+             * When body is sent as a raw string, we need to use customrequest option
+             */
+            $curl->setOption(CURLOPT_CUSTOMREQUEST, $request->getMethod());
+            $this->setPostFields($curl, $request);
+
+        } else {
+            /*
+             * Classic case
+             */
+            $curl->setMethod($request->getMethod());
+
         }
 
         $content = new ContentCollector();
@@ -309,6 +357,7 @@ class Kernel extends RemoteHttpKernel
         // These options must not be tampered with to ensure proper functionality
         $curl->setOptionArray(
             array(
+                CURLOPT_HTTPHEADER     => $this->buildHeadersArray($request->headers),
                 CURLOPT_HEADERFUNCTION => array($headers, "collect"),
                 CURLOPT_WRITEFUNCTION  => array($content, "collect"),
             )
@@ -317,10 +366,6 @@ class Kernel extends RemoteHttpKernel
         return array(
             $curl, $content, $headers
         );
-
-        // $curl->execute();
-
-        // return $response;
     }
 
 
@@ -344,6 +389,7 @@ class Kernel extends RemoteHttpKernel
 
         if (is_string($postfields)) {
             $curl->setOption(CURLOPT_POSTFIELDS, $postfields);
+            $request->headers->set('content-length', strlen($postfields));
         }
     }
 
@@ -365,11 +411,17 @@ class Kernel extends RemoteHttpKernel
 
 
     /**
-     * @param Request $request
-     * @param array $curlInfo
+     * Some headers like user-agent can be overrided by curl so we need to re-fetch postward the headers sent
+     * to reset them in the original request object
+     *
+     * @param Request $request request object after being sent
+     * @param array $curlInfo curl info needed to update the request object with final curl headers sent
      */
     protected function updateRequestHeadersFromCurlInfos(Request $request, array $curlInfo)
     {
+        if (!isset($curlInfo['request_header'])) {
+            return;
+        }
         $headers = explode("\r\n", $curlInfo['request_header']);
         array_shift($headers);
         $replacementsHeaders = array();

@@ -37,39 +37,71 @@ class Statement
     protected $error;
 
     /**
-     * $response : Service response
-     *
-     * @var Response
+     * @var Response statement response
      * @access protected
      */
     protected $response;
 
     /**
-     * A Deferred object
-     * @var Promise
+     * @var Promise A Deferred object
      */
     protected $promise;
 
-
     /**
-     * A Promise Deferred control object
-     * @var \React\Promise\Deferred
+     * @var \React\Promise\Deferred  A Promise Deferred control object
      */
     protected $deffered;
 
 
     /**
-     * timeout in milliseconds
      * @var integer timeout in milliseconds
      */
     protected $timeout;
-
 
     /**
      * true if request has already been sent, false otherwsie
      * @var boolean true if request has already been sent, false otherwsie
      */
     protected $sent;
+
+
+    /**
+     * @var boolean ignore ssl verification and notifications
+     */
+    protected $ignoreSslErrors;
+
+
+    /**
+     * Ignore SSL verification and notifications
+     *
+     * @return self
+     */
+    public function ignoreSslErrors()
+    {
+        $this->ignoreSslErrors = true;
+        return $this;
+    }
+
+    /**
+     * Set verification and notifications on ssl profiles
+     * @return boolean
+     */
+    public function getIgnoreSslErrors()
+    {
+        return $this->ignoreSslErrors;
+    }
+
+    /**
+     * Get verification and notifications on ssl profiles
+     *
+     * @param boolean $ignoreSslErrors
+     * @return self
+     */
+    public function setIgnoreSslErrors($ignoreSslErrors)
+    {
+        $this->ignoreSslErrors = $ignoreSslErrors;
+        return $this;
+    }
 
     /**
      *
@@ -84,6 +116,8 @@ class Statement
 
 
     /**
+     * Get global (connect+wait+transfer) request timeout in milliseconds
+     *
      * @return int timeout in milliseconds
      */
     public function getTimeout()
@@ -92,11 +126,15 @@ class Statement
     }
 
     /**
+     * Set global (connect+wait+transfer) request timeout in milliseconds
+     *
      * @param int $timeout timeout in milliseconds
+     * @return self
      */
     public function setTimeout($timeout)
     {
         $this->timeout = (int)$timeout;
+        return $this;
     }
 
 
@@ -144,6 +182,11 @@ class Statement
         return $this;
     }
 
+
+    public function addFile()
+    {
+
+    }
 
     /**
      * Set value for $request

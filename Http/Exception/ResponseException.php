@@ -6,7 +6,7 @@
  * Time: 20:38
  */
 
-namespace evaisse\SimpleHttpBundle\Http\Error;
+namespace evaisse\SimpleHttpBundle\Http\Exception;
 
 use evaisse\SimpleHttpBundle\Http\Error;
 
