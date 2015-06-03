@@ -15,6 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use Symfony\Component\BrowserKit\CookieJar;
 
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -27,6 +28,15 @@ class Helper implements ContainerAwareInterface
     public function __construct(ContainerInterface $container)
     {
         $this->setContainer($container);
+    }
+
+    /**
+     * @param SessionInterface $session a given session
+     * @return SessionCookieJar
+     */
+    public function createCookieSession(SessionInterface $session = null)
+    {
+        return new SessionCookieJar($session);
     }
 
     /**
@@ -54,6 +64,7 @@ class Helper implements ContainerAwareInterface
             foreach ($sessionCookies as $cookieName => $cookieValue) {
                 $service->getRequest()->cookies->set($cookieName, $cookieValue);
             }
+
         }
 
         $httpClient->execute($servicesList);
@@ -72,12 +83,7 @@ class Helper implements ContainerAwareInterface
                 $responseCookies[] = (string)$cookie;
             }
 
-//            dump($responseCookies);
-
             $cookieJar->updateFromSetCookie($responseCookies, $service->getRequest()->getUri());
-
-//            dump($cookieJar->allValues($service->getRequest()->getUri()));
-
         }
 
         $cookieJar->save();
