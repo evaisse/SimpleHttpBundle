@@ -18,6 +18,7 @@ use evaisse\SimpleHttpBundle\Http\Exception\TransportException;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -52,35 +53,38 @@ class Kernel extends RemoteHttpKernel
 
 
     /**
-     * An instance of Curl\RequestGenerator for getting preconfigured
-     * Curl\Request objects
-     *
-     * @var RequestGenerator
+     * @var RequestGenerator An instance of Curl\RequestGenerator for getting preconfigured Curl\Request objects
      */
     protected $generator;
 
     /**
-     * [$lastCurlRequest description]
-     * @var resource curlRequest
+     * @var resource curlRequest last executed curl request
      */
     protected $lastCurlRequest;
 
 
     /**
-     * [$eventDispatcher description]
      * @var \Symfony\Component\EventDispatcher\EventDispatcher
      */
     protected $eventDispatcher;
 
 
-
     /**
-     * [$requests description]
-     * @var [type]
+     * @var array a statement pool that contains statements during multicurl
      */
     protected $stmts;
 
 
+    /**
+     * @var string a tmp cookie filepath
+     */
+    protected $tmpCookieFile;
+
+
+    /**
+     * @param ContainerInterface $container a container interface
+     * @param RequestGenerator $generator Optionnal generator to construct curlrequest
+     */
     public function __construct(ContainerInterface $container, RequestGenerator $generator = null) 
     {
         $this->setContainer($container);
@@ -142,6 +146,8 @@ class Kernel extends RemoteHttpKernel
                 $headersCollector->retrieve()
             );
 
+            $this->loadCookiesFromCookieFile($request, $response);
+
             foreach ($headersCollector->getCookies() as $cookie) {
                 $response->headers->setCookie($cookie);
             }
@@ -183,6 +189,8 @@ class Kernel extends RemoteHttpKernel
 
         $this->services = array();
 
+        $this->setTmpCookieFile(tempnam(sys_get_temp_dir(), 'curl-cookie-file'));
+
         foreach ($stmts as $stmt) {
 
             $request = $stmt->getRequest();
@@ -219,6 +227,8 @@ class Kernel extends RemoteHttpKernel
         
         // for the "non blocking" multi manager, we need to trigger the destructor
         unset($mm);
+
+        $this->deleteTmpCookieFile();
 
 
         return $this;
@@ -303,12 +313,15 @@ class Kernel extends RemoteHttpKernel
 
         $curl = $this->lastCurlRequest = $this->getCurlRequest();
 
-        $curl->setOptionArray(array(
-            CURLOPT_URL         => $request->getUri(),
-            CURLOPT_COOKIE      => $this->buildCookieString($request->cookies),
-            CURLINFO_HEADER_OUT => true,
-        ));
+        $cookieFile = "/tmp/curlcookie.txt";
 
+        $curl->setOptionArray(array(
+            CURLOPT_URL            => $request->getUri(),
+            CURLOPT_COOKIE         => $this->buildCookieString($request->cookies),
+            CURLINFO_HEADER_OUT    => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_COOKIEJAR      => $cookieFile,
+        ));
 
         // Set timeout
         if ($stmt->getTimeout() !== null) {
@@ -323,20 +336,7 @@ class Kernel extends RemoteHttpKernel
         }
 
 
-        if ("PUT" === $request->getMethod() && count($request->files->all()) > 0) {
-            /*
-             * When only files are sent, here we can set the CURLOPT_PUT option
-             */
-            $curl->setMethod($request->getMethod());
-
-            $file = current($request->files->all());
-
-            $curl->setOptionArray(array(
-                CURLOPT_INFILE     => fopen($file->getRealPath(), 'r'),
-                CURLOPT_INFILESIZE => $file->getSize(),
-            ));
-
-        } else if ($request->getMethod() != "GET") {
+        if ($request->getMethod() != "GET") {
             /*
              * When body is sent as a raw string, we need to use customrequest option
              */
@@ -370,6 +370,32 @@ class Kernel extends RemoteHttpKernel
 
 
     /**
+     * Create a cURL file object from a given set of params,
+     * if version >= 5.5, CURLFile instance will be return, otherwise a string resource
+     *
+     * @param string $filename realpath to file
+     * @param string $mimetype mime content type
+     * @param string $postname base name for file
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return mixed|string|CURLFile if version >= 5.5, CURLFile instance will be return, otherwise a string resource
+     */
+    protected function createCurlFile($filename, $mimetype, $postname = null)
+    {
+        if (!realpath($filename) && is_file($filename)) {
+            throw new \InvalidArgumentException('invalid given filepath : ' . $filename);
+        }
+
+        if (function_exists('curl_file_create')) {
+            return new \CURLFile($filename, $mimetype, $postname);
+        }
+
+        $postname = $postname ? $postname : basename($filename);
+        return "@$filename;filename=$postname;type=$mimetype";
+    }
+
+    /**
      * Populate the POSTFIELDS option
      *
      * @param CurlRequest $curl cURL request object
@@ -380,16 +406,32 @@ class Kernel extends RemoteHttpKernel
         $postfields = null;
         $content = $request->getContent();
 
-
         if (!empty($content)) {
             $postfields = $content;
-        } else if (count($request->request->all()) > 0) {
+            $a = 1;
+        } else if (count($request->files)) {
+            // Add files to postfields as curl resources
+            foreach ($request->files->all() as $key => $file) {
+                $file = $this->createCurlFile($file->getRealPath(), $file->getMimeType(), basename($file->getClientOriginalName()));
+                $request->request->set($key, $file);
+            }
+            $postfields = $request->request->all();
+            // we need to manually set content-type
+            $request->headers->set('Content-Type', "multipart/form-data");
+            $a = 2;
+        } else if (count($request->request)) {
             $postfields = http_build_query($request->request->all());
+            $a = 3;
+        } else {
+            return;
         }
+
 
         if (is_string($postfields)) {
             $curl->setOption(CURLOPT_POSTFIELDS, $postfields);
             $request->headers->set('content-length', strlen($postfields));
+        } else {
+            $curl->setOption(CURLOPT_POSTFIELDS, $postfields);
         }
     }
 
@@ -475,4 +517,116 @@ class Kernel extends RemoteHttpKernel
 
         return $this;
     }
+
+    /**
+     * Extract any cookies found from the cookie file. This function expects to get
+     * a string containing the contents of the cookie file which it will then
+     * attempt to extract and return any cookies found within.
+     *
+     * @example
+     *
+     *   # Netscape HTTP Cookie File
+     *   # http://curl.haxx.se/rfc/cookie_spec.html
+     *   # This file was generated by libcurl! Edit at your own risk.
+     *
+     *   www.example.com        FALSE        /        FALSE        1338534278        cookiename        value
+     *
+     *
+     *   # The first few lines are comments and can therefore be ignored. The cookie data consists of the following items (in the order they appear in the file.
+     *   #
+     *   # domain - The domain that created and that can read the variable.
+     *   # flag - A TRUE/FALSE value indicating if all machines within a given domain can access the variable. This value is set automatically by the browser, depending on the value you set for domain.
+     *   # path - The path within the domain that the variable is valid for.
+     *   # secure - A TRUE/FALSE value indicating if a secure connection with the domain is needed to access the variable.
+     *   # expiration - The UNIX time that the variable will expire on.
+     *   # name - The name of the variable.
+     *   # value - The value of the variable.
+     *
+     * @param string $string The contents of the cookie file.
+     *
+     * @return array The array of cookies as extracted from the string.
+     *
+     */
+    protected function loadCookiesFromCookieFile(Request $request, Response $response)
+    {
+        $cookies = array();
+
+        if (!file_exists($this->getTmpCookieFile())) {
+            return;
+        }
+
+        $lines = explode("\n", file_get_contents($this->getTmpCookieFile()));
+
+        // iterate over lines
+        foreach ($lines as $line) {
+
+            // we only care for valid cookie def lines
+            if (isset($line[0]) && substr_count($line, "\t") == 6) {
+
+                // get tokens in an array
+                $tokens = explode("\t", $line);
+
+                // trim the tokens
+                $tokens = array_map('trim', $tokens);
+
+                $infos = array();
+
+                // Extract the data
+                $infos['domain'] = $tokens[0];
+                $infos['flag'] = (strtolower($tokens[1]) == "TRUE");
+                $infos['path'] = $tokens[2];
+                $infos['secure'] = (strtolower($tokens[3]) == "TRUE");
+
+                // Convert date to a readable format
+                $infos['expiration'] = new \DateTime(date('Y-m-d h:i:s', $tokens[4]));
+
+                $infos['name'] = $tokens[5];
+                $infos['value'] = $tokens[6];
+
+                // Record the cookie.
+                $cookie = new Cookie($infos['name'],
+                                     $infos['value'],
+                                     $infos['expiration'],
+                                     $infos['path'],
+                                     $infos['domain'],
+                                     $infos['secure'],
+                                     $infos['flag']);
+
+                $response->headers->setCookie($cookie);
+            }
+        }
+
+        return $cookies;
+    }
+
+
+
+    /**
+     * Get the cookie file path used to allow curl to persist the cookie jar session when multicurl parse response.
+     * @return string
+     */
+    protected function getTmpCookieFile()
+    {
+        return $this->tmpCookieFile;
+    }
+
+    /**
+     * Set the cookie file path used to allow curl to persist the cookie jar session when multicurl parse response.
+     * @param string $tmpCookieFile a real path to the cookie file used to allow curl to persist the cookie session
+     */
+    protected function setTmpCookieFile($tmpCookieFile)
+    {
+        $this->tmpCookieFile = $tmpCookieFile;
+    }
+
+    /**
+     * Delete tmp cookie jar file
+     */
+    protected function deleteTmpCookieFile()
+    {
+        if (file_exists($this->tmpCookieFile)) {
+            unlink($this->tmpCookieFile);
+        }
+    }
+
 }
