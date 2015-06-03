@@ -64,7 +64,23 @@ JSON services
                ->execute()
                ->getResult()['ip'];
 
-    
+File upload
+
+
+    $http->prepare('PUT', 'http://httpbin.org/put')
+         ->addFile('f1', './myfile.txt')
+         ->addFile('f2', './myfile.txt')
+         ->execute();
+
+
+    $http->prepare('POST', 'http://httpbin.org/post', [
+            'infos' => 'foo',
+            'bar'   => 'so so',
+        ])
+         ->addFile('f1', './myfile.txt')
+         ->addFile('f2', './myfile.txt')
+         ->execute();
+
 Cookies persistance 
 
     $a = $http->prepare('GET',  'http://httpbin.org/ip');
