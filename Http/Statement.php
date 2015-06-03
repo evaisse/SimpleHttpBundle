@@ -14,6 +14,8 @@ use React\Promise\Deferred;
 use React\Promise\Promise;
 
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class Statement
 {
@@ -337,20 +339,26 @@ class Statement
 
 
     /**
-     *
-     * @return string
+     * @param string $key multi-part form item key name
+     * @param string $filepath path to file
+     * @param string|null $mimetype file mimetype, if none provided, will be guess from filepath
+     * @param string|null $clientName optionnal client filename, if none provided, basename of filepath will be used
      */
-    public function __toString()
+    public function attachFile($key, $filepath, $mimetype = null, $clientName = null)
     {
-        if (!$this->isSent()) {
-            $this->execute();
-        }
+        $clientName = $clientName ? $clientName : basename($filepath);
 
-        if ($this->hasError()) {
-            return '';
-        }
+        $file = new File($filepath, true);
 
-        return $this->response->getContent();
+        $file = new UploadedFile(
+            $file->getRealPath(),
+            $clientName,
+            $file->getBasename(),
+            $file->getMimeType(),
+            $file->getSize(),
+            0);
+
+        $this->getRequest()->files->set($key, $file);
     }
 
 }
