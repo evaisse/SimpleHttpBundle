@@ -16,47 +16,65 @@ class FileUploadsTest extends AbstractTests
 {
 
 
-    public function testPutFile()
+    public function testPutFiles()
     {
         list($helper, $httpKernel, $container) = $this->createContext();
-//
-//        *
-//        * @param string $path         The full temporary path to the file
-//    * @param string $originalName The original file name
-//    * @param string $mimeType     The type of the file as provided by PHP
-//    * @param int    $size         The file size
-//    * @param int    $error        The error constant of the upload (one of PHP's UPLOAD_ERR_XXX constants)
-//     * @param bool   $test         Whether the test mode is active
-//     *
-//     * @throws FileException         If file_uploads is disabled
-//     * @throws FileNotFoundException If the file does not exist
-//     *
-//     * @api
-//     */
-//    public function __construct($path, $originalName, $mimeType = null, $size = null, $error = null, $test = false)
-
-        $file = new UploadedFile(
-            __FILE__,
-            basename(__FILE__),
-            'text/plain',
-            strlen(file_get_contents(__FILE__)),
-            0
-        );
 
         $stmt = $helper->prepare("PUT", 'http://httpbin.org/put');
-        $stmt->getRequest()->files->set('test', $file);
+
+        $stmt->attachFile('file', __FILE__);
+        $stmt->attachFile('file2', __DIR__ . '/../Fixtures/greenimg.jpg');
+
         $stmt->execute($httpKernel);
 
+        $res = $stmt->getResult();
 
-        var_dump($stmt->getResult());
+        $this->assertTrue(is_array($res));
+        $this->assertArrayHasKey('file', $res['files']);
+        $this->assertArrayHasKey('file2', $res['files']);
     }
 
 
-    public function testDownloadFile()
+    public function testPostFiles()
     {
+        list($helper, $httpKernel, $container) = $this->createContext();
 
+        $stmt = $helper->prepare("POST", 'http://httpbin.org/post');
+
+        $stmt->attachFile('file', __FILE__);
+        $stmt->attachFile('file2', __DIR__ . '/../Fixtures/greenimg.jpg');
+
+        $stmt->execute($httpKernel);
+
+        $res = $stmt->getResult();
+
+        $this->assertTrue(is_array($res));
+        $this->assertArrayHasKey('file', $res['files']);
+        $this->assertArrayHasKey('file2', $res['files']);
     }
 
+    public function testPostFilesWithOptionnalArgs()
+    {
+        $arg = 'é"("("(éù%"';
+
+        list($helper, $httpKernel, $container) = $this->createContext();
+
+        $stmt = $helper->prepare("POST", 'http://httpbin.org/post', array(
+            'exemple' => $arg,
+        ));
+
+        $stmt->attachFile('file', __FILE__);
+        $stmt->attachFile('file2', __DIR__ . '/../Fixtures/greenimg.jpg');
+
+        $stmt->execute($httpKernel);
+
+        $res = $stmt->getResult();
+
+        $this->assertTrue(is_array($res));
+        $this->assertArrayHasKey('file', $res['files']);
+        $this->assertArrayHasKey('file2', $res['files']);
+        $this->assertEquals($arg, $res['form']['exemple']);
+    }
 
 
 

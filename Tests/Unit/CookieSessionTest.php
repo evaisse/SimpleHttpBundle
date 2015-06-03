@@ -21,4 +21,87 @@ class CookieSessionTest extends AbstractTests
 {
 
 
+
+    public function testCookieStore()
+    {
+        list($helper, $httpKernel, $container) = $this->createContext();
+
+        $i = (int)rand(0,100);
+        $j = (int)rand(0,100);
+
+        $cookieSession = $helper->createCookieSession();
+
+        /*
+         * Sent a tmp cookie value
+         */
+
+        $stmt = $helper->prepare('GET', 'http://httpbin.org/cookies/set', [
+            'tmp'  => 1,
+        ]);
+
+        $helper->execute([
+            $stmt
+        ], $cookieSession, $httpKernel);
+
+
+        $cookies = $cookieSession->allValues('http://httpbin.org');
+
+        $this->assertEquals($cookies['tmp'], 1);
+
+
+        /*
+         * Set and delete some async
+         */
+
+        $stmt1 = $helper->prepare('GET', 'http://httpbin.org/cookies/set', [
+            'foo'  => $i,
+            'bar'  => $j,
+        ]);
+
+        $stmt2 = $helper->prepare('GET', 'http://httpbin.org/cookies/set', [
+            'also'  => $i,
+        ]);
+
+        $stmt3 = $helper->prepare('GET', 'http://httpbin.org/cookies/delete', [
+            'tmp'  => 1,
+        ]);
+
+        $helper->execute([
+            $stmt1,
+            $stmt2,
+            $stmt3
+        ], $cookieSession, $httpKernel);
+
+
+        $cookies = $cookieSession->allValues('http://httpbin.org');
+
+        $this->assertEquals($cookies['foo'], $i);
+        $this->assertEquals($cookies['bar'], $j);
+        $this->assertEquals($cookies['also'], $i);
+
+        $this->assertArrayNotHasKey('deleted', $cookies);
+
+
+        /*
+         *  Final cookies check
+         */
+
+        $stmt = $helper->prepare('GET', 'http://httpbin.org/cookies', [
+            'tmp'  => 1,
+        ]);
+
+        $helper->execute([
+            $stmt
+        ], $cookieSession, $httpKernel);
+
+        $res = $stmt->getResult();
+        $cookies = $res['cookies'];
+
+        $this->assertEquals($cookies['foo'], $i);
+        $this->assertEquals($cookies['bar'], $j);
+        $this->assertEquals($cookies['also'], $i);
+
+    }
+
+
 }
