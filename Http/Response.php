@@ -16,6 +16,12 @@ class Response extends \Symfony\Component\HttpFoundation\Response
      */
     protected $result;
 
+    /**
+     * @var
+     */
+    protected $hasParsedResult;
+
+
 
     /**
      * [$error description]
@@ -47,24 +53,11 @@ class Response extends \Symfony\Component\HttpFoundation\Response
     protected function parseResponse()
     {
         if ($this->headers->get('content-type') === "application/json") {
-            $this->result = json_decode($this->getContent(), true);
+            $result = json_decode($this->getContent(), true);
             if (json_last_error()) {
                 $this->error = new InvalidResponseError('Invalid Json response body');
             }
-        }
-
-
-
-        if (isset($this->result['error'])) {
-            $errorMsg = $this->result['error']['message'];
-            if (isset($this->result['error']['raw'])) {
-                $errorMsg .= " -- " . print_r($this->result['error'], true);
-            }
-            if ($this->result['error']['code'] > 10000) {
-                $this->error = new ServiceAuthenticationException($errorMsg, $this->result['error']['code']);
-            } else {
-                $this->error = new ServiceErrorException($errorMsg, $this->result['error']['code']);
-            }
+            $this->setResult($result);
         }
     }
 
@@ -86,16 +79,35 @@ class Response extends \Symfony\Component\HttpFoundation\Response
     }
 
 
+
     /**
      * Get service response result var
      * @return mixed get service response result var
      */
     public function getResult()
     {
-        return $this->result;
+        if ($this->hasParsedResult === null) {
+            $this->hasParsedResult = false;
+            $this->parseResponse();
+        }
+
+        if ($this->hasParsedResult) {
+            return $this->result;
+        } else {
+            return $this->content;
+        }
     }
 
-
+    /**
+     * @param mixed $result parsed result
+     * @return self
+     */
+    public function setResult($result)
+    {
+        $this->result = $result;
+        $this->hasParsedResult = true;
+        return $this;
+    }
 
     /**
      * Gets the Raw transfer infos (for cURL).
