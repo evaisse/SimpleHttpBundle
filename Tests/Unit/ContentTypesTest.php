@@ -9,9 +9,32 @@
 namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
 
+use evaisse\SimpleHttpBundle\Http\Exception\InvalidResponseBodyException;
+use evaisse\SimpleHttpBundle\Http\Response;
+
 class ContentTypesTest extends AbstractTests
 {
 
+
+    /**
+     * @return array
+     */
+    public function provideInvalidContentTypes()
+    {
+        $data = [];
+
+        $data[] = [
+            'application/json',
+            utf8_decode('{"a":"é"}'),
+        ];
+
+        $data[] = [
+            'application/json',
+            '{',
+        ];
+
+        return $data;
+    }
 
     public function testContentTypesDetection()
     {
@@ -41,5 +64,18 @@ class ContentTypesTest extends AbstractTests
 
     }
 
+    /**
+     * @dataProvider provideInvalidContentTypes
+     */
+    public function testInvalidJsonData($contentType, $body)
+    {
+        list($helper, $httpKernel, $container) = $this->createContext();
 
+        $response = new Response($body, 200, [
+            'Content-Type' => $contentType,
+        ]);
+
+        $this->assertInstanceOf('\evaisse\SimpleHttpBundle\Http\Exception\InvalidResponseBodyException',
+                                $response->getError());
+    }
 }

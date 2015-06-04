@@ -3,9 +3,11 @@
 namespace evaisse\SimpleHttpBundle\Http;
 
 
-use evaisse\SimpleHttpBundle\Http\Error\InvalidResponseError;
-use evaisse\SimpleHttpBundle\Http\Exception\InvalidJsonResponseException;
+use evaisse\SimpleHttpBundle\Http\Exception\HttpClientError;
+use evaisse\SimpleHttpBundle\Http\Exception\HttpServerError;
+use evaisse\SimpleHttpBundle\Http\Exception\InvalidResponseBodyException;
 use evaisse\SimpleHttpBundle\Http\Exception\ServiceErrorException;
+use \Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class Response extends \Symfony\Component\HttpFoundation\Response
 {
@@ -36,10 +38,11 @@ class Response extends \Symfony\Component\HttpFoundation\Response
     protected $transferInfos = array();
 
     /**
-     * [__construct description]
-     * @param string  $content [description]
-     * @param integer $status  [description]
-     * @param array   $headers [description]
+     * Create a new HTTP response object
+     *
+     * @param string  $content content string
+     * @param integer $status  http status code
+     * @param array   $headers A hash of HTTP headers
      */
     public function __construct($content = '', $status = 200, array $headers = array())
     {
@@ -52,10 +55,19 @@ class Response extends \Symfony\Component\HttpFoundation\Response
      */
     protected function parseResponse()
     {
+
+        if ($this->getStatusCode() >= 500) {
+            $message = HttpResponse::$statusTexts[$this->getStatusCode()];
+            $this->error = new HttpServerError($this, $message, $this->getStatusCode());
+        } else if ($this->getStatusCode() >= 400) {
+            $message = HttpResponse::$statusTexts[$this->getStatusCode()];
+            $this->error = new HttpClientError($this, $message, $this->getStatusCode());
+        }
+
         if ($this->headers->get('content-type') === "application/json") {
             $result = json_decode($this->getContent(), true);
             if (json_last_error()) {
-                $this->error = new InvalidResponseError('Invalid Json response body');
+                $this->error = new InvalidResponseBodyException($this, 'Invalid Json response body. ' . json_last_error_msg());
             }
             $this->setResult($result);
         }

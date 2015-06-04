@@ -11,6 +11,8 @@ namespace evaisse\SimpleHttpBundle\Http;
 
 use evaisse\SimpleHttpBundle\Http\Exception\CurlTransportException;
 use evaisse\SimpleHttpBundle\Http\Exception\HostNotFoundException;
+use evaisse\SimpleHttpBundle\Http\Exception\HttpClientError;
+use evaisse\SimpleHttpBundle\Http\Exception\HttpServerError;
 use evaisse\SimpleHttpBundle\Http\Exception\SslException;
 use evaisse\SimpleHttpBundle\Http\Exception\TimeoutException;
 use evaisse\SimpleHttpBundle\Http\Exception\TransportException;
@@ -20,6 +22,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event;
@@ -56,11 +59,6 @@ class Kernel extends RemoteHttpKernel
      * @var RequestGenerator An instance of Curl\RequestGenerator for getting preconfigured Curl\Request objects
      */
     protected $generator;
-
-    /**
-     * @var resource curlRequest last executed curl request
-     */
-    protected $lastCurlRequest;
 
 
     /**
@@ -253,7 +251,18 @@ class Kernel extends RemoteHttpKernel
     public function handle(HttpRequest $request, $type = HttpKernelInterface::SUB_REQUEST, $catch = true) 
     {
         try {
-            return $this->handleRaw($request);
+            $stmt = new Statement($request);
+
+            $this->execute([
+                $stmt
+            ]);
+
+            if ($stmt->hasError()) {
+                throw $stmt->getError();
+            }
+
+            return $stmt->getResponse();
+
         } catch (\Exception $e) {
             if (false === $catch) {
                 throw $e;
@@ -262,13 +271,6 @@ class Kernel extends RemoteHttpKernel
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function handleRaw(\Symfony\Component\HttpFoundation\Request $request)
-    {
-        return parent::handleRaw($request);
-    }
     
     /**
      * 
@@ -311,7 +313,7 @@ class Kernel extends RemoteHttpKernel
     {
         $request = $stmt->getRequest();
 
-        $curl = $this->lastCurlRequest = $this->getCurlRequest();
+        $curl = $this->getCurlRequest();
 
         $cookieFile = "/tmp/curlcookie.txt";
 
@@ -490,9 +492,6 @@ class Kernel extends RemoteHttpKernel
         return explode("\r\n", $headerBag);
     }
 
-    public function getLastCurlRequest() {
-        return $this->lastCurlRequest;
-    }
 
     /**
      * Gets the [$eventDispatcher description].

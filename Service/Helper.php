@@ -52,7 +52,7 @@ class Helper implements ContainerAwareInterface
      */
     public function execute(array $servicesList, SessionCookieJar $cookieJar = null, Kernel $client = null)
     {
-        $httpClient = $client ? $client : $this->container->get("simple_http.proxy");
+        $httpClient = $client ? $client : $this->container->get("simple_http.kernel");
         
         /*
             Fetch Cookie jar from session
@@ -93,13 +93,15 @@ class Helper implements ContainerAwareInterface
 
 
     /**
+     * Prepare a statement service for a given request, alias for Request::create()
+     *
      * @param string $method HTTP method
-     * @param string $url
-     * @param array $parameters
-     * @param array $cookies
-     * @param array $files
-     * @param array $server
-     * @param null $content
+     * @param string $url url or url pattern like /status/:code/fetch with parameters array('code' => 200) into /status/200
+     * @param array $parameters a list of parameters interpolated with url route if needed
+     * @param array $cookies an hash of cookieName => Value
+     * @param array $files a hash of files infos
+     * @param array $server server infos
+     * @param string $content optionnal RAW body content
      * @return Transaction
      */
     public function prepare($method, $url, $parameters = array(), $cookies = array(), $files = array(), $server = array(), $content = NULL)
@@ -133,7 +135,12 @@ class Helper implements ContainerAwareInterface
         return array($urlPattern, $parameters);
     }
 
-
+    /**
+     * @param string $method http method to send
+     * @param string $url url pattern
+     * @param array $parameters a list of parameters interpolated with url route if needed
+     * @return mixed http transaction body result, automaticaly parsed if json is returned
+     */
     protected function fire($method, $url, array $parameters = array())
     {
         $transaction = $this->prepare($method, $url, $parameters);
@@ -142,32 +149,51 @@ class Helper implements ContainerAwareInterface
     }
 
 
-
+    /**
+     * @param string $url url pattern
+     * @param array $parameters a list of parameters interpolated with url route if needed
+     * @return mixed http transaction body result, automaticaly parsed if json is returned
+     */
     public function GET($url, array $parameters = array())
     {
         return $this->fire('GET', $url, $parameters);
     }
 
+    /**
+     * @param string $url url pattern
+     * @param array $parameters a list of parameters interpolated with url route if needed
+     * @return mixed http transaction body result, automaticaly parsed if json is returned
+     */
     public function POST($url, array $parameters = array())
     {
         return $this->fire('POST', $url, $parameters);
     }
 
+    /**
+     * @param string $url url pattern
+     * @param array $parameters a list of parameters interpolated with url route if needed
+     * @return mixed http transaction body result, automaticaly parsed if json is returned
+     */
     public function PUT($url, array $parameters = array())
     {
         return $this->fire('PUT', $url, $parameters);
     }
 
+    /**
+     * @param string $url url pattern
+     * @param array $parameters a list of parameters interpolated with url route if needed
+     * @return mixed http transaction body result, automaticaly parsed if json is returned
+     */
     public function PATCH($url, array $parameters = array())
     {
         return $this->fire('PATCH', $url, $parameters);
     }
 
-    public function HEAD($url, array $parameters = array())
-    {
-        return $this->fire('HEAD', $url, $parameters);
-    }
-
+    /**
+     * @param string $url url pattern
+     * @param array $parameters a list of parameters interpolated with url route if needed
+     * @return mixed http transaction body result, automaticaly parsed if json is returned
+     */
     public function DELETE($url, array $parameters = array())
     {
         return $this->fire('DELETE', $url, $parameters);

@@ -12,27 +12,83 @@ namespace evaisse\SimpleHttpBundle\Tests\Unit;
 class ExceptionsTest extends AbstractTests
 {
 
-    public function testTimeoutException()
+    /**
+     * @return array
+     */
+    public function provideHttpClientErrorCodes()
     {
-
-    }
-
-    public function testHostNotFoundException()
-    {
-
+        $codes = array();
+        foreach (range(400, 417) as $code) {
+            $codes[] = array($code);
+        }
+        return $codes;
     }
 
     /**
-     * @expectedException evaisse\SimpleHttpBundle\Http\Exception\SslException
+     * @return array
      */
-    public function testSslValidationException()
+    public function provideHttpServerErrorCodes()
     {
+        $codes = array();
+        foreach (range(500, 508) as $code) {
+            $codes[] = array($code);
+        }
+        return $codes;
+    }
 
+    /**
+     * @expectedException evaisse\SimpleHttpBundle\Http\Exception\RequestNotSentException
+     */
+    public function testResultException()
+    {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $a = $helper->prepare("GET", 'https://www.pcwebshop.co.uk/');
-        $a->setTimeout(700);
-        $a->execute($httpKernel);
+        $stmt = $helper->prepare('GET', 'http://httpbin.org/ip');
 
+        $stmt->getResult();
     }
+
+
+    /**
+     * @dataProvider provideHttpClientErrorCodes
+     * @expectedException evaisse\SimpleHttpBundle\Http\Exception\HttpClientError
+     */
+    public function testResultWithClientErrorException($code)
+    {
+        list($helper, $httpKernel, $container) = $this->createContext();
+
+        $stmt = $helper->prepare('GET', 'http://httpbin.org/status/:code', array(
+            'code' => $code,
+        ));
+
+        $httpKernel->execute([
+            $stmt
+        ]);
+
+        $this->assertInstanceOf('evaisse\SimpleHttpBundle\Http\Exception', $stmt->getError());
+
+        $stmt->getResult();
+    }
+
+    /**
+     * @dataProvider provideHttpServerErrorCodes
+     * @expectedException evaisse\SimpleHttpBundle\Http\Exception\HttpServerError
+     */
+    public function testResultWithServerErrorException($code)
+    {
+        list($helper, $httpKernel, $container) = $this->createContext();
+
+        $stmt = $helper->prepare('GET', 'http://httpbin.org/status/:code', array(
+            'code' => $code,
+        ));
+
+        $httpKernel->execute([
+            $stmt
+        ]);
+
+        $this->assertInstanceOf('evaisse\SimpleHttpBundle\Http\Exception', $stmt->getError());
+
+        $stmt->getResult();
+    }
+
 }

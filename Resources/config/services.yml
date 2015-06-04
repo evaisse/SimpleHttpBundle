@@ -18,7 +18,7 @@ services:
         class:      evaisse\SimpleHttpBundle\Service\Helper
         arguments:  [@service_container]
 
-    simple_http.proxy:
+    simple_http.kernel:
         class:      evaisse\SimpleHttpBundle\Http\Kernel
         arguments:  [@service_container]
 

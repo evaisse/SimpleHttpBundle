@@ -10,6 +10,7 @@
 namespace evaisse\SimpleHttpBundle\Http;
 
 
+use evaisse\SimpleHttpBundle\Http\Exception\RequestNotSentException;
 use React\Promise\Deferred;
 use React\Promise\Promise;
 
@@ -157,7 +158,7 @@ class Statement
     public function getResult()
     {
         if (!$this->getResponse() && !$this->hasError()) {
-            throw new Exception("Service has not been sent yet");
+            throw new RequestNotSentException("Request has not been sent yet");
         }
 
         if (!$this->hasError()) {
@@ -224,9 +225,9 @@ class Statement
 
         if ($this->response->hasError()) {
             $this->setError($this->response->getError());
+        } else {
+            $this->deferred->resolve($response->getResult());
         }
-
-        $this->deferred->resolve($response->getResult());
 
         return $this;
     }
@@ -359,6 +360,58 @@ class Statement
             0);
 
         $this->getRequest()->files->set($key, $file);
+    }
+
+
+    /**
+     * A callbackto call on completed transaction, ethier on success or failure
+     *
+     * @param callable $callable callable proxyied to getPromise()->then($callable) to call on completed transaction, ethier on success or failure
+     * @return self
+     */
+    public function onSuccess(callable $callable)
+    {
+        $this->getPromise()->then($callable);
+        return $this;
+    }
+
+
+    /**
+     * Assign a callback on error
+     *
+     * @param callable $callable callable proxyied to getPromise()->otherwise($callable) to call on completed transaction, ethier on success or failure
+     * @return self
+     */
+    public function onError(callable $callable)
+    {
+        $this->getPromise()->then(null, $callable);
+        return $this;
+    }
+
+
+    /**
+     * Assign a callback on progress notification
+     *
+     * @param callable $callable callable proxyied to getPromise()->progress($callable) to call on completed transaction, ethier on success or failure
+     * @return self
+     */
+    public function onProgress(callable $callable)
+    {
+        $this->getPromise()->then(null, null, $callable);
+        return $this;
+    }
+
+
+    /**
+     * Assign a callback to  on completed transaction, ethier on success or failure
+     *
+     * @param callable $callable callable proxyied to getPromise()->then($callable) to call on completed transaction, ethier on success or failure
+     * @return self
+     */
+    public function onFinish(callable $callable)
+    {
+        $this->getPromise()->always($callable);
+        return $this;
     }
 
 }

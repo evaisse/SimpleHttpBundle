@@ -74,16 +74,19 @@ class SessionCookieJar extends CookieJar
         $this->session = $session;
     }
 
-
-
+    /**
+     * Load cookie JAR from session
+     */
     function load()
     {
-        $this->cookieJar = $this->session->get($this->cookieJarName, []);
+        $this->cookieJar = $this->getSession()->get($this->getCookieJarName(), []);
     }
 
-
+    /**
+     * Save in session the current cookie JAR
+     */
     function save()
     {
-
+        $this->getSession()->set($this->getCookieJarName(), $this->cookieJar);
     }
 }

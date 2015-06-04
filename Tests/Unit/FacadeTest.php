@@ -60,93 +60,6 @@ class FacadeTest extends AbstractTests
 
 
     /**
-     *
-     */
-    public function testPOSTJSON()
-    {
-
-    }
-
-
-    /**
-     *
-     */
-    public function testPUTJSON()
-    {
-
-    }
-
-
-
-
-    /**
-     *
-     */
-    public function testTimeouts()
-    {
-
-    }
-
-
-
-    /**
-     *
-     */
-    public function testParrallelExecution()
-    {
-
-    }
-
-    /**
-     *
-     */
-    public function testPromises()
-    {
-
-    }
-
-    /**
-     *
-     */
-    public function testSynchronousExecution()
-    {
-
-    }
-
-
-    /**
-     * test using PUT, POST
-     */
-    public function testFilesUpload()
-    {
-
-    }
-
-    /**
-     *
-     */
-    public function testFilesDownload()
-    {
-
-    }
-
-
-    /**
-     *
-     */
-    public function testHttpCode100()
-    {
-
-    }
-
-    public function testCookiePersistance()
-    {
-
-    }
-
-
-
-    /**
      * @dataProvider provideBaseTest
      */
     public function testCalls($method, $url, $code = 200)
@@ -179,6 +92,27 @@ class FacadeTest extends AbstractTests
         $statement->execute($httpKernel);
 
         $this->assertEquals($statement->getResponse()->getStatusCode(), $code);
+
+    }
+
+
+    /**
+     * @dataProvider provideBaseMethods
+     */
+    public function testFacadeCalls($method, $url, $code = 200)
+    {
+        list($helper, $httpKernel, $container) = $this->createContext();
+
+        $container->set('simple_http.helper', $helper);
+        $container->set('simple_http.kernel', $httpKernel);
+
+        $method = strtoupper($method);
+
+        $args = array_slice($_SERVER, 0, 3);
+
+        $data = $helper->$method('http://httpbin.org/' . strtolower($method), $args);
+
+        $this->assertEquals($data['headers']['Host'], 'httpbin.org');
 
     }
 
