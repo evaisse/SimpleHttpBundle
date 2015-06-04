@@ -10,23 +10,38 @@ namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
 
 
+
+
 class TimeoutTest extends AbstractTests
 {
 
 
+
+    public function testEmptyResponseOnTransportErrors()
+    {
+        list($helper, $httpKernel, $container) = $this->createContext();
+
+        $a = $helper->prepare("GET", 'http://httpbin.org/delay/1');
+        $a->setTimeout(800);
+
+        $httpKernel->execute([
+            $a,
+        ]);
+
+        $this->assertEquals($a->getResponse(), null);
+    }
+
+
     /**
-     * @expectedException evaisse\SimpleHttpBundle\Http\Error
+     * @expectedException evaisse\SimpleHttpBundle\Http\Exception\TimeoutException
      */
-    public function testParrellelExecutionWithError()
+    public function testTimeoutExecutionWithError()
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
         $a = $helper->prepare("GET", 'http://httpbin.org/delay/1');
         $a->setTimeout(800);
         $a->execute($httpKernel);
-
-
-//        $this->assertEquals($a->hasError(), true);
     }
 
 

@@ -70,7 +70,11 @@ class FacadeTest extends AbstractTests
         $request = $statement->getRequest();
         $this->assertTrue($statement instanceof Statement);
         $this->assertTrue($request instanceof Request);
-        $statement->execute($httpKernel);
+
+        $httpKernel->execute([
+            $statement
+        ]);
+
 
         $this->assertEquals($statement->getResponse()->getStatusCode(), $code);
 
@@ -89,7 +93,10 @@ class FacadeTest extends AbstractTests
         $request = $statement->getRequest();
         $this->assertTrue($statement instanceof Statement);
         $this->assertTrue($request instanceof Request);
-        $statement->execute($httpKernel);
+
+        $httpKernel->execute([
+            $statement
+        ]);
 
         $this->assertEquals($statement->getResponse()->getStatusCode(), $code);
 
@@ -113,12 +120,7 @@ class FacadeTest extends AbstractTests
         $data = $helper->$method('http://httpbin.org/' . strtolower($method), $args);
 
         $this->assertEquals($data['headers']['Host'], 'httpbin.org');
-
     }
-
-
-
-
 
 
 }
