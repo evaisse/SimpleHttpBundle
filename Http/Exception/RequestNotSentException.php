@@ -9,6 +9,8 @@
 namespace evaisse\SimpleHttpBundle\Http\Exception;
 
 
-class RequestNotSentException {
+
+class RequestNotSentException extends RequestException
+{
 
 }

@@ -9,6 +9,16 @@
 namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
 
-class ContainerTest {
+class ContainerTest extends AbstractTests
+{
+
+    function testCOntainer()
+    {
+        list($helper, $httpKernel, $container) = $this->createContext();
+
+        $container->set('simple_http.helper', $helper);
+        $container->set('simple_http.kernel', $httpKernel);
+    }
+
 
 }

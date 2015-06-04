@@ -1,14 +1,14 @@
 <?php
 /**
- * Created by PhpStorm.
+ * Exception for HTTP 5XX codes
  * User: evaisse
  * Date: 04/06/15
- * Time: 16:10
  */
 
 namespace evaisse\SimpleHttpBundle\Http\Exception;
 
 
-class HttpServerError {
+class HttpServerError extends HttpError
+{
 
 }

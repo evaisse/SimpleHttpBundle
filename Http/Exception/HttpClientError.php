@@ -1,14 +1,14 @@
 <?php
 /**
- * Created by PhpStorm.
+ * Exception for HTTP 4XX codes
  * User: evaisse
  * Date: 04/06/15
- * Time: 16:10
  */
 
 namespace evaisse\SimpleHttpBundle\Http\Exception;
 
 
-class HttpClientError {
+class HttpClientError extends HttpError
+{
 
 }

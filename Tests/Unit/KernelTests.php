@@ -9,6 +9,18 @@
 namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
 
-class KernelTests {
+class KernelTests extends AbstractTests
+{
+
+
+    public function testClassicKernelApi()
+    {
+        list($helper, $httpKernel, $container) = $this->createContext();
+
+
+        $stmt = $helper->prepare('GET', 'http://httpbin.org/');
+
+        $httpKernel->handle($stmt->getRequest());
+    }
 
 }

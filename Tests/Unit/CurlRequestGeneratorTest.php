@@ -9,7 +9,7 @@
 namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
 
-class CurlRequestGenerator extends AbstractTests
+class CurlRequestGeneratorTest extends AbstractTests
 {
 
 
