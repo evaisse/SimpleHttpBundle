@@ -4,8 +4,8 @@ SimpleHttpBundle
 A symfony2 2.7+ http client bundle built on the httpfoundation component (instead of guzzle), using cURL as engine.
 
 
-![testing](https://travis-ci.org/evaisse/SimpleHttpBundle.svg?branch=master)
-[![Coverage Status](https://coveralls.io/repos/evaisse/SimpleHttpBundle/badge.svg)](https://coveralls.io/r/evaisse/SimpleHttpBundle)
+[![testing](https://travis-ci.org/evaisse/SimpleHttpBundle.svg?branch=master)](https://travis-ci.org/evaisse/SimpleHttpBundle)
+[![Coverage Status](https://coveralls.io/repos/evaisse/SimpleHttpBundle/badge.svg?branch=master)](https://coveralls.io/r/evaisse/SimpleHttpBundle?branch=master)
 
 Quickstart
 ======
