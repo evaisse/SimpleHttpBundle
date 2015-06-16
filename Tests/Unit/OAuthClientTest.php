@@ -11,7 +11,7 @@ namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
-class OAuthClientTest extends AbstractTests
+abstract class OAuthClientTest extends AbstractTests
 {
 
 
@@ -73,7 +73,7 @@ class OAuthClientTest extends AbstractTests
                                                   "manu",
                                                   "3yu1uuet67uowc404c8cc80os480os8");
 
-        $helper->prepare('')
+//        $helper->prepare('')
 
         try {
 
