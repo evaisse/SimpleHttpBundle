@@ -24,8 +24,8 @@
         <tr>
             <td colspan="2">
                 <div class="progress">
-                    <div class="progress-bar warning" style="width: {{ connection_percent|number_format(0) }}%;">wait {{ connection_percent|number_format(0) }} %</div>
-                    <div class="progress-bar {% if error %}error{% else %}success{% endif %}" style="width: {{ process_percent|number_format(0) }}%;">process {{ process_percent|number_format(0) }} %</div>
+                    <div class="progress-bar" style="background: #AAA;width: {{ connection_percent|number_format(0) }}%;">wait {{ connection_percent|number_format(0) }} %</div>
+                    <div class="progress-bar {% if error %}error{% else %}success{% endif %}" style="background:#DDD;color:#999;width: {{ process_percent|number_format(0) }}%;">process {{ process_percent|number_format(0) }} %</div>
                 </div>
             </td>
         </tr>
