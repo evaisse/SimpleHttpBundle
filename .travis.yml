@@ -16,7 +16,7 @@ matrix:
 
 
 install:
-  - composer install
+  - composer install --dev --no-interaction
 
 
 script:
