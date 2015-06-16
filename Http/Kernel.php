@@ -12,6 +12,7 @@ namespace evaisse\SimpleHttpBundle\Http;
 use evaisse\SimpleHttpBundle\Http\Exception\CurlTransportException;
 use evaisse\SimpleHttpBundle\Http\Exception\HostNotFoundException;
 use evaisse\SimpleHttpBundle\Http\Exception\HttpClientError;
+use evaisse\SimpleHttpBundle\Http\Exception\HttpError;
 use evaisse\SimpleHttpBundle\Http\Exception\HttpServerError;
 use evaisse\SimpleHttpBundle\Http\Exception\SslException;
 use evaisse\SimpleHttpBundle\Http\Exception\TimeoutException;
@@ -258,7 +259,11 @@ class Kernel extends RemoteHttpKernel
             ]);
 
             if ($stmt->hasError()) {
-                throw $stmt->getError();
+                if ($stmt->getError() instanceof HttpError) {
+                    throw $stmt->getError()->createHttpFoundationException();
+                } else {
+                    throw $stmt->getError();
+                }
             }
 
             return $stmt->getResponse();
@@ -315,7 +320,7 @@ class Kernel extends RemoteHttpKernel
 
         $curl = $this->getCurlRequest();
 
-        $cookieFile = "/tmp/curlcookie.txt";
+        $cookieFile = $this->getTmpCookieFile();
 
         $curl->setOptionArray(array(
             CURLOPT_URL            => $request->getUri(),

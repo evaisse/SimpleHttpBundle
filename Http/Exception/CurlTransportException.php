@@ -8,7 +8,7 @@
 
 namespace evaisse\SimpleHttpBundle\Http\Exception;
 
-class CurlTransportException extends TransportException
+class CurlTransportException extends \RuntimeException
 {
 
 
@@ -104,6 +104,7 @@ class CurlTransportException extends TransportException
      */
     public function transformToGenericTransportException()
     {
+
         if (array_key_exists($this->getCode(), static::$codes)) {
             $name = static::$codes[$this->getCode()];
             $message = "[$name] " . $this->getMessage();
@@ -113,18 +114,18 @@ class CurlTransportException extends TransportException
 
         switch ($this->getCode()) {
             case 28:
-                $error = new TimeoutException($message, 1, $this);
+                $error = new TimeoutException($message, $this->getCode(), $this);
                 break;
             case 58:
             case 59:
             case 60:
-                $error = new SslException($message, 1, $this);
+                $error = new SslException($message, $this->getCode(), $this);
                 break;
             case 6:
-                $error = new HostNotFoundException($message, 1, $this);
+                $error = new HostNotFoundException($message, $this->getCode(), $this);
                 break;
             default:
-                $error = $this;
+                $error = new TransportException($message, $this->getCode(), $this);
                 break;
         }
 

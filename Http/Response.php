@@ -8,6 +8,10 @@ use evaisse\SimpleHttpBundle\Http\Exception\HttpServerError;
 use evaisse\SimpleHttpBundle\Http\Exception\InvalidResponseBodyException;
 use evaisse\SimpleHttpBundle\Http\Exception\ServiceErrorException;
 use \Symfony\Component\HttpFoundation\Response as HttpResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class Response extends \Symfony\Component\HttpFoundation\Response
 {
@@ -22,8 +26,6 @@ class Response extends \Symfony\Component\HttpFoundation\Response
      * @var
      */
     protected $hasParsedResult;
-
-
 
     /**
      * [$error description]
@@ -55,13 +57,24 @@ class Response extends \Symfony\Component\HttpFoundation\Response
      */
     protected function parseResponse()
     {
+        if ($this->getStatusCode() >= 400) {
 
-        if ($this->getStatusCode() >= 500) {
-            $message = HttpResponse::$statusTexts[$this->getStatusCode()];
-            $this->error = new HttpServerError($this, $message, $this->getStatusCode());
-        } else if ($this->getStatusCode() >= 400) {
-            $message = HttpResponse::$statusTexts[$this->getStatusCode()];
-            $this->error = new HttpClientError($this, $message, $this->getStatusCode());
+            switch ($this->getStatusCode()) {
+                case 400:
+                    $e = new BadRequestHttpException($this->getContent(), null, $this->getStatusCode());
+                    break;
+                case 401:
+                    $e = new UnauthorizedHttpException("", $this->getContent(), null, $this->getStatusCode());
+                    break;
+                case 404:
+                    $e = new NotFoundHttpException($this->getContent(), null, $this->getStatusCode());
+                    break;
+                default:
+                    $e = new HttpException($this->getStatusCode(), $this->getContent(), null, $this->headers->all());
+                    break;
+            }
+
+            $this->error = $e;
         }
 
         if ($this->headers->get('content-type') === "application/json") {

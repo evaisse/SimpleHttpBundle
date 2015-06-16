@@ -37,10 +37,11 @@ class ExceptionsTest extends AbstractTests
     }
 
     /**
-     * @expectedException evaisse\SimpleHttpBundle\Http\Exception\RequestNotSentException
+     * @expectedException \evaisse\SimpleHttpBundle\Http\Exception\RequestNotSentException
      */
     public function testResultException()
     {
+
         list($helper, $httpKernel, $container) = $this->createContext();
 
         $stmt = $helper->prepare('GET', 'http://httpbin.org/ip');
@@ -51,7 +52,7 @@ class ExceptionsTest extends AbstractTests
 
     /**
      * @dataProvider provideHttpClientErrorCodes
-     * @expectedException evaisse\SimpleHttpBundle\Http\Exception\HttpClientError
+     * @expectedException \Symfony\Component\HttpKernel\Exception\HttpException
      */
     public function testResultWithClientErrorException($code)
     {
@@ -65,14 +66,14 @@ class ExceptionsTest extends AbstractTests
             $stmt
         ]);
 
-        $this->assertInstanceOf('evaisse\SimpleHttpBundle\Http\Exception', $stmt->getError());
+        $this->assertInstanceOf('\Symfony\Component\HttpKernel\Exception\HttpException', $stmt->getError());
 
         $stmt->getResult();
     }
 
     /**
      * @dataProvider provideHttpServerErrorCodes
-     * @expectedException evaisse\SimpleHttpBundle\Http\Exception\HttpServerError
+     * @expectedException \Symfony\Component\HttpKernel\Exception\HttpException
      */
     public function testResultWithServerErrorException($code)
     {
@@ -86,7 +87,7 @@ class ExceptionsTest extends AbstractTests
             $stmt
         ]);
 
-        $this->assertInstanceOf('evaisse\SimpleHttpBundle\Http\Exception', $stmt->getError());
+        $this->assertInstanceOf('\Symfony\Component\HttpKernel\Exception\HttpException', $stmt->getError());
 
         $stmt->getResult();
     }

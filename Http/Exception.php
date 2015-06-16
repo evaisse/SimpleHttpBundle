@@ -2,8 +2,9 @@
 
 namespace evaisse\SimpleHttpBundle\Http;
 
-class Exception extends \Exception
-{
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
+class Exception extends HttpException
+{
 
 }

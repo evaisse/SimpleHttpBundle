@@ -27,6 +27,10 @@ class AbstractTests extends \PHPUnit_Framework_TestCase
         $container = new Container(new ParameterBag());
         $helper = new Helper($container);
         $httpKernel = new Kernel($container);
+
+        $container->set('simple_http.helper', $helper);
+        $container->set('simple_http.kernel', $httpKernel);
+
         return [$helper, $httpKernel, $container];
     }
 

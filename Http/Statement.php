@@ -15,8 +15,11 @@ use React\Promise\Deferred;
 use React\Promise\Promise;
 
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Security\Http\Firewall\ListenerInterface;
 
 class Statement
 {
@@ -75,6 +78,12 @@ class Statement
 
 
     /**
+     * @var EventDispatcher dispatcher for http transaction events
+     */
+    protected $eventDispatcher;
+
+
+    /**
      * Ignore SSL verification and notifications
      *
      * @return self
@@ -115,6 +124,7 @@ class Statement
         $this->setRequest($request);
         $this->deferred = new Deferred();
         $this->promise = $this->deferred->promise();
+        $this->eventDispatcher = new EventDispatcher();
     }
 
 
@@ -151,9 +161,10 @@ class Statement
 
     /**
      * Get service result if define
+     *
      * @return mixed
-     * @throws Exception
-     * @throws Error
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
      */
     public function getResult()
     {
@@ -169,27 +180,14 @@ class Statement
     }
 
 
-    public function addServiceListener(ServiceListenerInterface $listener)
+    /**
+     * @return EventDispatcher event dispatcher for internal http transactions events
+     */
+    public function getEventDispatcher()
     {
-        $this->listeners[] = $listener;
+        return $this->eventDispatcher;
     }
 
-    public function getServiceListeners()
-    {
-        return $this->listeners;
-    }
-
-    public function onDataAvailable($callback)
-    {
-        $this->onDataAvailableCallback = $callback;
-        return $this;
-    }
-
-
-    public function addFile()
-    {
-
-    }
 
     /**
      * Set value for $request
@@ -260,10 +258,10 @@ class Statement
     /**
      * Set value for $error
      *
-     * @param  Error $value value to set to error
+     * @param  HttpException  $value value to set to error
      * @return Object       instance for method chaining
      */
-    public function setError(Error $value)
+    public function setError(HttpException $value)
     {
         $this->error = $value;
 
@@ -274,7 +272,7 @@ class Statement
 
     /**
      * Get value for $error
-     * @return Error Error
+     * @return HttpException Error
      */
     public function getError()
     {
@@ -411,6 +409,30 @@ class Statement
     public function onFinish(callable $callable)
     {
         $this->getPromise()->always($callable);
+        return $this;
+    }
+
+
+    /**
+     * @param string $consumerKey
+     * @param string $consumerSecret
+     */
+    public function authorizeOAuth($consumerKey, $consumerSecret)
+    {
+
+        return $this;
+    }
+
+    /**
+     * @param string	$key	The key
+     * @param string|array	$values	The value or an array of values
+     * @param bool	$replace	Whether to replace the actual value or not (true by default)
+     *
+     * @return self
+     */
+    public function setHeader($key, $values, $replace = true)
+    {
+        $this->request->headers->set($key, $values, $replace);
         return $this;
     }
 
