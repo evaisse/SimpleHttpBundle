@@ -15,9 +15,17 @@ Get the simple API
 
     $http = $this->get('http');
 
-    $http->GET('http://httpbin.org/ip'); // yeah, that's all.
+    try {
+        $http->GET('http://httpbin.org/ip'); // yeah, that's all.
+    } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+        // handle errors
+    }
   
-    $data = $http->POST('http://httpbin.org/post', $myArgs);
+    try {
+        $data = $http->POST('http://httpbin.org/post', $myArgs);
+    } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+        // handle errors
+    }
     
 Easy routing
 
@@ -104,4 +112,18 @@ Cookies persistance
     
 
 Promise usage
+    
+    $stmt = $http->prepare('PUT', 'http://httpbin.org/put')
+
+    $stmt->onSuccess(function ($data) {
+        // handle data
+    })->onError(function (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+        // handle errors
+    })->onFinish(function () {
+        // like "finally"
+    });
+
+    $http->execute([
+        $stmt
+    ]);
     
