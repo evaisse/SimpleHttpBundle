@@ -9,6 +9,9 @@
         "zeroem/curl-bundle": "1.3.*",
         "react/promise": "2.2.*"
     },
+    "require-dev": {
+        "satooshi/php-coveralls": "dev-master"
+    },
     "suggest": {
     },
     "license": "MIT",
