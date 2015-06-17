@@ -7,14 +7,15 @@
 
 namespace evaisse\SimpleHttpBundle\Http\Exception;
 
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
-abstract class HttpError extends ResponseException
+abstract class HttpError extends HttpException
 {
 
     /**
      * @return \Symfony\Component\HttpKernel\Exception\HttpException exception for given http error
      */
-    public function createHttpFoundationException()
+    public static function createHttpFoundationException()
     {
         $message = HttpResponse::$statusTexts[$this->getStatusCode()];
 
@@ -28,4 +29,6 @@ abstract class HttpError extends ResponseException
         return new $cls($this->getStatusCode(), $this->getResponse()->getContent(), $this, $this->getResponse()->headers->all());
 
     }
+
+
 }

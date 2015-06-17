@@ -24,81 +24,117 @@ class PromisesTest extends AbstractTests
         ];
     }
 
-    /**
-     * @dataProvider provideErrors
-     */
-    public function testPromises($code, $expectedResults)
-    {
-        list($helper, $httpKernel, $container) = $this->createContext();
+//    /**
+//     * @dataProvider provideErrors
+//     */
+//    public function testPromises($code, $expectedResults)
+//    {
+//        list($helper, $httpKernel, $container) = $this->createContext();
+//
+//        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/:code', array(
+//            'code' => $code
+//        ));
+//
+//        $events = new \ArrayObject();
+//
+//        $stmt->getPromise()->then(function () use ($events) {
+//            $events[] = 'success';
+//        })->otherwise(function () use ($events) {
+//            $events[] = 'error';
+//        })->done(function () use ($events) {
+//            $events[] = 'done';
+//        });
+//
+//        $httpKernel->execute([
+//            $stmt
+//        ]);
+//
+//        $this->assertCount(2, $events);
+//
+//        foreach ($expectedResults as $expectedResult) {
+//            $this->assertContains($expectedResult, $events);
+//        }
+//
+//    }
+//
+//
+//    /**
+//     * @dataProvider provideErrors
+//     */
+//    public function testProxiedPromises($code, $expectedResults)
+//    {
+//        list($helper, $httpKernel, $container) = $this->createContext();
+//
+//        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/:code', array(
+//            'code' => $code
+//        ));
+//
+//        $events = new \ArrayObject();
+//
+//
+//        $stmt->onSuccess(function () use ($events) {
+//            $events[] = 'success';
+//        })->onError(function () use ($events) {
+//            $events[] = 'error';
+//        })->onFinish(function () use ($events) {
+//            $events[] = 'done';
+//        });
+//
+//
+//        $httpKernel->execute([
+//            $stmt
+//        ]);
+//
+//        $this->assertCount(2, $events);
+//
+//        foreach ($expectedResults as $expectedResult) {
+//            $this->assertContains($expectedResult, $events);
+//        }
+//
+//    }
+//
+//    /**
+//     *
+//     */
+//    public function testPromisesOnTimeout()
+//    {
+//        list($helper, $httpKernel, $container) = $this->createContext();
+//
+//        $stmt = $helper->prepare("GET", 'https://httpbin.org/delay/1');
+//
+//        $stmt->setTimeout(400);
+//
+//        $events = new \ArrayObject();
+//
+//        $stmt->onSuccess(function () use ($events) {
+//            $events[] = 'success';
+//        })->onError(function () use ($events) {
+//            $events[] = 'error';
+//        })->onFinish(function () use ($events) {
+//            $events[] = 'done';
+//        });
+//
+//        $httpKernel->execute([
+//            $stmt
+//        ]);
+//
+//        $this->assertCount(2, $events);
+//        $this->assertContains("error", $events);
+//        $this->assertContains("done", $events);
+//
+//
+//    }
 
-        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/:code', array(
-            'code' => $code
-        ));
 
-        $events = new \ArrayObject();
-
-        $stmt->getPromise()->then(function () use ($events) {
-            $events[] = 'success';
-        })->otherwise(function () use ($events) {
-            $events[] = 'error';
-        })->done(function () use ($events) {
-            $events[] = 'done';
-        });
-
-        $httpKernel->execute([
-            $stmt
-        ]);
-
-        $this->assertCount(2, $events);
-
-        foreach ($expectedResults as $expectedResult) {
-            $this->assertContains($expectedResult, $events);
-        }
-
-    }
-
-
-    /**
-     * @dataProvider provideErrors
-     */
-    public function testProxiedPromises($code, $expectedResults)
-    {
-        list($helper, $httpKernel, $container) = $this->createContext();
-
-        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/:code', array(
-            'code' => $code
-        ));
-
-        $events = new \ArrayObject();
-
-
-        $stmt->onSuccess(function () use ($events) {
-            $events[] = 'success';
-        })->onError(function () use ($events) {
-            $events[] = 'error';
-        })->onFinish(function () use ($events) {
-            $events[] = 'done';
-        });
-
-
-        $httpKernel->execute([
-            $stmt
-        ]);
-
-        $this->assertCount(2, $events);
-
-        foreach ($expectedResults as $expectedResult) {
-            $this->assertContains($expectedResult, $events);
-        }
-
-    }
 
     /**
      *
      */
-    public function testPromisesOnTimeout()
+    public function testPromisesValues()
     {
         list($helper, $httpKernel, $container) = $this->createContext();
+
+        try;
 
         $stmt = $helper->prepare("GET", 'https://httpbin.org/delay/1');
 
@@ -121,8 +157,6 @@ class PromisesTest extends AbstractTests
         $this->assertCount(2, $events);
         $this->assertContains("error", $events);
         $this->assertContains("done", $events);
-
-
     }
 
 }

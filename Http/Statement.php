@@ -169,7 +169,7 @@ class Statement
     public function getResult()
     {
         if (!$this->getResponse() && !$this->hasError()) {
-            throw new RequestNotSentException("Request has not been sent yet");
+            throw new RequestNotSentException($this->request, "Request has not been sent yet");
         }
 
         if (!$this->hasError()) {

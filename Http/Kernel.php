@@ -11,9 +11,9 @@ namespace evaisse\SimpleHttpBundle\Http;
 
 use evaisse\SimpleHttpBundle\Http\Exception\CurlTransportException;
 use evaisse\SimpleHttpBundle\Http\Exception\HostNotFoundException;
-use evaisse\SimpleHttpBundle\Http\Exception\HttpClientError;
+use evaisse\SimpleHttpBundle\Http\Exception\ClientErrorHttpException;
 use evaisse\SimpleHttpBundle\Http\Exception\HttpError;
-use evaisse\SimpleHttpBundle\Http\Exception\HttpServerError;
+use evaisse\SimpleHttpBundle\Http\Exception\ServerErrorHttpException;
 use evaisse\SimpleHttpBundle\Http\Exception\SslException;
 use evaisse\SimpleHttpBundle\Http\Exception\TimeoutException;
 use evaisse\SimpleHttpBundle\Http\Exception\TransportException;

@@ -8,7 +8,7 @@
 namespace evaisse\SimpleHttpBundle\Http\Exception;
 
 
-class HttpServerError extends HttpError
+class ServerErrorHttpException extends ErrorHttpException
 {
 
 }
