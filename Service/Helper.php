@@ -93,6 +93,37 @@ class Helper implements ContainerAwareInterface
 
 
     /**
+     * @param Request $request request to start a statement
+     * @return Statement
+     */
+    protected function createStatement(Request $request)
+    {
+        return new Statement($request);
+    }
+
+
+    /**
+     * Creates a Request based on a given URI and configuration.
+     *
+     * The information contained in the URI always take precedence
+     * over the other information (server and parameters).
+     *
+     * @param string $uri        The URI
+     * @param string $method     The HTTP method
+     * @param array  $parameters The query (GET) or request (POST) parameters
+     * @param array  $cookies    The request cookies ($_COOKIE)
+     * @param array  $files      The request files ($_FILES)
+     * @param array  $server     The server parameters ($_SERVER)
+     * @param string $content    The raw body data
+     *
+     * @return \Symfony\Component\HttpFoundation\Request
+     */
+    protected function createRequest($uri, $method = 'GET', $parameters = array(), $cookies = array(), $files = array(), $server = array(), $content = null)
+    {
+        return Request::create($uri, $method, $parameters, $cookies, $files, array(), $content);
+    }
+
+    /**
      * Prepare a statement service for a given request, alias for Request::create()
      *
      * @param string $method HTTP method
@@ -107,10 +138,13 @@ class Helper implements ContainerAwareInterface
     public function prepare($method, $url, $parameters = array(), $cookies = array(), $files = array(), $server = array(), $content = NULL)
     {
         list($url, $parameters) = $this->transformUrl($url, $parameters);
-        $service = new Statement(Request::create($url, $method, $parameters, $cookies, $files, array(), $content));
+        $request = $this->createRequest($url, $method, $parameters, $cookies, $files, array(), $content);
+        $service = $this->createStatement($request);
         $service->setContainer($this->container);
         return $service;
     }
+
+
 
 
     /**
