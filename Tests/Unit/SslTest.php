@@ -21,7 +21,6 @@ class SslTest extends AbstractTests
         list($helper, $httpKernel, $container) = $this->createContext();
 
         $a = $helper->prepare("GET", 'https://www.pcwebshop.co.uk/');
-        $a->setTimeout(700);
         $a->execute($httpKernel);
 
     }
