@@ -5,6 +5,7 @@ namespace evaisse\SimpleHttpBundle\Http;
 
 
 use evaisse\SimpleHttpBundle\Http\Exception\ErrorHttpException;
+use evaisse\SimpleHttpBundle\Http\Exception\InvalidResponseBodyException;
 
 class Response extends \Symfony\Component\HttpFoundation\Response
 {

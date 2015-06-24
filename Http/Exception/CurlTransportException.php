@@ -125,7 +125,7 @@ class CurlTransportException extends \RuntimeException
                 $error = new HostNotFoundException($message, $this->getCode(), $this);
                 break;
             default:
-                $error = new TransportException($message, $this->getCode(), $this);
+                $error = new UnknownTransportException($message, $this->getCode(), $this);
                 break;
         }
 

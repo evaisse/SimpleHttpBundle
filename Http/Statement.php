@@ -56,8 +56,7 @@ class Statement
     /**
      * @var \React\Promise\Deferred  A Promise Deferred control object
      */
-    protected $deffered;
-
+    protected $deferred;
 
     /**
      * @var integer timeout in milliseconds
