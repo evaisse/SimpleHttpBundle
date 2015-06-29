@@ -35,6 +35,14 @@ class Helper implements ContainerAwareInterface
      */
     public function getDefaultCookieJar()
     {
+        return $this->createCookieJar();
+    }
+
+    /**
+     * @return SessionCookieJar
+     */
+    protected function createCookieJar()
+    {
         return new SessionCookieJar();
     }
 

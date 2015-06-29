@@ -29,7 +29,7 @@ class CookieSessionTest extends AbstractTests
         $i = (int)rand(0,100);
         $j = (int)rand(0,100);
 
-        $cookieSession = $helper->createCookieSession();
+        $cookieSession = $helper->getDefaultCookieJar();
 
         /*
          * Sent a tmp cookie value
