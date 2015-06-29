@@ -13,7 +13,10 @@ Quickstart
 
 Get the simple API
 
+    $http = $this->container->get('http');
     $http = $this->get('http');
+    
+    // same as  
 
     try {
         $http->GET('http://httpbin.org/ip'); // yeah, that's all.
