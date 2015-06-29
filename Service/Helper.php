@@ -31,12 +31,11 @@ class Helper implements ContainerAwareInterface
     }
 
     /**
-     * @param SessionInterface $session a given session
-     * @return SessionCookieJar
+     * @return CookieJar
      */
-    public function createCookieSession(SessionInterface $session = null)
+    public function getDefaultCookieJar()
     {
-        return new SessionCookieJar($session);
+        return new SessionCookieJar();
     }
 
     /**
@@ -57,14 +56,13 @@ class Helper implements ContainerAwareInterface
         /*
             Fetch Cookie jar from session
          */
-        $cookieJar =  $cookieJar ? $cookieJar : new SessionCookieJar();
+        $cookieJar =  $cookieJar ? $cookieJar : $this->getDefaultCookieJar();
 
         foreach ($servicesList as $service) {
             $sessionCookies = $cookieJar->allValues($service->getRequest()->getUri());
             foreach ($sessionCookies as $cookieName => $cookieValue) {
                 $service->getRequest()->cookies->set($cookieName, $cookieValue);
             }
-
         }
 
         $httpClient->execute($servicesList);
