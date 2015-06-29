@@ -308,7 +308,7 @@ class Statement
     public function execute(Kernel $httpKernel = null)
     {
         $this->sent = true;
-        $http = $httpKernel ? $httpKernel : $this->container->get('simple_http.helper');
+        $http = $httpKernel ? $httpKernel : $this->container->get('simple_http.kernel');
         $http->execute([$this]);
 
         if ($this->hasError()) {

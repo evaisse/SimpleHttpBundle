@@ -31,6 +31,7 @@ class Helper implements ContainerAwareInterface
     }
 
     /**
+     *
      * @return CookieJar
      */
     public function getDefaultCookieJar()
@@ -39,11 +40,12 @@ class Helper implements ContainerAwareInterface
     }
 
     /**
+     * @param SessionInterface $session session to store the cookies
      * @return SessionCookieJar
      */
-    protected function createCookieJar()
+    public function createCookieJar(SessionInterface $session = null)
     {
-        return new SessionCookieJar();
+        return new SessionCookieJar($session);
     }
 
     /**
@@ -184,7 +186,15 @@ class Helper implements ContainerAwareInterface
     protected function fire($method, $url, array $parameters = array())
     {
         $transaction = $this->prepare($method, $url, $parameters);
-        $transaction->execute();
+
+        $this->execute([
+            $transaction
+        ]);
+
+        if ($transaction->hasError()) {
+            throw $transaction->getError();
+        }
+
         return $transaction->getResult();
     }
 

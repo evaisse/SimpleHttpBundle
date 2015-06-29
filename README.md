@@ -99,7 +99,7 @@ Cookies persistance
     $c = $http->prepare('POST', 'http://httpbin.org/post');
     
     
-    $cookies = $http->getCookieJar();
+    $cookies = $http->getDefaultCookieJar();
      // $cookies = $http->getCookieJar($session); if you want to directly store in user session
     
     $http->execute([
