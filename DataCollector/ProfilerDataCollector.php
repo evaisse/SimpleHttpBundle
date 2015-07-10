@@ -116,13 +116,15 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
                 'debugLink' => false,
             );
 
-
             if ($v['response']) {
                 foreach ($calls[$k]['response']['headers'] as $h) {
-                    if (stripos($h, 'x-debug-uri') !== false) {
-                        list($hv, $url) = explode(':', $h, 2);
-                        $url = trim($url);
-                        $calls[$k]['debugLink'] = $url;
+                    foreach(['x-debug-uri', 'x-debug-link'] as $hk) {
+                        if (stripos($h, $hk) !== false) {
+                            list($hv, $url) = explode(':', $h, 2);
+                            $url = trim($url);
+                            $calls[$k]['debugLink'] = $url;
+                            break;
+                        }
                     }
                 }
             }
@@ -179,6 +181,10 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
             "error"    => false,
             "stop"     => microtime(true),
         ));
+
+        if ($event->getResponse()->getStatusCode() >= 400) {
+            $this->errors++;
+        }
 
         $this->finishEvent($key);
     }
