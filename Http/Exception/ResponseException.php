@@ -8,11 +8,11 @@
 
 namespace evaisse\SimpleHttpBundle\Http\Exception;
 
-use evaisse\SimpleHttpBundle\Http\Exception;
 use evaisse\SimpleHttpBundle\Http\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 
-class ResponseException extends Exception
+class ResponseException extends HttpException
 {
 
     /**
@@ -30,7 +30,7 @@ class ResponseException extends Exception
      * @param Response $response response attached to error
      * @param string $message Message describing exception
      * @param int $code error code
-     * @param Exception $previous optionnal previous exception
+     * @param \Exception $previous optionnal previous exception
      */
     public function __construct(Response $response, $message = "", $code = 0, \Exception $previous = null)
     {
@@ -41,7 +41,7 @@ class ResponseException extends Exception
     /**
      * Set value for $response
      *
-     * @param  ServiceResponse $value value to set to response
+     * @param  Response $value value to set to response
      * @return Object          instance for method chaining
      */
     protected function setResponse(Response $value)
