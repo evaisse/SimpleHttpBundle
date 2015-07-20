@@ -232,6 +232,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
         parse_str($data['queryString'], $data['query']);
         $data['contentType'] = $request->headers->get('content-type');
+        $data['cookies'] = $request->cookies->all();
         return $data;
     }
 
@@ -249,7 +250,22 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         $data['headers'] = explode("\r\n\r\n", (string)$response, 2)[0];
         $data['headers'] = explode("\r\n", $data['headers']);
         $data['contentType'] = $response->headers->get('content-type');
-        $data['cookies'] = $response->headers->getCookies();
+        $cookies = $response->headers->getCookies();
+
+        $data['cookies'] = [];
+
+        foreach ($cookies as $c) {
+            $data['cookies'][$c->getName()] = array(
+                "value"     => $c->getValue(),
+                "domain"    => $c->getDomain(),
+                "expires"   => date('Y-m-d H:i:s', $c->getExpiresTime()),
+                "path"      => $c->getPath(),
+                "secure"    => $c->isSecure(),
+                "httpOnly"  => $c->isHttpOnly(),
+                "cleared"   => $c->isCleared(),
+            );
+        }
+
         $data['statusPhrase'] = $data['headers'][0];
 
         return $data;

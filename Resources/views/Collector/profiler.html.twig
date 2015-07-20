@@ -40,7 +40,12 @@
         <strong>HTTP</strong>
 
         <span class="count">
-            <span>{{ collector.countRequests }}</span>
+            {% if collector.countErrors > 0 %}
+                <span style="background:orange">{{ collector.countRequests }} / {{ collector.countErrors }}</span>
+            {% else %}
+                <span>{{ collector.countRequests }}</span>
+            {% endif %}
+
             {% if (collector.totalTime * 1000) < 1000 %}
                 <span>{{ '%0.0f'|format(collector.totalTime * 1000) }} ms</span>
             {% else %}

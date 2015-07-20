@@ -25,6 +25,9 @@
             </li>
             {% endif %}
             <li>
+                <a href="javascript://">Cookies</a>
+            </li>
+            <li>
                 <a href="javascript://">Raw</a>
             </li>
         </ul>
@@ -47,10 +50,12 @@
                     {% include 'SimpleHttpBundle:Collector:partials/error.html.twig' with {'index':index, 'error': call.error} %}
                 </div>
             {% endif %}
-            <div>
+            <div class="tab-content-cookies">
+                {% include 'SimpleHttpBundle:Collector:partials/cookies.html.twig' with {'request': call.request, 'response': call.response} %}
+            </div>
+            <div class="tab-content--raw">
                 {{ dump(call) }}
             </div>
-
         </div>
 
     </div>
