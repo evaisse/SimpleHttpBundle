@@ -193,7 +193,6 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     public function finishEvent($key)
     {
         $this->calls[$key]['stopWatchEvent']->stop();
-        // dump('stop' . $key, $this->calls[$key]['stopWatchEvent']);
         unset($this->calls[$key]['stopWatchEvent']);
     }
 
@@ -258,11 +257,12 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
             $data['cookies'][$c->getName()] = array(
                 "value"     => $c->getValue(),
                 "domain"    => $c->getDomain(),
-                "expires"   => date('Y-m-d H:i:s', $c->getExpiresTime()),
+                "expires"   => $c->getExpiresTime() === 0 ? 'on session close' : date('Y-m-d H:i:s', $c->getExpiresTime()),
                 "path"      => $c->getPath(),
                 "secure"    => $c->isSecure(),
                 "httpOnly"  => $c->isHttpOnly(),
-                "cleared"   => $c->isCleared(),
+                "cleared"   => $c->getExpiresTime() !== 0
+                            && time() > $c->getExpiresTime(),
             );
         }
 
