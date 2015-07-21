@@ -90,7 +90,7 @@ class ExceptionsTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare('GET', 'http://httpbin.org/status/:code', array(
+        $stmt = $helper->prepare('GET', 'http://httpbin.org/status/{code}', array(
             'code' => $code,
         ));
 
@@ -111,7 +111,7 @@ class ExceptionsTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare('GET', 'http://httpbin.org/status/:code', array(
+        $stmt = $helper->prepare('GET', 'http://httpbin.org/status/{code}', array(
             'code' => $code,
         ));
 
@@ -133,7 +133,7 @@ class ExceptionsTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare('GET', 'http://httpbin.org/status/:code', array(
+        $stmt = $helper->prepare('GET', 'http://httpbin.org/status/{code}', array(
             'code' => $code,
         ));
 

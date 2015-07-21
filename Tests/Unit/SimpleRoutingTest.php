@@ -36,7 +36,7 @@ class SimpleRoutingTest extends AbstractTests {
             "another" => __FILE__
         ];
 
-        $statement = $helper->prepare("GET", 'http://httpbin.org/status/:code', $args);
+        $statement = $helper->prepare("GET", 'http://httpbin.org/status/{code}', $args);
         $request = $statement->getRequest();
 
         $statement->execute($httpKernel);
@@ -44,5 +44,6 @@ class SimpleRoutingTest extends AbstractTests {
         $this->assertEquals($statement->getResponse()->getStatusCode(), $code);
 
     }
+
 
 }

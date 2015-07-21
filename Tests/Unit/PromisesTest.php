@@ -33,7 +33,7 @@ class PromisesTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/:code', array(
+        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', array(
             'code' => $code
         ));
 
@@ -67,7 +67,7 @@ class PromisesTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/:code', array(
+        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', array(
             'code' => $code
         ));
 
@@ -136,7 +136,7 @@ class PromisesTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/:code', [
+        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', [
             'code' => $code,
         ]);
 
@@ -174,7 +174,7 @@ class PromisesTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/:code', [
+        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', [
             'code' => $code,
         ]);
 
@@ -214,7 +214,7 @@ class PromisesTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/:code', [
+        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', [
             'code' => $code,
         ]);
 

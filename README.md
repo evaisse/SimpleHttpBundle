@@ -30,18 +30,20 @@ Get the simple API
         // handle errors
     }
     
-Easy routing
+Easy routing with replacement syntax (similar to php frameworks like symfony2/laravel)
 
-    $data = $http->POST('http://httpbin.org/status/:code', array(
+    $data = $http->GET('http://httpbin.org/status/{code}', array(
         "code" => 200
     ));
+    // will call http://httpbin.org/status/200
     
-    $data = $http->POST('http://httpbin.org/status/:code', array(
+    $data = $http->GET('http://httpbin.org/status/{code}', array(
         "code" => 200,
         "foo" => "bar" 
     ));
     // will call http://httpbin.org/status/200?foo=bar
-    
+
+
 
 
 Complete API

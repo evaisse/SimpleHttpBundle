@@ -165,12 +165,15 @@ class Helper implements ContainerAwareInterface
      */
     public function transformUrl($urlPattern, array $parameters = array())
     {
-        if (empty($parameters) || !preg_match('/:[a-z]/', $urlPattern)) {
+        if (empty($parameters)
+            || !preg_match('/\{[a-z+][a-z0-9_]+\}/i', $urlPattern)
+        ) {
             return array($urlPattern, $parameters); // no need to transform plain uri
         }
 
         foreach ($parameters as $key => $value) {
             $urlPattern = str_replace(":$key", $value, $urlPattern);
+            $urlPattern = str_replace('{' . $key . '}', $value, $urlPattern);
             unset($parameters[$key]);
         }
 
