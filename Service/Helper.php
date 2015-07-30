@@ -172,8 +172,7 @@ class Helper implements ContainerAwareInterface
         }
 
         foreach ($parameters as $key => $value) {
-            if (strpos($urlPattern, ":$key") !== false || strpos($urlPattern, '{' . $key . '}') !== false) {
-                $urlPattern = str_replace(":$key", $value, $urlPattern);
+            if (strpos($urlPattern, '{' . $key . '}') !== false) {
                 $urlPattern = str_replace('{' . $key . '}', $value, $urlPattern);
                 unset($parameters[$key]);
             }
