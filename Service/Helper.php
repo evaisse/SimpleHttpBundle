@@ -172,9 +172,10 @@ class Helper implements ContainerAwareInterface
         }
 
         foreach ($parameters as $key => $value) {
-            $urlPattern = str_replace(":$key", $value, $urlPattern);
-            $urlPattern = str_replace('{' . $key . '}', $value, $urlPattern);
-            unset($parameters[$key]);
+            if (strpos($urlPattern, '{' . $key . '}') !== false) {
+                $urlPattern = str_replace('{' . $key . '}', $value, $urlPattern);
+                unset($parameters[$key]);
+            }
         }
 
         return array($urlPattern, $parameters);

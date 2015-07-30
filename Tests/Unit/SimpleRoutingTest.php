@@ -42,8 +42,25 @@ class SimpleRoutingTest extends AbstractTests {
         $statement->execute($httpKernel);
 
         $this->assertEquals($statement->getResponse()->getStatusCode(), $code);
-
     }
 
+    public function testUrlTransformation()
+    {
+        list($helper, $httpKernel, $container) = $this->createContext();
 
+        $result = $helper->transformUrl('/foo/doh');
+        $this->assertEquals($result[0], '/foo/doh');
+
+        $result = $helper->transformUrl('/foo/doh/{param}', ['param' => 'test']);
+        $this->assertEquals($result[0], '/foo/doh/test');
+        $this->assertEquals($result[1], []);
+
+        $result = $helper->transformUrl('/foo/doh/{param}', ['param' => 'test', 'param2' => 'test2']);
+        $this->assertEquals($result[0], '/foo/doh/test');
+        $this->assertEquals($result[1], ['param2' => 'test2']);
+
+        $result = $helper->transformUrl('/foo/doh', ['param' => 'test', 'param2' => 'test2']);
+        $this->assertEquals($result[0], '/foo/doh');
+        $this->assertEquals($result[1], ['param' => 'test', 'param2' => 'test2']);
+    }
 }
