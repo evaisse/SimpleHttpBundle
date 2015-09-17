@@ -55,7 +55,7 @@ class Response extends \Symfony\Component\HttpFoundation\Response
             $this->error = ErrorHttpException::createHttpException($this);
         }
 
-        if ($this->headers->get('content-type') === "application/json") {
+        if (fnmatch("application/json*", $this->headers->get('content-type'))) {
             $result = json_decode($this->getContent(), true);
             if (json_last_error()) {
                 $this->error = new InvalidResponseBodyException($this, 'Invalid Json response body. ' . $this->getJsonLastErrorMessage());
