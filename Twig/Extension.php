@@ -18,6 +18,10 @@ class Extension extends \Twig_Extension
                     array($this, 'formatHttpCode'), 
                     array('is_safe' => array('html'))
             ),
+            new \Twig_SimpleFilter('simple_http_format_http_code_as_badge',
+                array($this, 'formatHttpCodeAsSfBadge'),
+                array('is_safe' => array('html'))
+            ),
             new \Twig_SimpleFilter('simple_http_md5',
                     array($this, 'md5')
             ),
@@ -43,7 +47,27 @@ class Extension extends \Twig_Extension
             $cls = '';
         }
         $statusText = Response::$statusTexts[$code];
-        return '<span class="badge ' . $cls . '"><abbr title="' . htmlentities($statusText) . '">' . $code . '</a></span>';
+        return '<span class="badge ' . $cls . '"><abbr title="' . htmlentities($statusText) . '">' . $code . '</abbr></span>';
+    }
+
+
+    public function formatHttpCodeAsSfBadge($code)
+    {
+        if ($code >= 500) {
+            $cls = "red";
+        } else if ($code >= 400) {
+            $cls = "yellow";
+        } else if ($code >= 300) {
+            $cls = 'blue';
+        } else if ($code >= 200) {
+            $cls = "green";
+        } else {
+            $cls = 'default';
+        }
+
+        $statusText = Response::$statusTexts[$code];
+
+        return '<span class="sf-toolbar-status sf-toolbar-status-' . $cls . '"><abbr title="' . htmlentities($statusText) . '">' . $code . '</abbr></span>';
     }
 
     public function format($code, $contentType)
@@ -51,10 +75,10 @@ class Extension extends \Twig_Extension
         $class = array('hljs');
         if (strpos($contentType, 'application/json') !== false) {
             $class[] = 'json';
-            $code = $this->formatJson($code);
+            $code = @$this->formatJson($code);
         } else if (strpos($contentType, 'application/xml') !== false) {
             $class[] = 'xml';
-            $code = $this->formatXml($code);
+            $code = @$this->formatXml($code);
         } else {
             $class[] = 'html';
             $code = $code;

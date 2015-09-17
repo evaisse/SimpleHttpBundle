@@ -5,28 +5,33 @@
 	{% set icon %}
 		<span class="icon"><img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAMAAAAM7l6QAAADAFBMVEX///98fHwAAAChoaGCgoKkpKSIiIhfX18hISFYWFipqanR0dHU1NSbm5sFBQVnZ2fKysrLy8vJycliYmIjIyMlJSVvb28BAQF5eXlCQkJ4eHhPT08LCwtOTk6SkpJjY2NkZGSRkZFAQEA/Pz+8vLx+fn57e3t6enqlpaXHx8erq6vQ0NDCwsIODg5BQUFxcXHa2trOzs40NDQeHh46OjqxsbHExMQbGxuioqIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABNzw3sAAAAAXRSTlMAQObYZgAAAAlwSFlzAAALEgAACxIB0t1+/AAAAJ9JREFUeNrdkccSgkAQRNs2IyquAQOKWRFz/v8vkwPCbsFa5ZV3nDc9tTsDZIwc8z9sgWRRa0ssV6o04kJNtibraKDJuEJLzbcCZ0paoN350u3BspVu20J/EDFMaKEOF4n0yIkYpwyfuNMQd/b/8DkjFinp5WodstnCk3ayC/7tYy+3+wdpJ0c4OPGsucCF19udD+2FvOA5BvQ8X29kjA+IfQ2Y35PlXQAAAABJRU5ErkJggg==" /></span>
 
-		{% if collector.countErrors > 0 %}
-            <span class="sf-toolbar-status sf-toolbar-status-red">{{ collector.countRequests }} / {{ collector.countErrors }}</span>
-        {% else %}
-            <span class="sf-toolbar-status sf-toolbar-status-green">{{ collector.countRequests }}</span>
+        {% if (collector.countRequests - collector.countErrors) %}
+        <span class="sf-toolbar-status sf-toolbar-status-green">{{ collector.countRequests - collector.countErrors }}</span>
         {% endif %}
+        {% if collector.countErrors > 0 %}
+            <span class="sf-toolbar-status sf-toolbar-status-red">{{ collector.countErrors }}</span>
+        {% endif %}
+
+        <span>{{ '%0.1f'|format(collector.totalTime) }} s.</span>
 
 	{% endset %}
 
     {% set text %}
         <div class="sf-toolbar-info-piece">
-            <span class="sf-toolbar-status sf-toolbar-status-green">{{ collector.countRequests }}</span>
-            {% if collector.countErrors > 0 %}
-                + <span class="sf-toolbar-status sf-toolbar-status-red">{{ collector.countErrors }}</span>
-            {% endif %}
-        </div>
-        <div class="sf-toolbar-info-piece">
-            <b>Time</b>
-            {% if collector.totalTime > 1000 %}
-                <span>{{ '%0.2f'|format(collector.totalTime) }} ms</span>
-            {% else %}
-                <span>{{ '%0.2f'|format(collector.totalTime) }} ms</span>
-            {% endif %}
+            {% for index, call in collector.calls %}
+            <a href="{{ path('_profiler', { 'token': token, 'panel': 'profiler' }) }}#request{{ index }}" style="display: block;border-bottom: 1px solid #DDD;padding-bottom:5px;margin-bottom: 5px">
+                <div>
+                    <span style="font-weight:bold">{{ call.request.method }}</span>
+                    <abbr title="{{ call.request.requestUri }}">{{ call.request.requestUri }}</abbr>
+                </div>
+                <div>
+                    {{ call.response.statusCode | simple_http_format_http_code_as_badge }}
+                    <span>{{ '%0.1f'|format(call.time.total) }} s.</span>
+                    <span style="color: #999">{{ call.request.schemeAndHttpHost }}</span>
+                </div>
+                <div style="clear:both"></div>
+            </a>
+            {% endfor %}
         </div>
     {% endset %}
 
@@ -40,17 +45,12 @@
         <strong>HTTP</strong>
 
         <span class="count">
+            <span>{{ collector.countRequests - collector.countErrors }}</span>
             {% if collector.countErrors > 0 %}
-                <span style="background:orange">{{ collector.countRequests }} / {{ collector.countErrors }}</span>
-            {% else %}
-                <span>{{ collector.countRequests }}</span>
+                <span style="background:red"> {{ collector.countErrors }}</span>
             {% endif %}
 
-            {% if (collector.totalTime * 1000) < 1000 %}
-                <span>{{ '%0.0f'|format(collector.totalTime * 1000) }} ms</span>
-            {% else %}
-                <span style="background:red">{{ '%0.0f'|format(collector.totalTime * 1000) }} ms</span>
-            {% endif %}
+            <span>{{ '%0.0f'|format(collector.totalTime) }} s.</span>
         </span>
 
 
@@ -86,6 +86,7 @@
 
 
     {% for index, call in collector.calls %}
+        <a name="request{{ index }}"></a>
         {% include 'SimpleHttpBundle:Collector:partials/call.html.twig' with { 'call': call } %}
     {% endfor %}
 
