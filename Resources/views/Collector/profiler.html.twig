@@ -19,7 +19,8 @@
     {% set text %}
         <div class="sf-toolbar-info-piece">
             {% for index, call in collector.calls %}
-            <a href="{{ path('_profiler', { 'token': token, 'panel': 'profiler' }) }}#request{{ index }}" style="display: block;border-bottom: 1px solid #DDD;padding-bottom:5px;margin-bottom: 5px">
+            <a href="{{ path('_profiler', { 'token': token, 'panel': 'profiler' }) }}#request{{ index }}"
+               style="text-decoration: none;display: block;border-bottom: 1px solid #DDD;padding-bottom:5px;margin-bottom: 5px">
                 <div>
                     <span style="font-weight:bold">{{ call.request.method }}</span>
                     <abbr title="{{ call.request.requestUri }}">{{ call.request.requestUri }}</abbr>
