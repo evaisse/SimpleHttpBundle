@@ -24,8 +24,12 @@
                     <span style="font-weight:bold">{{ call.request.method }}</span>
                     <abbr title="{{ call.request.requestUri }}">{{ call.request.requestUri }}</abbr>
                 </div>
-                <div>
-                    {{ call.response.statusCode | simple_http_format_http_code_as_badge }}
+                <div style="text-decoration: none">
+                    {% if call.response %}
+                        {{ call.response.statusCode | simple_http_format_http_code_as_badge }}
+                    {% else %}
+                        <span class="sf-toolbar-status sf-toolbar-status-red">ERR</span>
+                    {% endif %}
                     <span>{{ '%0.1f'|format(call.time.total) }} s.</span>
                     <span style="color: #999">{{ call.request.schemeAndHttpHost }}</span>
                 </div>
