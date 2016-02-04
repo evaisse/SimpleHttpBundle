@@ -39,7 +39,7 @@ class ReplayController extends Controller
             $params = json_decode($content, true); // 2nd param to get as array
 
             if (isset($params['uri'])) {
-                $ch = curl_init($params['uri']);
+                $ch = curl_init($params['uri'].$params['queryString']);
 
                 curl_setopt($ch,CURLOPT_HTTPHEADER, array_values($params['headers']));
 
@@ -48,15 +48,9 @@ class ReplayController extends Controller
                 curl_setopt($ch, CURLOPT_HEADER, 1);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $params['method']);
 
-                $query = [];
-                if (!empty($params['query'])) {
-                    $query = $params['query'];
-                }
-                if (!empty($params['content'])) {
-                    $query = array_merge($query, json_decode($params['content'], true));
-                }
-                if (!empty($query)) {
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($query));
+                if ($params['method'] === 'POST'  && !empty($params['content'])) {
+
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $params['content']);
                 }
 
                 $response = curl_exec($ch);
@@ -81,6 +75,6 @@ class ReplayController extends Controller
 
         }
 
-        return ['content' => json_decode($params['content']), 'response' => $response];
+        return ['content' => $params, 'response' => $response];
     }
 }
