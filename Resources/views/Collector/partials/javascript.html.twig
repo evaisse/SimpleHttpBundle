@@ -41,7 +41,7 @@ Array.prototype.slice.call(document.querySelectorAll("#collector-content pre.hlj
 
         $dom.get('.replay').forEach(function (replay, i) {
 
-            replay.addEventListener('click', function () {
+            replay.addEventListener('click', function (e) {
 
                 var request = replay.getAttribute('data-request');
                 var xmlhttp;
@@ -87,6 +87,7 @@ Array.prototype.slice.call(document.querySelectorAll("#collector-content pre.hlj
                 xmlhttp.open("POST", "/_profiler/simple_http/replay", true);
                 xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
                 xmlhttp.send(request);
+                e.preventDefault();
                 return false;
 
             });
