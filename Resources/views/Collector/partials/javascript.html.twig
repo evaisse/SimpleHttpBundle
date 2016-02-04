@@ -64,8 +64,14 @@ Array.prototype.slice.call(document.querySelectorAll("#collector-content pre.hlj
                             var tab = document.createElement("li");
                             var link = document.createElement("a");
                             link.setAttribute('href', 'javascript://');
-                            var node = document.createTextNode("This is new.");
+
+                            var span = document.createElement("span");
+                            span.setAttribute('class', (xmlhttp.status == 200 ? 'badge success' : 'badge error'));
+                            span.innerHTML =  xmlhttp.status;
+
+                            var node = document.createTextNode("Response " );
                             link.appendChild(node);
+                            link.appendChild(span);
                             tab.appendChild(link);
                             tabs.appendChild(tab) ;
 
