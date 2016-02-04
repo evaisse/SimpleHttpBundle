@@ -58,28 +58,23 @@ Array.prototype.slice.call(document.querySelectorAll("#collector-content pre.hlj
                     if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
                         if(xmlhttp.status == 200){
 
-                            var parent = document.getElementById('call-'+replay.getAttribute('data-index'));
-                            var tabs = parent.getElementsByClassName('tabs-nav')[0];
+                        var parent = document.getElementById('call-'+replay.getAttribute('data-index'));
+                        var tabs = parent.getElementsByClassName('tabs-nav')[0];
 
-                            var tab = document.createElement("li");
-                            var link = document.createElement("a");
-                            link.setAttribute('href', 'javascript://');
+                        var tab = document.createElement("li");
+                        var link = document.createElement("a");
+                        link.setAttribute('href', 'javascript://');
 
-                            var span = document.createElement("span");
-                            span.setAttribute('class', (xmlhttp.status == 200 ? 'badge success' : 'badge error'));
-                            span.innerHTML =  xmlhttp.status;
+                        var node = document.createTextNode("Response");
+                        link.appendChild(node);
+                        tab.appendChild(link);
+                        tabs.appendChild(tab) ;
 
-                            var node = document.createTextNode("Response " );
-                            link.appendChild(node);
-                            link.appendChild(span);
-                            tab.appendChild(link);
-                            tabs.appendChild(tab) ;
-
-                            var tabsContent = parent.getElementsByClassName('tabs-content')[0];
-                            var div = document.createElement("div");
-                            div.innerHTML = xmlhttp.response;
-                            tabsContent.appendChild(div) ;
-                            tabClick();
+                        var tabsContent = parent.getElementsByClassName('tabs-content')[0];
+                        var div = document.createElement("div");
+                        div.innerHTML = xmlhttp.response;
+                        tabsContent.appendChild(div) ;
+                        tabClick();
                         }
                         else if(xmlhttp.status == 400) {
                             alert('There was an error 400')

@@ -30,44 +30,42 @@ class ReplayController extends Controller
      */
     public function replayRequestAction(Request $request)
     {
-        $header = $body = $query = false;
-        $params = array();
         $content = $request->getContent();
         $response = false;
-        if (!empty($content))
-        {
+
+        if (!empty($content)) {
             $params = json_decode($content, true); // 2nd param to get as array
 
             if (isset($params['uri'])) {
                 $ch = curl_init($params['uri'].$params['queryString']);
 
-                curl_setopt($ch,CURLOPT_HTTPHEADER, array_values($params['headers']));
-
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array_values($params['headers']));
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 curl_setopt($ch, CURLOPT_VERBOSE, 1);
                 curl_setopt($ch, CURLOPT_HEADER, 1);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $params['method']);
 
                 if ($params['method'] === 'POST'  && !empty($params['content'])) {
-
                     curl_setopt($ch, CURLOPT_POSTFIELDS, $params['content']);
                 }
 
                 $response = curl_exec($ch);
-                $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-                $headers = substr($response, 0, $header_size);
-                $body = substr($response, $header_size);
+                $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+                $headers = substr($response, 0, $headerSize);
+                $body = substr($response, $headerSize);
+                $info = curl_getinfo($ch);
                 curl_close($ch);
 
                 $headerParsed = [];
-                foreach(explode("\r\n", $headers) as $header) {
+                foreach (explode("\r\n", $headers) as $header) {
                     $header = explode(':', $header, 2);
                     if (isset($header[0]) && isset($header[1])) {
                         $headerParsed[trim($header[0])] = trim($header[1]);
                     }
                 }
 
-                $response = new Response($body, 200, $headerParsed);
+                $responseStatus = $info["http_code"];
+                $response = new Response($body, $responseStatus, $headerParsed);
 
                 $dataCollector = new ProfilerDataCollector();
                 $response = $dataCollector->fetchResponseInfos($response);
@@ -75,6 +73,6 @@ class ReplayController extends Controller
 
         }
 
-        return ['content' => $params, 'response' => $response];
+        return ['response' => $response];
     }
 }
