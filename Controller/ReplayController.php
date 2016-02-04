@@ -24,14 +24,13 @@ class ReplayController extends Controller
 
     /**
      * @Route("/_profiler/simple_http/replay", name="simple_http.replay_request")
-     *
      * @Template("SimpleHttpBundle:Collector/partials:response.html.twig")
      * @param Request $request
      * @return array
      */
     public function replayRequestAction(Request $request)
     {
-        $header = $body = false;
+        $header = $body = $query = false;
         $params = array();
         $content = $request->getContent();
         $response = false;
@@ -47,6 +46,18 @@ class ReplayController extends Controller
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 curl_setopt($ch, CURLOPT_VERBOSE, 1);
                 curl_setopt($ch, CURLOPT_HEADER, 1);
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $params['method']);
+
+                $query = [];
+                if (!empty($params['query'])) {
+                    $query = $params['query'];
+                }
+                if (!empty($params['content'])) {
+                    $query = array_merge($query, json_decode($params['content'], true));
+                }
+                if (!empty($query)) {
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($query));
+                }
 
                 $response = curl_exec($ch);
                 $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
@@ -70,6 +81,6 @@ class ReplayController extends Controller
 
         }
 
-        return ['content' => $params, 'response' => $response];
+        return ['content' => json_decode($params['content']), 'response' => $response];
     }
 }
