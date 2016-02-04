@@ -1,3 +1,1 @@
-simple_http_homepage:
-    path:     /_simple_http
-    defaults: { _controller: SimpleHttpBundle:Default:index }
+

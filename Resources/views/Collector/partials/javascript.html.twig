@@ -12,68 +12,125 @@ Array.prototype.slice.call(document.querySelectorAll("#collector-content pre.hlj
 </script>
 
 <script type="text/javascript">    
-(function () {
-    var links = $dom.get('.tabs-nav > li > a'),
-        panels =  $dom.get('.tabs-content > div'),
-        box,
-        i;
+    (function () {
 
-    links.forEach(function (link, i) {
+        tabClick();
 
-        link.addEventListener('click', function () {
 
-            // console.log(link);
-            var childs,
-                childLinks,
-                content;
+        $dom.get('.js-http-call-hosts-filter')[0].addEventListener('change', function (event) {
 
-            childs = $dom.descendants($dom.ancestor(link, '.tabs'), '.tabs-content > div')
-                        .concat($dom.descendants($dom.ancestor(link, '.tabs'), '.tabs-nav > li > a'));
+            var value = event.target.value;
 
-            if (!panels[i]) {
-                return true;
+
+            if (value == 0) {
+                $dom.get(".http-call").forEach(function (elt) {
+                    elt.style.display = "block";
+                });
+            } else {
+                $dom.get(".http-call").forEach(function (elt) {
+                    // console.log(value, elt, $dom.hasClass(elt, value));
+                    if ($dom.hasClass(elt, value)) {
+                        elt.style.display = "block";
+                    } else {
+                        elt.style.display = "none";
+                    }
+                });
             }
 
-            childs.forEach(function (c) {
-                $dom.removeClass(c, 'active');
-            });
+        });
 
-            $dom.addClass(link, 'active')
-            $dom.addClass(panels[i], 'active');
+        $dom.get('.replay').forEach(function (replay, i) {
+
+            replay.addEventListener('click', function (e) {
+
+                var request = replay.getAttribute('data-request');
+                var xmlhttp;
+
+                if (window.XMLHttpRequest) {
+                    // code for IE7+, Firefox, Chrome, Opera, Safari
+                    xmlhttp = new XMLHttpRequest();
+                } else {
+                    // code for IE6, IE5
+                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+
+                xmlhttp.onreadystatechange = function() {
+                    if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+                        if(xmlhttp.status == 200){
+
+                        var parent = document.getElementById('call-'+replay.getAttribute('data-index'));
+                        var tabs = parent.getElementsByClassName('tabs-nav')[0];
+
+                        var tab = document.createElement("li");
+                        var link = document.createElement("a");
+                        link.setAttribute('href', 'javascript://');
+
+                        var node = document.createTextNode("Response");
+                        link.appendChild(node);
+                        tab.appendChild(link);
+                        tabs.appendChild(tab) ;
+
+                        var tabsContent = parent.getElementsByClassName('tabs-content')[0];
+                        var div = document.createElement("div");
+                        div.innerHTML = xmlhttp.response;
+                        tabsContent.appendChild(div) ;
+                        tabClick();
+                        }
+                        else if(xmlhttp.status == 400) {
+                            alert('There was an error 400')
+                        }
+                        else {
+                            alert('something else other than 200 was returned')
+                        }
+                    }
+                }
+
+                xmlhttp.open("POST", "/_profiler/simple_http/replay", true);
+                xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                xmlhttp.send(request);
+                e.preventDefault();
+                return false;
+
+            });
 
         });
-    
 
-    });
+    })();
 
+    function tabClick(){
+        var links = $dom.get('.tabs-nav > li > a'),
+                panels =  $dom.get('.tabs-content > div'),
+                box,
+                i;
 
+        links.forEach(function (link, i) {
 
+            link.addEventListener('click', function () {
 
-    $dom.get('.js-http-call-hosts-filter')[0].addEventListener('change', function (event) {
+                // console.log(link);
+                var childs,
+                        childLinks,
+                        content;
 
-        var value = event.target.value;
+                childs = $dom.descendants($dom.ancestor(link, '.tabs'), '.tabs-content > div')
+                        .concat($dom.descendants($dom.ancestor(link, '.tabs'), '.tabs-nav > li > a'));
 
-
-        if (value == 0) {
-            $dom.get(".http-call").forEach(function (elt) {
-                elt.style.display = "block";
-            });
-        } else {
-            $dom.get(".http-call").forEach(function (elt) {
-                // console.log(value, elt, $dom.hasClass(elt, value));
-                if ($dom.hasClass(elt, value)) {
-                    elt.style.display = "block";
-                } else {
-                    elt.style.display = "none";
+                if (!panels[i]) {
+                    return true;
                 }
+
+                childs.forEach(function (c) {
+                    $dom.removeClass(c, 'active');
+                });
+
+                $dom.addClass(link, 'active')
+                $dom.addClass(panels[i], 'active');
+
             });
-        }
-
-    });
-
-        
 
 
-})();
+        });
+    }
+
 
 </script>
