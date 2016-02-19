@@ -9,7 +9,11 @@
         <span class="sf-toolbar-status sf-toolbar-status-green">{{ collector.countRequests - collector.countErrors }}</span>
         {% endif %}
         {% if collector.countErrors > 0 %}
+            {% if collector.hasServerErrors %}
                 <span class="sf-toolbar-status sf-toolbar-status-red">{{ collector.countErrors }}</span>
+            {% else %}
+                <span class="sf-toolbar-status sf-toolbar-status-yellow">{{ collector.countErrors }}</span>
+            {% endif %}
         {% endif %}
 
         <span>{{ '%0.1f'|format(collector.totalTime) }} s.</span>
