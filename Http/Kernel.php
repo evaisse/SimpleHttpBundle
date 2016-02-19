@@ -141,7 +141,7 @@ class Kernel extends RemoteHttpKernel
 
             $response = new Response(
                 $contentCollector->retrieve(),
-                $headersCollector->getCode(),
+                (int)$headersCollector->getCode(),
                 $headersCollector->retrieve()
             );
 
