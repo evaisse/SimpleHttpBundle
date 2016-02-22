@@ -59,6 +59,15 @@ The simple http bundle provide you a nice profiler toolbar addition
   - Request timing displayed in the timeline panel  
 
 
+![Panels details]
+(https://raw.githubusercontent.com/evaisse/SimpleHttpBundle/master/Resources/doc/profiler-panels.png)
+
+![Toolbar block]
+(https://raw.githubusercontent.com/evaisse/SimpleHttpBundle/master/Resources/doc/profiler-toolbar.png)
+
+![Timeline panel]
+(https://raw.githubusercontent.com/evaisse/SimpleHttpBundle/master/Resources/doc/profiler-timeline.png)
+
 
 Complete API
 =====
