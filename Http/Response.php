@@ -42,6 +42,12 @@ class Response extends \Symfony\Component\HttpFoundation\Response
      */
     public function __construct($content = '', $status = 200, array $headers = array())
     {
+        if ($status < 100 || $status >= 600) {
+            $status = 580;
+        } else {
+            $status = (int)$status;
+        }
+
         parent::__construct($content, $status, $headers);
         $this->parseResponse();
     }

@@ -32,14 +32,15 @@ abstract class ErrorHttpException extends HttpException
      */
     public static function createHttpException(Response $response)
     {
-        $message = \Symfony\Component\HttpFoundation\Response::$statusTexts[$response->getStatusCode()];
-
         /*
          * We create a standard Response exception to forward exception response content if necessary
          */
-        $previous = new ResponseException($response, "", 0);
+        $previous = new ResponseException($response, "Http Error : " . $response->getStatusCode(), 0);
 
         switch ($response->getStatusCode()) {
+            case 0:
+                $e = new InternalServerErrorHttpException("Unknow error code ".$response->getStatusCode(), $previous);
+                break;
             case 400:
                 $e = new BadRequestHttpException($response->getContent(), $previous, $response->getStatusCode());
                 break;
@@ -113,9 +114,10 @@ abstract class ErrorHttpException extends HttpException
             case 505:
                 $e = new HttpVersionNotSupportedHttpException($response->getContent(), $previous, $response->getStatusCode());
                 break;
-
             default:
-                $e = $response->getStatusCode() >= 500 ? new ServerErrorHttpException($response->getStatusCode(), "", $previous) : new ClientErrorHttpException("", $previous);
+                $e = $response->getStatusCode() >= 500
+                   ? new InternalServerErrorHttpException("Unknow error code ".$response->getStatusCode(), $previous)
+                   : new BadRequestHttpException("Unknow error code ".$response->getStatusCode(), $previous);
                 break;
         }
 

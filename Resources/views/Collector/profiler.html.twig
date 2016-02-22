@@ -9,7 +9,11 @@
         <span class="sf-toolbar-status sf-toolbar-status-green">{{ collector.countRequests - collector.countErrors }}</span>
         {% endif %}
         {% if collector.countErrors > 0 %}
-            <span class="sf-toolbar-status sf-toolbar-status-red">{{ collector.countErrors }}</span>
+            {% if collector.hasServerErrors %}
+                <span class="sf-toolbar-status sf-toolbar-status-red">{{ collector.countErrors }}</span>
+            {% else %}
+                <span class="sf-toolbar-status sf-toolbar-status-yellow">{{ collector.countErrors }}</span>
+            {% endif %}
         {% endif %}
 
         <span>{{ '%0.1f'|format(collector.totalTime) }} s.</span>
@@ -19,7 +23,13 @@
     {% set text %}
         <div class="sf-toolbar-info-piece">
             {% for index, call in collector.calls %}
-            <a href="{{ path('_profiler', { 'token': token, 'panel': 'profiler' }) }}#request{{ index }}" style="display: block;border-bottom: 1px solid #DDD;padding-bottom:5px;margin-bottom: 5px">
+            {% if call.debugLink %}
+                <a href="{{ call.debugLink }}" style="display: block;background-color: white;padding:9px 0 9px 11px;margin: 0 5px;font-size:10px;float: right;border-left:1px dotted #DDD;background: white" title="External debug link">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAgElEQVQYV5XQMQpCQQxF0fNX4G60stFGdyBYuSE3InwQBG20URDclPKKkSAfxXST3FxepvO9nm3c/QDHOGAU8IxZWXhggkB7bHAMGP0clwI3aN36DawRAvVY4VYzxljBHba444pp4CFjve8t+Rtc4vTxVYtc22LFmEeaQ5XlSLwAJVAaAqoDe/cAAAAASUVORK5CYII=" />
+                </a>
+            {% endif %}
+
+            <a href="{{ path('_profiler', { 'token': token, 'panel': 'profiler' }) }}#request{{ index }}" style="display: block;border-bottom: 1px solid #DDD;padding-bottom:5px;margin-bottom: 5px;{% if call.debugLink %}padding-right:35px{% endif %}">
                 <div>
                     <span style="font-weight:bold">{{ call.request.method }}</span>
                     <abbr title="{{ call.request.requestUri }}">{{ call.request.requestUri }}</abbr>
