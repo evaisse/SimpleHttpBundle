@@ -13,6 +13,8 @@ Quickstart
 
 Get the simple API
 
+```php
+
     $http = $this->container->get('http');
     $http = $this->get('http');
     
@@ -29,8 +31,11 @@ Get the simple API
     } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
         // handle errors
     }
-    
+```
+
+
 Easy routing with replacement syntax (similar to php frameworks like symfony2/laravel)
+
 
     $data = $http->GET('http://httpbin.org/status/{code}', array(
         "code" => 200
