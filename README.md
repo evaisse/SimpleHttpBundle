@@ -56,7 +56,7 @@ The simple http bundle provide you a nice profiler toolbar addition
   - Request/Response body & headers details
   - Cookies handy panel 
   - External debug links (to remote profiler using X-Debug-Link header)
-
+  - Request timing displayed in the timeline panel  
 
 
 
