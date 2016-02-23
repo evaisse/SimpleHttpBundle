@@ -29,7 +29,7 @@
                 </a>
             {% endif %}
 
-            <a href="{{ path('_profiler', { 'token': token, 'panel': 'httpprofiler' }) }}#request{{ index }}" style="display: block;border-bottom: 1px solid #DDD;padding-bottom:5px;margin-bottom: 5px;{% if call.debugLink %}padding-right:35px{% endif %}">
+            <a href="{{ path('_profiler', { 'token': token, 'panel': 'simplehttpprofiler' }) }}#request{{ index }}" style="display: block;border-bottom: 1px solid #DDD;padding-bottom:5px;margin-bottom: 5px;{% if call.debugLink %}padding-right:35px{% endif %}">
                 <div style="overflow-x:hidden">
                     <span style="font-weight:bold">{{ call.request.method }}</span>
                     <abbr title="{{ call.request.requestUri }}">{{ call.request.requestUri }}</abbr>
