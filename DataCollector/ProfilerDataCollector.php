@@ -89,7 +89,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      */
     public function getName()
     {
-        return 'profiler';
+        return 'simplehttpprofiler';
     }
 
     public static function getSubscribedEvents()

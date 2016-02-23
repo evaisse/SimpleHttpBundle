@@ -29,7 +29,7 @@
                 </a>
             {% endif %}
 
-            <a href="{{ path('_profiler', { 'token': token, 'panel': 'profiler' }) }}#request{{ index }}" style="display: block;border-bottom: 1px solid #DDD;padding-bottom:5px;margin-bottom: 5px;{% if call.debugLink %}padding-right:35px{% endif %}">
+            <a href="{{ path('_profiler', { 'token': token, 'panel': 'httpprofiler' }) }}#request{{ index }}" style="display: block;border-bottom: 1px solid #DDD;padding-bottom:5px;margin-bottom: 5px;{% if call.debugLink %}padding-right:35px{% endif %}">
                 <div style="overflow-x:hidden">
                     <span style="font-weight:bold">{{ call.request.method }}</span>
                     <abbr title="{{ call.request.requestUri }}">{{ call.request.requestUri }}</abbr>
@@ -49,7 +49,7 @@
         </div>
     {% endset %}
 
-    {% include 'WebProfilerBundle:Profiler:toolbar_item.html.twig' with { 'link': 'profiler' } %}
+    {% include 'WebProfilerBundle:Profiler:toolbar_item.html.twig' with { link: "simplehttpprofiler" } %}
 {% endblock %}
 
 {% block menu %}
@@ -72,7 +72,13 @@
 
 {% block head %}
     {{ parent() }}
-    {% include 'SimpleHttpBundle:Collector:partials/css.html.twig' %}
+
+    {% stylesheets '@SimpleHttpBundle/Resources/public/libs/highlightjs/highlightjs-8.5.css'
+                   '@SimpleHttpBundle/Resources/public/simple-http-bundle.css' %}
+        <link rel="stylesheet" href="{{ asset_url }}"></link>
+    {% endstylesheets %}
+
+
 {% endblock %}
 
 
@@ -82,7 +88,6 @@
 
 
     <style>
-
         .http-call__title__method {
             display: inline-block;
             vertical-align: top;
@@ -121,7 +126,11 @@
         {% include 'SimpleHttpBundle:Collector:partials/call.html.twig' with { 'call': call } %}
     {% endfor %}
 
-    {% include 'SimpleHttpBundle:Collector:partials/javascript.html.twig' %}
+    {%  javascripts "@SimpleHttpBundle/Resources/public/libs/jquery/jquery-1.12.1.js"
+                    "@SimpleHttpBundle/Resources/public/libs/highlightjs/highlightjs-8.5.js"
+                    "@SimpleHttpBundle/Resources/public/simple-http-bundle.js" %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
 
 
 {% endblock %}

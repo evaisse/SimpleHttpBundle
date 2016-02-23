@@ -23,56 +23,36 @@ class ReplayController extends Controller
 {
 
     /**
-     * @Route("/_profiler/simple_http/replay", name="simple_http.replay_request")
-     * @Template("SimpleHttpBundle:Collector/partials:response.html.twig")
+     * @Route("/replay", name="simple_http.replay_request")
+     * @Template()
      * @param Request $request
      * @return array
      */
     public function replayRequestAction(Request $request)
     {
-        $content = $request->getContent();
-        $response = false;
+        $request = json_decode($request->request->get('request'));
 
-        if (!empty($content)) {
-            $params = json_decode($content, true); // 2nd param to get as array
+        $service = $this->get('service.helper')->prepare($request->method, $request->uri);
+        $service->getRequest()->setContent($request->content);
 
-            if (isset($params['uri'])) {
-                $ch = curl_init($params['uri'].$params['queryString']);
-
-                curl_setopt($ch, CURLOPT_HTTPHEADER, array_values($params['headers']));
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($ch, CURLOPT_VERBOSE, 1);
-                curl_setopt($ch, CURLOPT_HEADER, 1);
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $params['method']);
-
-                if ($params['method'] === 'POST'  && !empty($params['content'])) {
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, $params['content']);
-                }
-
-                $response = curl_exec($ch);
-                $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-                $headers = substr($response, 0, $headerSize);
-                $body = substr($response, $headerSize);
-                $info = curl_getinfo($ch);
-                curl_close($ch);
-
-                $headerParsed = [];
-                foreach (explode("\r\n", $headers) as $header) {
-                    $header = explode(':', $header, 2);
-                    if (isset($header[0]) && isset($header[1])) {
-                        $headerParsed[trim($header[0])] = trim($header[1]);
-                    }
-                }
-
-                $responseStatus = $info["http_code"];
-                $response = new Response($body, $responseStatus, $headerParsed);
-
-                $dataCollector = new ProfilerDataCollector();
-                $response = $dataCollector->fetchResponseInfos($response);
+        foreach ($request->headers as $header) {
+            if (fnmatch('*:*', $header)) {
+                list($headerName, $headerValue) = explode(':', $header, 2);
+                trim($headerName);
+                trim($headerValue);
+                $service->getRequest()->headers->set($headerName, $headerValue);
             }
-
         }
 
-        return ['response' => $response];
+        foreach ($request->cookies as $cookieName => $cookieValue) {
+            $service->getRequest()->cookies->set($cookieName, $cookieValue);
+        }
+
+
+        $this->get('service.helper')->execute([
+            $service,
+        ]);
+
+        return new Response('ok');
     }
 }
