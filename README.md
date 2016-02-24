@@ -59,6 +59,21 @@ The simple http bundle provide you a nice profiler toolbar addition
   - Request timing displayed in the timeline panel  
 
 
+Replay feature
+---
+
+Add this to routing.yml file
+
+
+    _simple_http:
+        resource: "@SimpleHttpBundle/Controller/"
+        type:     annotation
+        prefix:   /_profiler/simple-http
+
+
+You can now resend an http call directly from the profiler debug panel
+  
+
 Panels details
 ---
 
