@@ -61,7 +61,11 @@
         <span class="count">
             <span>{{ collector.countRequests - collector.countErrors }}</span>
             {% if collector.countErrors > 0 %}
-                <span style="background:red"> {{ collector.countErrors }}</span>
+                {% if collector.hasServerErrors %}
+                    <span style="backgroun:#B95E5E">{{ collector.countErrors }}</span>
+            {% else %}
+                    <span style="background:#FAA732">{{ collector.countErrors }}</span>
+                {% endif %}
             {% endif %}
 
             <span>{{ '%0.0f'|format(collector.totalTime) }} s.</span>
