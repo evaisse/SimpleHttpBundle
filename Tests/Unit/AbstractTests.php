@@ -22,6 +22,9 @@ use Symfony\Component\DependencyInjection\Container;
 class AbstractTests extends \PHPUnit_Framework_TestCase
 {
 
+//    public static $baseUrl = "http://127.0.0.1:8989";
+    public static $baseUrl = "http://httpbin.org";
+
     protected function createContext()
     {
         $container = new Container(new ParameterBag());

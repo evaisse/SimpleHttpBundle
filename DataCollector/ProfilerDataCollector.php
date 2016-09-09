@@ -113,6 +113,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
                 'request'   => $this->fetchRequestInfos($v['request']),
                 'response'  => !empty($v['response']) ? $this->fetchResponseInfos($v['response']) : false,
                 'error'     => !empty($v['error']) ? $this->fetchErrorInfos($v['error']) : false,
+                'trace'     => $v['trace'],
                 'debugLink' => false,
             );
 
@@ -139,11 +140,14 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         $request = $event->getRequest();
 
         $eventName = "#" . count($this->calls) . ' ' . $request->getMethod() . ' ' . $request->getUri();
-        
+
+        try {throw new \Exception('');} catch (\Exception $e) { $trace = $e->getTraceAsString(); }
+
         $this->calls[] = array(
             "start"          => microtime(true),
             "request"        => $request,
-            'stopWatchEvent' => $this->getStopwatch()->start($eventName, 'doctrine')
+            'stopWatchEvent' => $this->getStopwatch()->start($eventName, 'doctrine'),
+            "trace"          => explode("\n", $trace),
         );
     }
 
@@ -245,8 +249,13 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         $encoders = array(new JsonEncoder());
         $serializer = new Serializer($normalizers, $encoders);
 
-        $data = json_decode($serializer->serialize($response, 'json'), true);
-        $data['headers'] = explode("\r\n\r\n", (string)$response, 2)[0];
+        $data = [
+            'statusCode' => $response->getStatusCode(),
+        ];
+
+        $parts = explode("\r\n\r\n", (string)$response, 2);
+        $data['headers'] = isset($parts[0]) ? $parts[0] : "";
+        $data['body'] = isset($parts[1]) ? $parts[1] : "";
         $data['headers'] = explode("\r\n", $data['headers']);
         $data['contentType'] = $response->headers->get('content-type');
         $cookies = $response->headers->getCookies();

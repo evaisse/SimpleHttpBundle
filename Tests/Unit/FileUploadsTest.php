@@ -20,7 +20,7 @@ class FileUploadsTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare("PUT", 'http://httpbin.org/put');
+        $stmt = $helper->prepare("PUT", AbstractTests::$baseUrl . '/put');
 
         $stmt->attachFile('file', __FILE__);
         $stmt->attachFile('file2', __DIR__ . '/../Fixtures/greenimg.jpg');
@@ -39,7 +39,7 @@ class FileUploadsTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare("POST", 'http://httpbin.org/post');
+        $stmt = $helper->prepare("POST", AbstractTests::$baseUrl . '/post');
 
         $stmt->attachFile('file', __FILE__);
         $stmt->attachFile('file2', __DIR__ . '/../Fixtures/greenimg.jpg');
@@ -59,7 +59,7 @@ class FileUploadsTest extends AbstractTests
 
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare("POST", 'http://httpbin.org/post', array(
+        $stmt = $helper->prepare("POST", AbstractTests::$baseUrl . '/post', array(
             'exemple' => $arg,
         ));
 

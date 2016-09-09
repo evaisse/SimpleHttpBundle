@@ -6,9 +6,10 @@
  * Time: 10:15
  */
 
-namespace evaisse\SimpleHttpBundle\Http;
+namespace evaisse\SimpleHttpBundle\Curl;
 
-use Zeroem\CurlBundle\Curl\Collector\HeaderCollector;
+use evaisse\SimpleHttpBundle\Curl\Collector\HeaderCollector;
+
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\BrowserKit\Cookie as CookieParser;
 

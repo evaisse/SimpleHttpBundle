@@ -116,6 +116,11 @@ class CurlTransportException extends \RuntimeException
             case 28:
                 $error = new TimeoutException($message, $this->getCode(), $this);
                 break;
+            case 35:
+            case 51:
+            case 52:
+            case 53:
+            case 54:
             case 58:
             case 59:
             case 60:

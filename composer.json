@@ -5,9 +5,10 @@
     "homepage": "https://github.com/evaisse/SimpleHttpBundle",
     "require": {
         "php": ">=5.3.3",
-        "symfony/symfony": "2.7.*",
-        "zeroem/curl-bundle": "1.3.*",
-        "react/promise": "2.2.*"
+        "symfony/http-foundation": ">=2.7",
+        "symfony/http-kernel": ">=2.7",
+        "symfony/event-dispatcher": ">=2.7",
+        "react/promise": "2.*"
     },
     "require-dev": {
         "satooshi/php-coveralls": "dev-master"

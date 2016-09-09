@@ -40,7 +40,7 @@ class ContentTypesTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare('GET', 'http://httpbin.org/ip');
+        $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/ip');
 
         $stmt->execute($httpKernel);
 
@@ -55,7 +55,7 @@ class ContentTypesTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare('GET', 'http://httpbin.org/image/png');
+        $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/image/png');
 
         $stmt->execute($httpKernel);
 

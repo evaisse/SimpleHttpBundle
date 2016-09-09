@@ -36,7 +36,7 @@ class SimpleRoutingTest extends AbstractTests {
             "another" => __FILE__
         ];
 
-        $statement = $helper->prepare("GET", 'http://httpbin.org/status/{code}', $args);
+        $statement = $helper->prepare("GET", AbstractTests::$baseUrl . '/status/{code}', $args);
         $request = $statement->getRequest();
 
         $statement->execute($httpKernel);

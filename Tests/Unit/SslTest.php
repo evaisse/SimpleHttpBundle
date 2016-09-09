@@ -26,7 +26,6 @@ class SslTest extends AbstractTests
     }
 
 
-
     public function testDisablingSslVerif()
     {
 
@@ -39,16 +38,4 @@ class SslTest extends AbstractTests
         $this->assertEquals($a->getResponse()->getStatusCode(), 200);
     }
 
-
-    public function testDisablingSslVerif2()
-    {
-
-        list($helper, $httpKernel, $container) = $this->createContext();
-
-        $a = $helper->prepare("GET", 'https://www.pcwebshop.co.uk/');
-        $a->ignoreSslErrors(true);
-        $a->execute($httpKernel);
-
-        $this->assertEquals($a->getResponse()->getStatusCode(), 200);
-    }
 }

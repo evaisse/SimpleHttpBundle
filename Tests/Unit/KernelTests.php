@@ -17,7 +17,7 @@ class KernelTests extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare('GET', 'http://httpbin.org/');
+        $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/');
 
         $httpKernel->handle($stmt->getRequest());
     }

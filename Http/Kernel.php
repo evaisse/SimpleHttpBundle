@@ -18,6 +18,8 @@ use evaisse\SimpleHttpBundle\Http\Exception\SslException;
 use evaisse\SimpleHttpBundle\Http\Exception\TimeoutException;
 use evaisse\SimpleHttpBundle\Http\Exception\TransportException;
 
+
+use evaisse\SimpleHttpBundle\Http\Kernel\RemoteHttpKernel;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -32,17 +34,15 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Symfony\Component\HttpFoundation\HeaderBag;
 
-use Zeroem\CurlBundle\Curl\Request as CurlRequest;
-use Zeroem\CurlBundle\Curl\Collector\HeaderCollector;
-use Zeroem\CurlBundle\Curl\Collector\ContentCollector;
-use Zeroem\CurlBundle\Curl\CurlErrorException;
-use Zeroem\CurlBundle\Curl\RequestGenerator;
+use evaisse\SimpleHttpBundle\Curl\Request as CurlRequest;
+use evaisse\SimpleHttpBundle\Curl\CurlHeaderCollector;
+use evaisse\SimpleHttpBundle\Curl\Collector\ContentCollector;
+use evaisse\SimpleHttpBundle\Curl\CurlErrorException;
+use evaisse\SimpleHttpBundle\Curl\RequestGenerator;
 
-use Zeroem\CurlBundle\Curl\MultiManager;
-use Zeroem\CurlBundle\Curl\CurlEvents;
-use Zeroem\CurlBundle\Curl\MultiInfoEvent;
-
-use Zeroem\CurlBundle\HttpKernel\RemoteHttpKernel;
+use evaisse\SimpleHttpBundle\Curl\MultiManager;
+use evaisse\SimpleHttpBundle\Curl\CurlEvents;
+use evaisse\SimpleHttpBundle\Curl\MultiInfoEvent;
 
 
 /**
@@ -206,7 +206,7 @@ class Kernel extends RemoteHttpKernel
                 ];
 
             } catch (CurlErrorException $e) {
-                $stmt->setError(new Exception\TransportException("CURL connection error", 1, $e));
+                $stmt->setError(new Exception\UnknownTransportException("CURL connection error", 1, $e));
                 $event = new Event\GetResponseForExceptionEvent(
                     $this, $request, 
                     $requestType,

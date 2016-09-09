@@ -1,8 +1,6 @@
+<script type="text/javascript">eval({{ "@SimpleHttpBundle/Resources/public/libs/dollardom/dollardom.min.0.9.2b.js" | include_asset | json_encode | raw }})</script>
+<script type="text/javascript">eval({{ "@SimpleHttpBundle/Resources/public/libs/highlightjs/highlightjs-8.5.js" | include_asset | json_encode | raw}})</script>
 
-{%  javascripts "@SimpleHttpBundle/Resources/public/libs/dollardom/dollardom.min.0.9.2b.js"
-                "@SimpleHttpBundle/Resources/public/libs/highlightjs/highlightjs-8.5.js" %}
-    <script src="{{ asset_url }}"></script>
-{% endjavascripts %}
 
 <script>
 Array.prototype.slice.call(document.querySelectorAll("#collector-content pre.hljs")).forEach(function (element) {

@@ -76,7 +76,7 @@ class ExceptionsTest extends AbstractTests
 
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare('GET', 'http://httpbin.org/ip');
+        $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/ip');
 
         $stmt->getResult();
     }
@@ -90,7 +90,7 @@ class ExceptionsTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare('GET', 'http://httpbin.org/status/{code}', array(
+        $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/status/{code}', array(
             'code' => $code,
         ));
 
@@ -111,7 +111,7 @@ class ExceptionsTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare('GET', 'http://httpbin.org/status/{code}', array(
+        $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/status/{code}', array(
             'code' => $code,
         ));
 
@@ -133,7 +133,7 @@ class ExceptionsTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare('GET', 'http://httpbin.org/status/{code}', array(
+        $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/status/{code}', array(
             'code' => $code,
         ));
 
@@ -165,7 +165,7 @@ class ExceptionsTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $stmt = $helper->prepare('GET', 'http://httpbin.org/put');
+        $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/put');
 
         $httpKernel->execute([
             $stmt

@@ -8,7 +8,7 @@ services:
         class: Symfony\Bridge\Monolog\Logger
         arguments: [simple_http]
         calls:
-            - [pushHandler, [@simple_http.logger.handler]]
+            - [pushHandler, ["@simple_http.logger.handler"]]
 
     simple_http.logger.handler:
         class: Monolog\Handler\StreamHandler
@@ -16,20 +16,22 @@ services:
 
     simple_http.helper:
         class:      evaisse\SimpleHttpBundle\Service\Helper
-        arguments:  [@service_container]
+        arguments:  ["@service_container"]
 
     simple_http.kernel:
         class:      evaisse\SimpleHttpBundle\Http\Kernel
-        arguments:  [@service_container]
+        arguments:  ["@service_container"]
 
     simple_http.profiler.data_collector:
         class: evaisse\SimpleHttpBundle\DataCollector\ProfilerDataCollector
         calls:
-            - [ setStopWatch, [ @debug.stopwatch ] ]
+            - [ setStopWatch, [ "@debug.stopwatch" ] ]
         tags:
             - { name: data_collector, template: "SimpleHttpBundle:Collector:profiler", id: "profiler" }
 
     simple_http.twig.extension:
         class: evaisse\SimpleHttpBundle\Twig\Extension
+        arguments: ["@twig.loader"]
+        public: false
         tags:
             - { name: twig.extension }

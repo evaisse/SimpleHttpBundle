@@ -21,7 +21,7 @@ class TimeoutTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $a = $helper->prepare("GET", 'http://httpbin.org/delay/1');
+        $a = $helper->prepare("GET", AbstractTests::$baseUrl . '/delay/1');
         $a->setTimeout(800);
 
         $httpKernel->execute([
@@ -39,7 +39,7 @@ class TimeoutTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $a = $helper->prepare("GET", 'http://httpbin.org/delay/1');
+        $a = $helper->prepare("GET", AbstractTests::$baseUrl . '/delay/1');
         $a->setTimeout(800);
         $a->execute($httpKernel);
     }

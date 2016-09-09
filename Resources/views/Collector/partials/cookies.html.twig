@@ -12,7 +12,7 @@
 {%- endmacro %}
 
 
-<h5>Request Cookies</h5>
+<h5>Request Cookies ({{ request.cookies | length  }})</h5>
 
 
 <table>
@@ -34,7 +34,7 @@
 
 
 {% if response %}
-<h5>Response Cookies</h5>
+<h5>Response Cookies ({{ response.cookies | length  }})</h5>
 
 <table>
     <tbody>

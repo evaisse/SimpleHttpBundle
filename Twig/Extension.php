@@ -3,10 +3,26 @@
 namespace evaisse\SimpleHttpBundle\Twig;
 
 
+use Symfony\Bundle\TwigBundle\Loader\FilesystemLoader;
 use Symfony\Component\HttpFoundation\Response;
 
 class Extension extends \Twig_Extension
 {
+
+    /**
+     * @var FilesystemLoader
+     */
+    protected $loader;
+
+    /**
+     * @param FilesystemLoader $loader
+     */
+    function __construct(FilesystemLoader $loader)
+    {
+        $this->loader = $loader;
+    }
+
+
     public function getFilters()
     {
         return array(
@@ -24,6 +40,10 @@ class Extension extends \Twig_Extension
             ),
             new \Twig_SimpleFilter('simple_http_md5',
                     array($this, 'md5')
+            ),
+            new \Twig_SimpleFilter('include_asset',
+                array($this, 'assetInclude'),
+                array('is_safe' => array('html'))
             ),
         );
     }
@@ -50,6 +70,11 @@ class Extension extends \Twig_Extension
         return '<span class="badge ' . $cls . '"><abbr title="' . htmlentities($statusText) . '">' . $code . '</abbr></span>';
     }
 
+
+    public function assetInclude($file)
+    {
+        return $this->loader->getSource($file);
+    }
 
     public function formatHttpCodeAsSfBadge($code)
     {

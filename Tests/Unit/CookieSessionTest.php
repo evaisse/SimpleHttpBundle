@@ -35,7 +35,7 @@ class CookieSessionTest extends AbstractTests
          * Sent a tmp cookie value
          */
 
-        $stmt = $helper->prepare('GET', 'http://httpbin.org/cookies/set', [
+        $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/cookies/set', [
             'tmp'  => 1,
         ]);
 
@@ -44,7 +44,7 @@ class CookieSessionTest extends AbstractTests
         ], $cookieSession, $httpKernel);
 
 
-        $cookies = $cookieSession->allValues('http://httpbin.org');
+        $cookies = $cookieSession->allValues(AbstractTests::$baseUrl . '');
 
         $this->assertEquals($cookies['tmp'], 1);
 
@@ -53,16 +53,16 @@ class CookieSessionTest extends AbstractTests
          * Set and delete some async
          */
 
-        $stmt1 = $helper->prepare('GET', 'http://httpbin.org/cookies/set', [
+        $stmt1 = $helper->prepare('GET', AbstractTests::$baseUrl . '/cookies/set', [
             'foo'  => $i,
             'bar'  => $j,
         ]);
 
-        $stmt2 = $helper->prepare('GET', 'http://httpbin.org/cookies/set', [
+        $stmt2 = $helper->prepare('GET', AbstractTests::$baseUrl . '/cookies/set', [
             'also'  => $i,
         ]);
 
-        $stmt3 = $helper->prepare('GET', 'http://httpbin.org/cookies/delete', [
+        $stmt3 = $helper->prepare('GET', AbstractTests::$baseUrl . '/cookies/delete', [
             'tmp'  => 1,
         ]);
 
@@ -73,7 +73,7 @@ class CookieSessionTest extends AbstractTests
         ], $cookieSession, $httpKernel);
 
 
-        $cookies = $cookieSession->allValues('http://httpbin.org');
+        $cookies = $cookieSession->allValues(AbstractTests::$baseUrl . '');
 
         $this->assertEquals($cookies['foo'], $i);
         $this->assertEquals($cookies['bar'], $j);
@@ -86,7 +86,7 @@ class CookieSessionTest extends AbstractTests
          *  Final cookies check
          */
 
-        $stmt = $helper->prepare('GET', 'http://httpbin.org/cookies', [
+        $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/cookies', [
             'tmp'  => 1,
         ]);
 

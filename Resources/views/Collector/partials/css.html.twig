@@ -1,6 +1,4 @@
-{% stylesheets '@SimpleHttpBundle/Resources/public/libs/highlightjs/highlightjs-8.5.css' %}
-    <link rel="stylesheet" href="{{ asset_url }}"></link>
-{% endstylesheets %}
+<style>{{ '@SimpleHttpBundle/Resources/public/libs/highlightjs/highlightjs-8.5.css' | include_asset }}</style>
 
 
 <style>
@@ -71,8 +69,9 @@
 
 
 /* Bootstrap progress bar */
+
 .progress {
-    height: 12px;
+    height: 19px;
     overflow: hidden;
     background-color: #F7F7F7;
     background-repeat: repeat-x;

@@ -27,9 +27,9 @@ class ParrallelExecutionTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $a = $helper->prepare("GET", 'http://httpbin.org/ip');
-        $b = $helper->prepare("PUT", 'http://httpbin.org/put');
-        $c = $helper->prepare("POST", 'http://httpbin.org/post');
+        $a = $helper->prepare("GET", AbstractTests::$baseUrl . '/ip');
+        $b = $helper->prepare("PUT", AbstractTests::$baseUrl . '/put');
+        $c = $helper->prepare("POST", AbstractTests::$baseUrl . '/post');
 
 
         $helper->execute([
@@ -50,11 +50,11 @@ class ParrallelExecutionTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $a = $helper->prepare("GET", 'http://httpbin.org/delay/3');
+        $a = $helper->prepare("GET", AbstractTests::$baseUrl . '/delay/3');
         $a->setTimeout(800);
 
-        $b = $helper->prepare("PUT", 'http://httpbin.org/put');
-        $c = $helper->prepare("POST", 'http://httpbin.org/post');
+        $b = $helper->prepare("PUT", AbstractTests::$baseUrl . '/put');
+        $c = $helper->prepare("POST", AbstractTests::$baseUrl . '/post');
 
 
         $helper->execute([
@@ -74,9 +74,9 @@ class ParrallelExecutionTest extends AbstractTests
     {
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $a = $helper->prepare("GET", 'http://httpbin.org/ip');
-        $b = $helper->prepare("PUT", 'http://httpbin.org/put');
-        $c = $helper->prepare("POST", 'http://httpbin.org/post');
+        $a = $helper->prepare("GET", AbstractTests::$baseUrl . '/ip');
+        $b = $helper->prepare("PUT", AbstractTests::$baseUrl . '/put');
+        $c = $helper->prepare("POST", AbstractTests::$baseUrl . '/post');
 
         $helper
             ->execute([$a], null, $httpKernel)

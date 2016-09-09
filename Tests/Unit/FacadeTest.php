@@ -24,7 +24,7 @@ class FacadeTest extends AbstractTests
 
     public function provideBaseMethods()
     {
-        $b = 'http://httpbin.org';
+        $b = AbstractTests::$baseUrl . '';
 
         return [
             ['GET', $b . '/get', ],
@@ -38,14 +38,14 @@ class FacadeTest extends AbstractTests
 
     public function provideBaseTest()
     {
-        $b = 'http://httpbin.org';
+        $b = AbstractTests::$baseUrl . '';
 
         return array_merge($this->provideBaseMethods(), $this->provideWrongMethods());
     }
 
     public function provideWrongMethods()
     {
-        $b = 'http://httpbin.org';
+        $b = AbstractTests::$baseUrl . '';
 
         return [
             ['POST', $b . '/get', 405],
@@ -117,9 +117,9 @@ class FacadeTest extends AbstractTests
 
         $args = array_slice($_SERVER, 0, 3);
 
-        $data = $helper->$method('http://httpbin.org/' . strtolower($method), $args);
+        $data = $helper->$method(AbstractTests::$baseUrl . '/' . strtolower($method), $args);
 
-        $this->assertEquals($data['headers']['Host'], 'httpbin.org');
+        $this->assertEquals($data['headers']['Host'], explode('//', AbstractTests::$baseUrl)[1]);
     }
 
 
