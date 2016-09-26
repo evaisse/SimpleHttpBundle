@@ -212,7 +212,6 @@ button[data-simple-http-replay] img {
 }
 
 
-
 .tabs-content h5 {
     font-size: 12px;
     margin: 0;
@@ -223,4 +222,14 @@ button[data-simple-http-replay] img {
 
 .hljs {
     background: none;
+}
+
+
+.simple-http-badge {
+    display: inline-block;
+    background: #CCC;
+    font-size: 10px;
+    border-radius: 2px;
+    padding: 2px 3px;
+    color: white;
 }

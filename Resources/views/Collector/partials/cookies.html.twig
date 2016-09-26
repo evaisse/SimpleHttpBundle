@@ -17,18 +17,22 @@
 
 <table>
     <tbody>
-    {% for name, parameter in request.cookies %}
-        <tr>
-            <th valign="top">{{ name }}</th>
-            <td>
-                {% if parameter is iterable %}
-                    {{ _self.display_array_recursive(parameter) }}
-                {% else %}
-                    {{ parameter }}
-                {% endif %}
-            </td>
-        </tr>
-    {% endfor %}
+    {% if not request.cookies %}
+        <tr><td>no cookies.</td></tr>
+    {% else %}
+        {% for name, parameter in request.cookies %}
+            <tr>
+                <th valign="top">{{ name }}</th>
+                <td>
+                    {% if parameter is iterable %}
+                        {{ _self.display_array_recursive(parameter) }}
+                    {% else %}
+                        {{ parameter }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    {% endif %}
     </tbody>
 </table>
 
@@ -38,28 +42,32 @@
 
 <table>
     <tbody>
-    {% for name, parameter in response.cookies %}
-        <tr>
-            {% if parameter.cleared %}
-                <th valign="top" style="text-decoration: line-through">{{ name }}</th>
-            {%  else %}
-                <th valign="top">{{ name }}</th>
-            {% endif %}
-            <td>
-                {% if not parameter.cleared %}
-                    {{ parameter.value }}
-                    <hr style="background: #DDD; border:none; height:1px;" />
+    {% if not request.cookies %}
+        <tr><td>no cookies.</td></tr>
+    {% else %}
+        {% for name, parameter in response.cookies %}
+            <tr>
+                {% if parameter.cleared %}
+                    <th valign="top" style="text-decoration: line-through">{{ name }}</th>
+                {%  else %}
+                    <th valign="top">{{ name }}</th>
                 {% endif %}
-                <div style="color:#888">
-                {% if parameter is iterable %}
-                    {{ _self.display_array_recursive(parameter) }}
-                {% else %}
-                    {{ parameter }}
-                {% endif %}
-                </div>
-            </td>
-        </tr>
-    {% endfor %}
+                <td>
+                    {% if not parameter.cleared %}
+                        {{ parameter.value }}
+                        <hr style="background: #DDD; border:none; height:1px;" />
+                    {% endif %}
+                    <div style="color:#888">
+                    {% if parameter is iterable %}
+                        {{ _self.display_array_recursive(parameter) }}
+                    {% else %}
+                        {{ parameter }}
+                    {% endif %}
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    {% endif %}
     </tbody>
 </table>
 {% endif %}

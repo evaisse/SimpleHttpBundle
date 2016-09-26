@@ -171,7 +171,7 @@ class Kernel extends RemoteHttpKernel
 
     /**
      * handle multi curl
-     * @param array $stmts a list of Service instances
+     * @param Statement[] $stmts a list of Service instances
      * @return HttpKernel current httpkernel for method chaining
      */
     public function execute(array $stmts)
@@ -196,7 +196,7 @@ class Kernel extends RemoteHttpKernel
                 $event = new Event\GetResponseEvent($this, $request, $requestType);
                 $this->getEventDispatcher()->dispatch(KernelEvents::REQUEST, $event);
 
-                list($curlHandler, $contentCollector, $headerCollector) = $this->prepareRawCurlHandler($stmt, $requestType, false);
+                list($curlHandler, $contentCollector, $headerCollector) = $this->prepareRawCurlHandler($stmt);
 
                 $mm->addRequest($curlHandler);
 
@@ -206,7 +206,7 @@ class Kernel extends RemoteHttpKernel
                 ];
 
             } catch (CurlErrorException $e) {
-                $stmt->setError(new Exception\TransportException("CURL connection error", 1, $e));
+                $stmt->setError(new Exception\CurlTransportException("CURL connection error", 1, $e));
                 $event = new Event\GetResponseForExceptionEvent(
                     $this, $request, 
                     $requestType,

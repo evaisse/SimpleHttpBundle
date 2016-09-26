@@ -25,49 +25,73 @@ class Extension extends \Twig_Extension
             new \Twig_SimpleFilter('simple_http_md5',
                     array($this, 'md5')
             ),
+            new \Twig_SimpleFilter('simple_http_format_ms',
+                array($this, 'formatMilliseconds')
+            ),
+            new \Twig_SimpleFilter('simple_http_format_num',
+                array($this, 'numberFormat')
+            ),
         );
     }
 
+    /**
+     * @param int|float $number
+     * @param int       $decimals
+     * @return string
+     */
+    public function numberFormat($number, $decimals = 0)
+    {
+        static $locale;
+
+        $locale = $locale ? $locale : localeconv();
+
+        return number_format($number, $decimals, $locale['decimal_point'], $locale['thousands_sep']);
+    }
+
+    /**
+     * @param $ms
+     * @return string
+     */
+    public function formatMilliseconds($ms)
+    {
+        if ($ms >= 1) {
+            return $this->numberFormat($ms, 1) .  ' s';
+        } else {
+            return $this->numberFormat($ms * 1000) . " ms";
+        }
+    }
+
+    /**
+     * @param $str
+     * @return string
+     */
     public function md5($str)
     {
         return md5($str);
     }
 
-    public function formatHttpCode($code)
+
+    /**
+     * @param int|array $codeOrResponse response data or just an http code
+     * @return string
+     */
+    public function formatHttpCode($codeOrResponse)
     {
-        if ($code >= 500) {
-            $cls = "error";
-        } else if ($code >= 400) {
-            $cls = "warning";
-        } else if ($code >= 300) {
-            $cls = 'info';
-        } else if ($code >= 200) {
-            $cls = "success";
-        } else {
-            $cls = '';
-        }
-        $statusText = Response::$statusTexts[$code];
-        return '<span class="badge ' . $cls . '"><abbr title="' . htmlentities($statusText) . '">' . $code . '</abbr></span>';
+        $d = $this->fetchInfosFromCodeOrResponse($codeOrResponse);
+        return '<span class="http-status badge '.$d['level'].' '.($d['fromCache']?'http-cache-hit':'').'"><abbr title="' . htmlentities($d['text']) . '">'.$d['code'].($d['fromCache']?' <small>+cached</small>':'').'</abbr></span>';
     }
 
 
-    public function formatHttpCodeAsSfBadge($code)
+    /**
+     * @param int|array $codeOrResponse response data or just an http code
+     * @return string
+     */
+    public function formatHttpCodeAsSfBadge($codeOrResponse)
     {
-        if ($code >= 500) {
-            $cls = "red";
-        } else if ($code >= 400) {
-            $cls = "yellow";
-        } else if ($code >= 300) {
-            $cls = 'blue';
-        } else if ($code >= 200) {
-            $cls = "green";
-        } else {
-            $cls = 'default';
-        }
-
-        $statusText = Response::$statusTexts[$code];
-
-        return '<span class="sf-toolbar-status sf-toolbar-status-' . $cls . '"><abbr title="' . htmlentities($statusText) . '">' . $code . '</abbr></span>';
+        $d = $this->fetchInfosFromCodeOrResponse($codeOrResponse);
+        return '<span class="http-status sf-toolbar-status sf-toolbar-status-' . $d['color'].' '.($d['fromCache']?'http-cache-hit':'').'">'
+              .'<abbr title="' . htmlentities($d['text']) . '">'.$d['code'].($d['fromCache']?'<small>+cache</small>':'').'</abbr>'
+              .'</span>';
     }
 
     public function format($code, $contentType)
@@ -169,5 +193,50 @@ class Extension extends \Twig_Extension
     public function getName()
     {
         return 'simple_http_extension';
+    }
+
+
+
+    /**
+     * @param int|array $codeOrResponse response data or just an http code
+     * @return array infos "fromCache", "text", "color"
+     */
+    protected function fetchInfosFromCodeOrResponse($codeOrResponse)
+    {
+        $fromCache = false;
+        if (is_array($codeOrResponse)) {
+            $response = $codeOrResponse;
+            $code = $response['statusCode'];
+            $fromCache = !empty($response['fromHttpCache']);
+        } else {
+            $code = (int)$codeOrResponse;
+        }
+
+        if ($code >= 500) {
+            $cls = "red";
+            $level = "error";
+        } else if ($code >= 400) {
+            $cls = "yellow";
+            $level = "warning";
+        } else if ($code >= 300) {
+            $cls = 'blue';
+            $level = 'info';
+        } else if ($code >= 200) {
+            $cls = "green";
+            $level = "success";
+        } else {
+            $cls = 'default';
+            $level = 'default';
+        }
+
+        $statusText = Response::$statusTexts[$code];
+
+        return [
+            'fromCache' => $fromCache,
+            'text'      => $statusText,
+            'color'     => $cls,
+            'code'      => $code,
+            'level'     => $level,
+        ];
     }
 }

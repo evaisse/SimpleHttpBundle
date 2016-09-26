@@ -109,22 +109,27 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         foreach ($this->calls as $k => $v) {
 
             $calls[$k] = array(
-                'time'      => $this->fetchTransferInfos($v),
-                'request'   => $this->fetchRequestInfos($v['request']),
-                'response'  => !empty($v['response']) ? $this->fetchResponseInfos($v['response']) : false,
-                'error'     => !empty($v['error']) ? $this->fetchErrorInfos($v['error']) : false,
-                'debugLink' => false,
+                'time'          => $this->fetchTransferInfos($v),
+                'request'       => $this->fetchRequestInfos($v['request']),
+                'response'      => !empty($v['response']) ? $this->fetchResponseInfos($v['response']) : false,
+                'error'         => !empty($v['error']) ? $this->fetchErrorInfos($v['error']) : false,
+                'debugLink'     => false,
+                'trace'         => array_slice($v['trace'], 3),
             );
 
             if ($v['response']) {
+                $calls[$k]['response']['fromHttpCache'] = false;
                 foreach ($calls[$k]['response']['headers'] as $h) {
-                    foreach(['x-debug-uri', 'x-debug-link'] as $hk) {
-                        if (stripos($h, $hk) !== false) {
+                    foreach(['x-debug-uri:', 'x-debug-link:'] as $hk) {
+                        if (stripos($h, $hk) === 0) {
                             list($hv, $url) = explode(':', $h, 2);
                             $url = trim($url);
                             $calls[$k]['debugLink'] = $url;
                             break;
                         }
+                    }
+                    if (stripos($h, "X-Cache:") !== false && strpos($h, "HIT") !== false) {
+                        $calls[$k]['response']['fromHttpCache'] = true;
                     }
                 }
             }
@@ -139,11 +144,17 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         $request = $event->getRequest();
 
         $eventName = "#" . count($this->calls) . ' ' . $request->getMethod() . ' ' . $request->getUri();
-        
+
+        try {
+            throw new \Exception("");
+        } catch (\Exception $e) {
+            $trace = explode("\n", $e->getTraceAsString());
+        }
         $this->calls[] = array(
             "start"          => microtime(true),
             "request"        => $request,
-            'stopWatchEvent' => $this->getStopwatch()->start($eventName, 'doctrine')
+            'stopWatchEvent' => $this->getStopwatch()->start($eventName, 'doctrine'),
+            "trace"          => $trace
         );
     }
 
@@ -185,6 +196,17 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
         if ($event->getResponse()->getStatusCode() >= 400) {
             $this->errors++;
+        }
+
+        /*
+         *  If there is some cache hit informative headers,
+         *  we set cache infos for the timeline
+         */
+        if ($event->getResponse()
+            && $event->getResponse()->headers->get('X-Cache')
+            && stripos($event->getResponse()->headers->get('X-Cache')[0], 'HIT') !== false
+        ) {
+            $this->calls[$key]['cache'] = true;
         }
 
         $this->finishEvent($key);
@@ -316,7 +338,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     public function getCalls()
     {
-        return $this->data['calls'];
+        return array_map(array($this, 'filterCall'), $this->data['calls']);
     }
 
 
@@ -349,19 +371,49 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return $hosts;
     }
 
+
+    /**
+     * Current calls stack contains http client errors 4XX
+     * @return int
+     */
+    public function getClientErrorsCount()
+    {
+        return count($this->getClientErrors());
+    }
+
+
     /**
      * Test if current calls stack contains http client errors 4XX
      * @return bool
      */
     public function hasClientErrors()
     {
-        foreach ($this->getCalls() as $call) {
+        return (bool)$this->getClientErrorsCount();
+    }
+
+
+    /**
+     * Get all HTTP 4XX client errors calls
+     * @return array[]
+     */
+    public function getClientErrors()
+    {
+        return array_filter($this->getCalls(), function ($call) {
             if ($call['response']
                 && $call['response']['statusCode'] < 500
                 && $call['response']['statusCode'] >= 400) {
                 return true;
             }
-        }
+        });
+    }
+
+    /**
+     * current calls stack contains http server errors 5XX
+     * @return int
+     */
+    public function getServerErrorsCount()
+    {
+        return count($this->getServerErrors());
     }
 
     /**
@@ -370,11 +422,21 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      */
     public function hasServerErrors()
     {
-        foreach ($this->getCalls() as $call) {
+        return (bool)$this->getServerErrorsCount();
+    }
+
+
+    /**
+     * Get all HTTP 5XX server errors calls
+     * @return array[]
+     */
+    public function getServerErrors()
+    {
+        return array_filter($this->getCalls(), function ($call) {
             if ($call['response'] && $call['response']['statusCode'] >= 500) {
                 return true;
             }
-        }
+        });
     }
 
 
@@ -401,4 +463,97 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
         return $this;
     }
+
+
+    /**
+     *
+     */
+    protected function filterCall(array $call)
+    {
+
+        $call['auth'] = false;
+
+        foreach ($call['request']['headers'] as $h) {
+            if (!preg_match('/Authorization:\s*Bearer\s+(\w+\.\w+.\w+)/i', $h, $m)) {
+                continue;
+            }
+            $call['auth'] = $call['auth'] ? $call['auth'] : [];
+            $call['auth']['type'] = "JWT";
+            $jwt = $m[1];
+            $call['request']['jwt'] = [
+                'encoded' => $m[1],
+                'decoded' => [
+                    "header"    => $this->urlsafeB64Decode(explode('.', $jwt)[0]),
+                    "payload"   => $this->urlsafeB64Decode(explode('.', $jwt)[1]),
+                    "signature" => explode('.', $m[1])[2],
+                ],
+            ];
+        }
+
+        foreach ($call['request']['headers'] as $h) {
+            if (!preg_match('/Authorization:\s*Bearer\s+(\w+\.\w+.\w+)/i', $h, $m)) {
+                continue;
+            }
+            $call['auth'] = $call['auth'] ? $call['auth'] : [];
+            $call['auth']['type'] = "JWT";
+            $jwt = $m[1];
+            $call['request']['jwt'] = [
+                'encoded' => $m[1],
+                'decoded' => [
+                    "header"    => $this->urlsafeB64Decode(explode('.', $jwt)[0]),
+                    "payload"   => $this->urlsafeB64Decode(explode('.', $jwt)[1]),
+                    "signature" => explode('.', $m[1])[2],
+                ],
+            ];
+        }
+
+        foreach ($call['response']['headers'] as $h) {
+            if (!preg_match('/Authorization:\s*Bearer\s+(\w+\.\w+.\w+)/i', $h, $m)) {
+                continue;
+            }
+            $call['auth'] = $call['auth'] ? $call['auth'] : [];
+            $call['auth']['type'] = "JWT";
+            $jwt = $m[1];
+            $call['response']['jwt'] = [
+                'encoded' => $m[1],
+                'decoded' => [
+                    "header"    => $this->urlsafeB64Decode(explode('.', $jwt)[0]),
+                    "payload"   => $this->urlsafeB64Decode(explode('.', $jwt)[1]),
+                    "signature" => explode('.', $m[1])[2],
+                ],
+            ];
+        }
+
+        return $call;
+    }
+
+
+    /**
+     * Decode a string with URL-safe Base64.
+     *
+     * @param string $input A Base64 encoded string
+     *
+     * @return string A decoded string
+     */
+    public function urlsafeB64Decode($input)
+    {
+        $remainder = strlen($input) % 4;
+        if ($remainder) {
+            $padlen = 4 - $remainder;
+            $input .= str_repeat('=', $padlen);
+        }
+        return base64_decode(strtr($input, '-_', '+/'));
+    }
+    /**
+     * Encode a string with URL-safe Base64.
+     *
+     * @param string $input The string you want encoded
+     *
+     * @return string The base64 encode of what you passed in
+     */
+    public function urlsafeB64Encode($input)
+    {
+        return str_replace('=', '', strtr(base64_encode($input), '+/', '-_'));
+    }
+
 }

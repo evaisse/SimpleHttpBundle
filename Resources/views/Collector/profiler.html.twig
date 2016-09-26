@@ -5,18 +5,18 @@
 	{% set icon %}
 		<span class="icon"><img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAMAAAAM7l6QAAADAFBMVEX///98fHwAAAChoaGCgoKkpKSIiIhfX18hISFYWFipqanR0dHU1NSbm5sFBQVnZ2fKysrLy8vJycliYmIjIyMlJSVvb28BAQF5eXlCQkJ4eHhPT08LCwtOTk6SkpJjY2NkZGSRkZFAQEA/Pz+8vLx+fn57e3t6enqlpaXHx8erq6vQ0NDCwsIODg5BQUFxcXHa2trOzs40NDQeHh46OjqxsbHExMQbGxuioqIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABNzw3sAAAAAXRSTlMAQObYZgAAAAlwSFlzAAALEgAACxIB0t1+/AAAAJ9JREFUeNrdkccSgkAQRNs2IyquAQOKWRFz/v8vkwPCbsFa5ZV3nDc9tTsDZIwc8z9sgWRRa0ssV6o04kJNtibraKDJuEJLzbcCZ0paoN350u3BspVu20J/EDFMaKEOF4n0yIkYpwyfuNMQd/b/8DkjFinp5WodstnCk3ayC/7tYy+3+wdpJ0c4OPGsucCF19udD+2FvOA5BvQ8X29kjA+IfQ2Y35PlXQAAAABJRU5ErkJggg==" /></span>
 
-        {% if (collector.countRequests - collector.countErrors) %}
-        <span class="sf-toolbar-status sf-toolbar-status-green">{{ collector.countRequests - collector.countErrors }}</span>
+
+        {% if collector.hasServerErrors %}
+            <span class="sf-toolbar-status sf-toolbar-status-red">{{ collector.serverErrorsCount }}</span>
         {% endif %}
-        {% if collector.countErrors > 0 %}
-            {% if collector.hasServerErrors %}
-                <span class="sf-toolbar-status sf-toolbar-status-red">{{ collector.countErrors }}</span>
-            {% else %}
-                <span class="sf-toolbar-status sf-toolbar-status-yellow">{{ collector.countErrors }}</span>
-            {% endif %}
+        {% if collector.hasClientErrors %}
+            <span class="sf-toolbar-status sf-toolbar-status-yellow">{{ collector.clientErrorsCount }}</span>
+        {% endif %}
+        {% if collector.countSuccessfullRequest %}
+            <span class="sf-toolbar-status sf-toolbar-status-green">{{ collector.countSuccessfullRequest }}</span>
         {% endif %}
 
-        <span>{{ '%0.1f'|format(collector.totalTime) }} s.</span>
+        <span>{{ collector.totalTime|simple_http_format_ms }}</span>
 
 	{% endset %}
 
@@ -36,11 +36,11 @@
                 </div>
                 <div style="text-decoration: none">
                     {% if call.response %}
-                        {{ call.response.statusCode | simple_http_format_http_code_as_badge }}
+                        {{ call.response | simple_http_format_http_code_as_badge }}
                     {% else %}
                         <span class="sf-toolbar-status sf-toolbar-status-red">ERR</span>
                     {% endif %}
-                    <span>{{ '%0.1f'|format(call.time.total) }} s.</span>
+                    <span>{{ call.time.total|simple_http_format_ms }}</span>
                     <span style="color: #999">{{ call.request.schemeAndHttpHost }}</span>
                 </div>
                 <div style="clear:both"></div>
@@ -59,16 +59,17 @@
         <strong>HTTP</strong>
 
         <span class="count">
-            <span>{{ collector.countRequests - collector.countErrors }}</span>
-            {% if collector.countErrors > 0 %}
-                {% if collector.hasServerErrors %}
-                    <span style="backgroun:#B95E5E">{{ collector.countErrors }}</span>
-            {% else %}
-                    <span style="background:#FAA732">{{ collector.countErrors }}</span>
-                {% endif %}
+            {% if collector.hasServerErrors %}
+                <span style="background:rgb(185, 94, 94)">{{ collector.serverErrorsCount }}</span>
+            {% endif %}
+            {% if collector.hasClientErrors %}
+                <span style="background:rgb(250, 166, 35)">{{ collector.clientErrorsCount }}</span>
+            {% endif %}
+            {% if collector.countSuccessfullRequest %}
+                <span style="background: rgb(96,184,87);">{{ collector.countSuccessfullRequest }}</span>
             {% endif %}
 
-            <span>{{ '%0.0f'|format(collector.totalTime) }} s.</span>
+            <span>{{ collector.totalTime|simple_http_format_ms }}</span>
         </span>
 
     </span>
