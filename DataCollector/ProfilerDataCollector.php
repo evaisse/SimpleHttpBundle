@@ -464,69 +464,67 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return $this;
     }
 
-
     /**
-     *
+     * Parse additionnal infos for request/response results, like auth mechanism
+     * @param array $call call info
+     * @return array filtered call info
      */
     protected function filterCall(array $call)
     {
-
         $call['auth'] = false;
 
-        foreach ($call['request']['headers'] as $h) {
-            if (!preg_match('/Authorization:\s*Bearer\s+(\w+\.\w+.\w+)/i', $h, $m)) {
-                continue;
-            }
-            $call['auth'] = $call['auth'] ? $call['auth'] : [];
-            $call['auth']['type'] = "JWT";
-            $jwt = $m[1];
-            $call['request']['jwt'] = [
-                'encoded' => $m[1],
-                'decoded' => [
-                    "header"    => $this->urlsafeB64Decode(explode('.', $jwt)[0]),
-                    "payload"   => $this->urlsafeB64Decode(explode('.', $jwt)[1]),
-                    "signature" => explode('.', $m[1])[2],
-                ],
-            ];
+        if ($requestJwt = $this->fetchJwtInfosFromHeaders($call['request']['headers'])) {
+            $call['request']['jwt'] = $requestJwt;
         }
 
-        foreach ($call['request']['headers'] as $h) {
-            if (!preg_match('/Authorization:\s*Bearer\s+(\w+\.\w+.\w+)/i', $h, $m)) {
-                continue;
-            }
-            $call['auth'] = $call['auth'] ? $call['auth'] : [];
-            $call['auth']['type'] = "JWT";
-            $jwt = $m[1];
-            $call['request']['jwt'] = [
-                'encoded' => $m[1],
-                'decoded' => [
-                    "header"    => $this->urlsafeB64Decode(explode('.', $jwt)[0]),
-                    "payload"   => $this->urlsafeB64Decode(explode('.', $jwt)[1]),
-                    "signature" => explode('.', $m[1])[2],
-                ],
-            ];
+        if ($responseJwt = $this->fetchJwtInfosFromHeaders($call['response']['headers'])) {
+            $call['response']['jwt'] = $responseJwt;
         }
 
-        foreach ($call['response']['headers'] as $h) {
-            if (!preg_match('/Authorization:\s*Bearer\s+(\w+\.\w+.\w+)/i', $h, $m)) {
-                continue;
-            }
+        if ($requestJwt || $responseJwt) {
             $call['auth'] = $call['auth'] ? $call['auth'] : [];
             $call['auth']['type'] = "JWT";
-            $jwt = $m[1];
-            $call['response']['jwt'] = [
-                'encoded' => $m[1],
-                'decoded' => [
-                    "header"    => $this->urlsafeB64Decode(explode('.', $jwt)[0]),
-                    "payload"   => $this->urlsafeB64Decode(explode('.', $jwt)[1]),
-                    "signature" => explode('.', $m[1])[2],
-                ],
-            ];
         }
 
         return $call;
     }
 
+    /**
+     * @param string[] $headers
+     * @return array|null null if no jwt, infos otherwise [
+     *  'encoded' => $m[1],
+     *  'decoded' => [
+     *    "header"    => $jwtHeader,
+     *    "payload"   => $jwtPayload,
+     *    "signature" => $jwtSignature,
+     *  ],
+     * ]
+     */
+    protected function fetchJwtInfosFromHeaders(array $headers)
+    {
+        $jwt = null;
+
+        foreach ($headers as $h) {
+            if (!preg_match('/Authorization:\s*Bearer\s+(\w+\.\w+.\w+)/i', $h, $m)) {
+                continue;
+            }
+            $parts = explode('.', $m[1]);
+            $jwtHeader = isset($parts[0]) ? $parts[0] : null;
+            $jwtPayload = isset($parts[1]) ? $parts[1] : null;
+            $jwtSignature = isset($parts[2]) ? $parts[2] : null;
+
+            $jwt = [
+                'encoded' => $m[1],
+                'decoded' => [
+                    "header"    => $this->urlsafeB64Decode($jwtHeader),
+                    "payload"   => $this->urlsafeB64Decode($jwtPayload),
+                    "signature" => $jwtSignature,
+                ],
+            ];
+        }
+
+        return $jwt;
+    }
 
     /**
      * Decode a string with URL-safe Base64.
@@ -542,7 +540,11 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
             $padlen = 4 - $remainder;
             $input .= str_repeat('=', $padlen);
         }
-        return base64_decode(strtr($input, '-_', '+/'));
+        try {
+            return base64_decode(strtr($input, '-_', '+/'));
+        } catch (\Exception $e) {
+            return "";
+        }
     }
     /**
      * Encode a string with URL-safe Base64.
