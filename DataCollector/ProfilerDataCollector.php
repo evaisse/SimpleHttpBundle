@@ -264,8 +264,16 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      */
     public function fetchResponseInfos(Response $response)
     {
+        if ($response->headers->get('charset', '') == "utf-8"
+            || stripos($response->headers->get('content-type', ''), 'utf-8') !== 0
+        ) {
+            $encoders = array(new LazyJsonEncoder());
+        } else {
+            $encoders = array(new LazyJsonEncoder());
+        }
+
         $normalizers = array(new CustomGetSetNormalizer());
-        $encoders = array(new JsonEncoder());
+        $encoders = array(new LazyJsonEncoder());
         $serializer = new Serializer($normalizers, $encoders);
 
         $data = json_decode($serializer->serialize($response, 'json'), true);
