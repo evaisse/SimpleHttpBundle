@@ -19,8 +19,21 @@ class CurlHeaderCollector extends HeaderCollector
     private $code;
     private $message;
 
-    private $headers = array();
-    private $cookies = array();
+    /**
+     * @var array
+     */
+    private $headers = [];
+
+    /**
+     * @var array A list of prepended headers that give infos about transaction process
+     * (i.e. HTTP/1.1 100 Continue, HTTP/1.1 200 Connection established)
+     */
+    private $transactionHeaders = [];
+
+    /**
+     * @var array
+     */
+    private $cookies = [];
 
     public function collect() {
 
@@ -48,6 +61,8 @@ class CurlHeaderCollector extends HeaderCollector
     private function parseHttp($header) {
         list($version,$code,$message) = explode(" ", $header);
 
+        $this->transactionHeaders[] = $header;
+        
         $versionParts = explode("/",$version);
         $this->version = end($versionParts);
         $this->code = $code;
@@ -77,13 +92,15 @@ class CurlHeaderCollector extends HeaderCollector
             if (strtolower($name) == "set-cookie") {
 
                 $cookie = CookieParser::fromString($value);
-                $this->cookies[] = new Cookie($cookie->getName(),
+                $this->cookies[] = new Cookie(
+                    $cookie->getName(),
                     $cookie->getRawValue(),
                     (int)$cookie->getExpiresTime(),
                     $cookie->getPath(),
                     $cookie->getDomain(),
                     $cookie->isSecure(),
-                    $cookie->isHttpOnly());
+                    $cookie->isHttpOnly()
+                );
 
             } else {
 
@@ -116,6 +133,14 @@ class CurlHeaderCollector extends HeaderCollector
     public function getCookies()
     {
         return $this->cookies;
+    }
+
+    /**
+     * @return array
+     */
+    public function getTransactionHeaders()
+    {
+        return $this->transactionHeaders;
     }
 
 
