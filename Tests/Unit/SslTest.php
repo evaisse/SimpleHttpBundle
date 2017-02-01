@@ -13,7 +13,7 @@ class SslTest extends AbstractTests
 {
 
     /**
-     * @expectedException evaisse\SimpleHttpBundle\Http\Exception\SslException
+     * @expectedException evaisse\SimpleHttpBundle\Http\Exception\TransportException
      */
     public function testSslValidationException()
     {

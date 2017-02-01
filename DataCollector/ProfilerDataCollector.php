@@ -89,7 +89,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      */
     public function getName()
     {
-        return 'profiler';
+        return 'simplehttpprofiler';
     }
 
     public static function getSubscribedEvents()
@@ -166,6 +166,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         $key = $this->getRequestKey($event->getRequest());
 
         $this->errors++;
+
         $this->calls[$key] = array_merge($this->calls[$key], array(
             'response' => $event->getResponse(),
             "error"    => $event->getException(),
@@ -245,8 +246,16 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      */
     public function fetchResponseInfos(Response $response)
     {
+        if ($response->headers->get('charset', '') == "utf-8"
+            || stripos($response->headers->get('content-type', ''), 'utf-8') !== 0
+        ) {
+            $encoders = array(new LazyJsonEncoder());
+        } else {
+            $encoders = array(new LazyJsonEncoder());
+        }
+
         $normalizers = array(new CustomGetSetNormalizer());
-        $encoders = array(new JsonEncoder());
+        $encoders = array(new LazyJsonEncoder());
         $serializer = new Serializer($normalizers, $encoders);
 
         $data = [
@@ -357,6 +366,33 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return $hosts;
     }
 
+    /**
+     * Test if current calls stack contains http client errors 4XX
+     * @return bool
+     */
+    public function hasClientErrors()
+    {
+        foreach ($this->getCalls() as $call) {
+            if ($call['response']
+                && $call['response']['statusCode'] < 500
+                && $call['response']['statusCode'] >= 400) {
+                return true;
+            }
+        }
+    }
+
+    /**
+     * Test if current calls stack contains http server errors 5XX
+     * @return bool
+     */
+    public function hasServerErrors()
+    {
+        foreach ($this->getCalls() as $call) {
+            if ($call['response'] && $call['response']['statusCode'] >= 500) {
+                return true;
+            }
+        }
+    }
 
 
     /**

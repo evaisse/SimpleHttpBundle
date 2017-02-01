@@ -141,7 +141,7 @@ class Helper implements ContainerAwareInterface
      * @param array $files a hash of files infos
      * @param array $server server infos
      * @param string $content optionnal RAW body content
-     * @return Transaction
+     * @return \evaisse\SimpleHttpBundle\Http\Statement
      */
     public function prepare($method, $url, $parameters = array(), $cookies = array(), $files = array(), $server = array(), $content = NULL)
     {
@@ -151,7 +151,6 @@ class Helper implements ContainerAwareInterface
         $service->setContainer($this->container);
         return $service;
     }
-
 
 
 

@@ -25,7 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\ParameterBag;
-use Symfony\Component\HttpFoundation\Response as HttpResponse;
+
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event;
@@ -152,7 +152,9 @@ class Kernel extends RemoteHttpKernel
             $response->setProtocolVersion($headersCollector->getVersion());
             $response->setStatusCode($headersCollector->getCode(), $headersCollector->getMessage());
 
-            $response->setTransferInfos($e->getRequest()->getInfo());
+            $response->setTransferInfos(array_merge($e->getRequest()->getInfo(), [
+               'additionnalProxyHeaders' =>  $headersCollector->getTransactionHeaders()
+            ]));
 
             $event = new Event\FilterResponseEvent($this, $request, $requestType, $response);
             $this->getEventDispatcher()->dispatch(KernelEvents::RESPONSE, $event);

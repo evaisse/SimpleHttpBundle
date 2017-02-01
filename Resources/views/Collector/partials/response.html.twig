@@ -1,24 +1,36 @@
+{% if response %}
+    <h5>Body</h5>
+{#
 
-<h5>Body</h5>
+    <table>
+        <tbody>
+            <tr>
+                <td>{{ response.content | simple_http_beautify(response.contentType) }}</td>
+            </tr>
+        </tbody>
+    </table>
+#}
 
-<table>
-    <tbody>
-        <tr>
-            <td>{{ response.body }}</td>
-        </tr>
-    </tbody>
-</table>
+    <table>
+        <tbody>
+            <tr>
+                <td>{{ response.body }}</td>
+            </tr>
+        </tbody>
+    </table>
 
-<h5>Headers</h5>
 
-<table>
-    <tbody>
-    {% for header in response.headers %}
-        <tr>
-            <td>
-                {{ header }}
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+    <h5>Headers</h5>
+
+    <table>
+        <tbody>
+        {% for header in response.headers %}
+            <tr>
+                <td>
+                    {{ header }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}

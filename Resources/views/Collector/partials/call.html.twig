@@ -2,8 +2,10 @@
 <div id="call-{{ index }}" class="http-call http-call--{{ call.request.method | lower }} {{ call.request.schemeAndHttpHost | simple_http_md5 }}">
     
     <h3 class="http-call__title">
+        {#<span style="float: right"><a href="#" class="replay" data-request="{{ call.request|json_encode }}" data-index="{{ index }}">Replay</a></span>#}
         <span class="http-call__title__method">{{ call.request.method }}</span>
-        <span class="http-call__title__webhost">{{ call.request.schemeAndHttpHost }}</span><span class="http-call__path">{{ call.request.requestUri }}</span>
+        <abbr title="{{ call.request.requestUri }}" class="http-call__path">{{ call.request.requestUri }}</abbr><br/>
+        <span class="http-call__title__webhost">{{ call.request.schemeAndHttpHost }}</span>
     </h3>
 
     <div class="http-call__details tabs">
@@ -58,5 +60,15 @@
             </div>
         </div>
 
+        <div class="http-call__replays">
+            <div class="http-call__replay-calls"></div>
+            <div class="http-call__replay-action">
+                <button data-simple-http-replay-url="{{ path("simple_http.replay_request") }}"
+                        data-simple-http-replay="{{ call.request|json_encode }}">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABQ0lEQVQ4T6XSv0tXcRTG8ZeKS4ODOvRDwX/AxZCgwc1QWoQGXXUSQURQQXB0KJRoEMJdELcEwQbRSfLHIA3ODQUm2uDUlMWBc+Fyu/JF/Cz33vM5z/ue85zT5IGnqYH+OeZwjE1cVvMbAYawm6LfWML7MqQRoBsTeIPeFK5ivoAUgFa8wijaMFIpNfIW8Dbjw/gc73HRhW305eUtnuFnjT8fMYkveFkA4tmBqwTG9zTWagA9+JbxTvwqWniBowhkfwMYrwBa8Cd/FOLQnBSAKOcwy36CZkQr5bOBg5xC+BQtnxWAx7jI7HD+R035M/hQ8qkdN+UxnqAfYdRUDeBpggvNaUyrDHiNnRQu4h3+VkCfcI0t7Icn1UVaydUN3TlCsI7vd6183SbOYhmPUjSIvfsAIjfGNJaexO5/vS/grvz/4v8AYOI4K1/F6HgAAAAASUVORK5CYII=" />
+                    Replay
+                </button>
+            </div>
+        </div>
     </div>
 </div>
