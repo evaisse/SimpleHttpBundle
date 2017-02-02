@@ -5,7 +5,7 @@
 <table>
     <tbody>
         <tr>
-            <th>
+            <td>
                 {% if debugLink %}
                     <a style="float: right;display: inline-block" href="{{ debugLink }}" target="_blank">
                         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAgElEQVQYV5XQMQpCQQxF0fNX4G60stFGdyBYuSE3InwQBG20URDclPKKkSAfxXST3FxepvO9nm3c/QDHOGAU8IxZWXhggkB7bHAMGP0clwI3aN36DawRAvVY4VYzxljBHba444pp4CFjve8t+Rtc4vTxVYtc22LFmEeaQ5XlSLwAJVAaAqoDe/cAAAAASUVORK5CYII=" />
@@ -17,7 +17,7 @@
         
                 wait {{ time.connection|simple_http_format_ms }} ({{ connection_percent|number_format(0) }}%),
                 process {{ (time.total - time.connection)|simple_http_format_ms }} ({{ process_percent|number_format(0) }}%)
-            </th>
+            </td>
         </tr>
     </tbody>
 </table>

@@ -10,7 +10,6 @@
             line-height: 22px;
         }
 
-
         #menu-profiler .selected .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-red,
         .sf-toolbar-block:hover .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-red {
             background: rgb(176, 65, 62);
@@ -72,37 +71,48 @@
     {% set text %}
 
         {% for index, call in collector.calls %}
-        <div class="sf-toolbar-info-piece">
-            <span style="display: table-cell">
-                {% if call.response %}
-                    {{ call.response | simple_http_format_http_code_as_badge }}
-                {% else %}
-                    <span class="sf-toolbar-status sf-toolbar-status-red">ERR</span>
-                {% endif %}
-            </span>
 
-            <a style="display: table-cell"
-               href="{{ path('_profiler', { 'token': token, 'panel': 'simplehttpprofiler' }) }}#request{{ index }}">
-               <span>{{ call.request.method }} {{ call.request.requestUri }}</span>
-            </a>
+            <div class="sf-toolbar-info-piece">
+                <span style="display: table-cell">
+                    {% if call.response %}
+                        {{ call.response | simple_http_format_http_code_as_badge }}
+                    {% else %}
+                        <span class="sf-toolbar-status sf-toolbar-status-red">ERR</span>
+                    {% endif %}
+                </span>
 
-
-
-
-            <b>
-            {% if call.debugLink %}
-                <a style="display: table-cell;padding-left: 10px" href="{{ call.debugLink }}" title="External debug link">
-                    <span>Debug &#8599;</span>
+                <a style="display: table-cell"
+                   href="{{ path('_profiler', { 'token': token, 'panel': 'simplehttpprofiler' }) }}#request{{ index }}">
+                   <span>{{ call.request.method }} {{ call.request.requestUri }}</span>
                 </a>
-            {% endif %}
-            </b>
 
-        </div>
-        <div class="sf-toolbar-info-piece">
-            <b style="font-weight: normal">{{ call.time.total|simple_http_format_ms }}</b>
-            <b>{{ call.request.schemeAndHttpHost }}</b>
-            <b></b>
-        </div>
+
+            </div>
+
+            <div class="sf-toolbar-info-piece">
+                <b style="font-weight: normal">{{ call.time.total|simple_http_format_ms }}</b>
+                <b>
+                    {{ call.request.schemeAndHttpHost }}
+                    {% if call.debugLink %}
+                    -
+                    <a style="text-transform: uppercase;
+                                font-variant: small-caps;
+                                display: inline-block;
+                                background-color: rgba(255,255,255,0.3);
+                                text-decoration: none;
+                                font-size:9px;
+                                color: #333;
+                                padding: 1px 4px;"
+                       href="{{ call.debugLink }}"
+                       target="_blank">
+                        <img style="height:10px;width:10px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAgElEQVQYV5XQMQpCQQxF0fNX4G60stFGdyBYuSE3InwQBG20URDclPKKkSAfxXST3FxepvO9nm3c/QDHOGAU8IxZWXhggkB7bHAMGP0clwI3aN36DawRAvVY4VYzxljBHba444pp4CFjve8t+Rtc4vTxVYtc22LFmEeaQ5XlSLwAJVAaAqoDe/cAAAAASUVORK5CYII=" />
+                        debug link
+                    </a>
+                    {% endif %}
+                </b>
+            </div>
+
+
         {% endfor %}
 
     {% endset %}
