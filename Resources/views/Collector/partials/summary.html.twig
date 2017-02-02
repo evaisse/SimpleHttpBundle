@@ -6,7 +6,6 @@
     <tbody>
         <tr>
             <th>
-
                 {% if debugLink %}
                     <a style="float: right;display: inline-block" href="{{ debugLink }}" target="_blank">
                         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAgElEQVQYV5XQMQpCQQxF0fNX4G60stFGdyBYuSE3InwQBG20URDclPKKkSAfxXST3FxepvO9nm3c/QDHOGAU8IxZWXhggkB7bHAMGP0clwI3aN36DawRAvVY4VYzxljBHba444pp4CFjve8t+Rtc4vTxVYtc22LFmEeaQ5XlSLwAJVAaAqoDe/cAAAAASUVORK5CYII=" />
@@ -14,20 +13,11 @@
                     </a>
                 {% endif %}
 
-                Duration total {{ (time.total * 1000)|number_format(0, '', '') }} ms,
+                Duration total {{ time.total|simple_http_format_ms }},
         
-                wait {{ (time.connection * 1000)|number_format(0, '', '') }} ms - {{ connection_percent|number_format(0, '', '') }}%,
-                process {{ ((time.total - time.connection) * 1000)|number_format(0, '', '') }} ms - {{ process_percent|number_format(0, '', '') }}%
-
+                wait {{ time.connection|simple_http_format_ms }} ({{ connection_percent|number_format(0) }}%),
+                process {{ (time.total - time.connection)|simple_http_format_ms }} ({{ process_percent|number_format(0) }}%)
             </th>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <div class="progress">
-                    <div class="progress-bar" style="background: #AAA;width: {{ connection_percent|number_format(0) }}%;">wait {{ connection_percent|number_format(0) }} %</div>
-                    <div class="progress-bar {% if error %}error{% else %}success{% endif %}" style="background:#DDD;color:#999;width: {{ process_percent|number_format(0) }}%;">process {{ process_percent|number_format(0) }} %</div>
-                </div>
-            </td>
         </tr>
     </tbody>
 </table>

@@ -4,7 +4,7 @@
     <h3 class="http-call__title">
         {#<span style="float: right"><a href="#" class="replay" data-request="{{ call.request|json_encode }}" data-index="{{ index }}">Replay</a></span>#}
         <span class="http-call__title__method">{{ call.request.method }}</span>
-        <abbr title="{{ call.request.requestUri }}" class="http-call__path">{{ call.request.requestUri }}</abbr><br/>
+        <span title="{{ call.request.requestUri }}" class="http-call__path">{{ call.request.requestUri }}</span><br/>
         <span class="http-call__title__webhost">{{ call.request.schemeAndHttpHost }}</span>
     </h3>
 
@@ -18,7 +18,7 @@
             </li>
             {% if call.response %}
             <li>
-                <a href="javascript://">Response {{ call.response.statusCode | simple_http_format_http_code }}</a>
+                <a href="javascript://">Response {{ call.response | simple_http_format_http_code }}</a>
             </li>
             {% endif %}
             {% if call.error %}
@@ -29,6 +29,11 @@
             <li>
                 <a href="javascript://">Cookies</a>
             </li>
+            {% if call.auth %}
+            <li>
+                <a href="javascript://">Auth <span class="simple-http-badge">{{ call.auth.type }}</span></a>
+            </li>
+            {% endif %}
             <li>
                 <a href="javascript://">Raw</a>
             </li>
@@ -36,7 +41,12 @@
 
         <div class="tabs-content">
             <div class="active">
-                {% include 'SimpleHttpBundle:Collector:partials/summary.html.twig' with { 'time': call.time, 'response': call.response, 'error': call.error, 'debugLink': call.debugLink } only %}
+                {% include 'SimpleHttpBundle:Collector:partials/summary.html.twig' with {
+                    time: call.time,
+                    response: call.response,
+                    error: call.error,
+                    debugLink: call.debugLink
+                } only %}
             </div>
             <div>
                 {% include 'SimpleHttpBundle:Collector:partials/request.html.twig' with {'index':index, 'request': call.request, 'time': call.time} %}
@@ -55,6 +65,11 @@
             <div class="tab-content-cookies">
                 {% include 'SimpleHttpBundle:Collector:partials/cookies.html.twig' with {'request': call.request, 'response': call.response} %}
             </div>
+            {% if call.auth %}
+                <div class="tab-content-auth">
+                    {% include 'SimpleHttpBundle:Collector:partials/auth.html.twig' with {'call': call} only %}
+                </div>
+            {% endif %}
             <div class="tab-content--raw">
                 {{ dump(call) }}
             </div>

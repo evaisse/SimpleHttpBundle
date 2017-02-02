@@ -1,0 +1,36 @@
+{% macro display_array_recursive(array, separator = ', ', opening_char = '[', closing_char = ']') -%}
+    {{ opening_char }}
+    {%- for key, value in array -%}
+        {%- if value is iterable -%}
+            {{ key }} => {{ _self.display_array_recursive(value, separator, opening_char, closing_char) }}
+        {%- else -%}
+            {{ key }} => {{ value }}
+            {%- if not loop.last %}{{ separator }}{% endif -%}
+        {%- endif -%}
+    {%- endfor -%}
+    {{ closing_char }}
+{%- endmacro %}
+
+
+<h5>Request JWT Payload</h5>
+
+<table>
+    <tr>
+        <td>
+            {% if call.auth.type == "JWT" %}{{ call.request.jwt.decoded.payload|simple_http_beautify("application/json") }}{% endif %}
+        </td>
+    </tr>
+</table>
+
+{% if call.response and call.response.jwt|default(false) %}
+
+    <h5>Response JWT Payload</h5>
+
+    <table>
+        <tr>
+            <td>
+                {% if call.auth.type == "JWT" %}{{ call.response.jwt.decoded.payload|simple_http_beautify("application/json") }}{% endif %}
+            </td>
+        </tr>
+    </table>
+{% endif %}

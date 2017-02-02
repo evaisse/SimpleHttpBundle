@@ -8,7 +8,7 @@
 
 namespace evaisse\SimpleHttpBundle\Http\Exception;
 
-class CurlTransportException extends \RuntimeException
+class CurlTransportException extends TransportException
 {
 
 

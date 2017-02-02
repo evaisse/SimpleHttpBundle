@@ -81,6 +81,11 @@ class Kernel extends RemoteHttpKernel
 
 
     /**
+     * @var Statement[]
+     */
+    protected $services = [];
+
+    /**
      * @param ContainerInterface $container a container interface
      * @param RequestGenerator $generator Optionnal generator to construct curlrequest
      */
@@ -102,6 +107,11 @@ class Kernel extends RemoteHttpKernel
     {
         $r = $e->getRequest();
 
+        if (empty($this->services)) {
+            return;
+        }
+
+        $value = [];
         foreach ($this->services as $key => $value) {
             if ($value[1][0] === $r) {
                 break;
@@ -109,6 +119,7 @@ class Kernel extends RemoteHttpKernel
         }
 
         $requestType = HttpKernelInterface::SUB_REQUEST;
+
 
         $stmt = $value[0];
         $request = $stmt->getRequest();
@@ -173,7 +184,7 @@ class Kernel extends RemoteHttpKernel
 
     /**
      * handle multi curl
-     * @param array $stmts a list of Service instances
+     * @param Statement[] $stmts a list of Service instances
      * @return HttpKernel current httpkernel for method chaining
      */
     public function execute(array $stmts)
@@ -198,7 +209,7 @@ class Kernel extends RemoteHttpKernel
                 $event = new Event\GetResponseEvent($this, $request, $requestType);
                 $this->getEventDispatcher()->dispatch(KernelEvents::REQUEST, $event);
 
-                list($curlHandler, $contentCollector, $headerCollector) = $this->prepareRawCurlHandler($stmt, $requestType, false);
+                list($curlHandler, $contentCollector, $headerCollector) = $this->prepareRawCurlHandler($stmt);
 
                 $mm->addRequest($curlHandler);
 
@@ -208,7 +219,9 @@ class Kernel extends RemoteHttpKernel
                 ];
 
             } catch (CurlErrorException $e) {
-                $stmt->setError(new Exception\UnknownTransportException("CURL connection error", 1, $e));
+
+                $stmt->setError(new Exception\CurlTransportException("CURL connection error", 1, $e));
+
                 $event = new Event\GetResponseForExceptionEvent(
                     $this, $request, 
                     $requestType,

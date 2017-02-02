@@ -1,72 +1,110 @@
 {% extends 'WebProfilerBundle:Profiler:layout.html.twig' %}
 
+{% macro css_custom_status_styles() %}
+
+    <style>
+        .simplehttpprofiler-status-count .sf-toolbar-value {
+            border-radius: 1px;
+            padding: 0 5px;
+            display: inline-block;
+            line-height: 22px;
+        }
+
+
+        #menu-profiler .selected .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-red,
+        .sf-toolbar-block:hover .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-red {
+            background: rgb(176, 65, 62);
+        }
+
+        .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-red {
+            background: rgb(125, 46, 44);
+        }
+
+        #menu-profiler .selected .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-yellow,
+        .sf-toolbar-block:hover .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-yellow {
+            background: rgb(164, 105, 23);
+        }
+
+        .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-yellow {
+            background: rgb(125, 80, 18);
+        }
+
+        #menu-profiler .selected .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-green,
+        .sf-toolbar-block:hover .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-green {
+            background: rgb(80, 127, 91);
+        }
+
+        .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-green {
+            background: rgb(58, 86, 65);
+        }
+
+    </style>
+{% endmacro %}
+
+
 
 {% block toolbar %}
 
 	{% set icon %}
+
+        {% import _self as customMacro %}
+        {{ customMacro.css_custom_status_styles() }}
+
 		<span class="icon"><img alt="" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgZGF0YS1uYW1lPSJMYXllciAxIiBpZD0iTGF5ZXJfMSIgdmlld0JveD0iMCAwIDMyIDMyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojQUFBO308L3N0eWxlPjwvZGVmcz48dGl0bGUvPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTQsMTZhNyw3LDAsMCwxLDctN2g4LjM2bC0xLjUyLjM5LTEuMjYsMS4yNmEyLDIsMCwxLDAsMi44MywyLjgzbDUtNWEyLDIsMCwwLDAsMC0yLjgzbC01LTVhMiwyLDAsMCwwLTIuODMsMi44M2wxLjE3LDEuMTdMMTkuMyw1SDExQTExLDExLDAsMCwwLDIuNzgsMjMuMzFhMiwyLDAsMCwwLDMtMi42NkE3LDcsMCwwLDEsNCwxNloiLz48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yOS4xOCw4LjY0YTIsMiwwLDAsMC0zLDIuNjhBNyw3LDAsMCwxLDIxLDIzSDEzbDEuMjQtLjQyLDEuMTYtMS4xNmEyLDIsMCwwLDAtMi44My0yLjgzbC01LDVhMiwyLDAsMCwwLDAsMi44M2w1LDVhMiwyLDAsMCwwLDIuODMtMi44M2wtMS4yMi0xLjIyTDEzLDI3aDhBMTEsMTEsMCwwLDAsMjkuMTgsOC42NFoiLz48L3N2Zz4=" /></span>
 
-        <style>
-            .simplehttpprofiler-status-count .sf-toolbar-value {
-                border-radius: 3px;
-                padding: 0 3px;
-                display: inline-block;
-                line-height: 22px;
-            }
-            .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-red {
-                background: rgb(176,65,62);
-            }
-            .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-yellow {
-                background: rgb(164, 105, 23);
-            }
-            .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-green {
-                background: rgb(80, 127, 91);
-            }
-        </style>
-
         <span class="simplehttpprofiler-status-count">
-        {% if (collector.countRequests - collector.countErrors) > 0 %}
-        <span class="sf-toolbar-value sf-toolbar-status-green">{{ collector.countRequests - collector.countErrors }}</span>
-        {% endif %}
-        {% if collector.countErrors > 0 %}
             {% if collector.hasServerErrors %}
-                <span class="sf-toolbar-value sf-toolbar-status-red">{{ collector.countErrors }}</span>
-            {% else %}
-                <span class="sf-toolbar-value sf-toolbar-status-yellow">{{ collector.countErrors }}</span>
+                <span class="sf-toolbar-value sf-toolbar-status-red">{{ collector.serverErrorsCount }}</span>
             {% endif %}
-        {% endif %}
+            {% if collector.hasClientErrors %}
+                <span class="sf-toolbar-value sf-toolbar-status-yellow">{{ collector.clientErrorsCount }}</span>
+            {% endif %}
+            {% if collector.countSuccessfullRequest %}
+                <span class="sf-toolbar-value sf-toolbar-status-green">{{ collector.countSuccessfullRequest }}</span>
+            {% endif %}
         </span>
-        <span class="sf-toolbar-value">{{ '%0.1f'|format(collector.totalTime) }} s.</span>
+
+        <span class="sf-toolbar-value">{{ collector.totalTime|simple_http_format_ms }}</span>
+
 
 	{% endset %}
 
     {% set text %}
+
+        {% for index, call in collector.calls %}
         <div class="sf-toolbar-info-piece">
-            {% for index, call in collector.calls %}
+            <span style="display: table-cell">
+                {% if call.response %}
+                    {{ call.response | simple_http_format_http_code_as_badge }}
+                {% else %}
+                    <span class="sf-toolbar-status sf-toolbar-status-red">ERR</span>
+                {% endif %}
+            </span>
+
+            <a style="display: table-cell"
+               href="{{ path('_profiler', { 'token': token, 'panel': 'simplehttpprofiler' }) }}#request{{ index }}">
+               <span>{{ call.request.method }} {{ call.request.requestUri }}</span>
+            </a>
+
+
+
+
+            <b>
             {% if call.debugLink %}
-                <a href="{{ call.debugLink }}" style="display: block;background-color: white;padding:9px 0 9px 11px;margin: 0 5px;font-size:10px;float: right;border-left:1px dotted #DDD;background: white" title="External debug link">
-                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAgElEQVQYV5XQMQpCQQxF0fNX4G60stFGdyBYuSE3InwQBG20URDclPKKkSAfxXST3FxepvO9nm3c/QDHOGAU8IxZWXhggkB7bHAMGP0clwI3aN36DawRAvVY4VYzxljBHba444pp4CFjve8t+Rtc4vTxVYtc22LFmEeaQ5XlSLwAJVAaAqoDe/cAAAAASUVORK5CYII=" />
+                <a style="display: table-cell;padding-left: 10px" href="{{ call.debugLink }}" title="External debug link">
+                    <span>Debug &#8599;</span>
                 </a>
             {% endif %}
+            </b>
 
-            <a href="{{ path('_profiler', { 'token': token, 'panel': 'simplehttpprofiler' }) }}#request{{ index }}" style="display: block;border-bottom: 1px solid #DDD;padding-bottom:5px;margin-bottom: 5px;{% if call.debugLink %}padding-right:35px{% endif %}">
-                <div style="overflow-x:hidden">
-                    <span style="font-weight:bold">{{ call.request.method }}</span>
-                    <abbr title="{{ call.request.requestUri }}">{{ call.request.requestUri }}</abbr>
-                </div>
-                <div style="text-decoration: none">
-                    {% if call.response %}
-                        {{ call.response.statusCode | simple_http_format_http_code_as_badge }}
-                    {% else %}
-                        <span class="sf-toolbar-status sf-toolbar-status-red">ERR</span>
-                    {% endif %}
-                    <span>{{ '%0.1f'|format(call.time.total) }} s.</span>
-                    <span style="color: #999">{{ call.request.schemeAndHttpHost }}</span>
-                </div>
-                <div style="clear:both"></div>
-            </a>
-            {% endfor %}
         </div>
+        <div class="sf-toolbar-info-piece">
+            <b style="font-weight: normal">{{ call.time.total|simple_http_format_ms }}</b>
+            <b>{{ call.request.schemeAndHttpHost }}</b>
+            <b></b>
+        </div>
+        {% endfor %}
+
     {% endset %}
 
     {% if not collector.countRequests  %}
@@ -80,6 +118,7 @@
     {% endif %}
 
     {% include 'WebProfilerBundle:Profiler:toolbar_item.html.twig' with { link: "simplehttpprofiler", status: status } %}
+
 {% endblock %}
 
 {% block menu %}
@@ -88,29 +127,33 @@
 
         <strong>HTTP</strong>
 
-        <span class="count">
-            <span>{{ collector.countRequests - collector.countErrors }}</span>
-            {% if collector.countErrors > 0 %}
-                {% if collector.hasServerErrors %}
-                    <span style="backgroun:#B95E5E">{{ collector.countErrors }}</span>
-            {% else %}
-                    <span style="background:#FAA732">{{ collector.countErrors }}</span>
-                {% endif %}
+        {% import _self as customMacro %}
+        {{ customMacro.css_custom_status_styles() }}
+
+        <span class="count simplehttpprofiler-status-count" style="background: transparent">
+            {% if collector.hasServerErrors %}
+                <b class="sf-toolbar-value sf-toolbar-status-red">{{ collector.serverErrorsCount }}</b>
+            {% endif %}
+            {% if collector.hasClientErrors %}
+                <b class="sf-toolbar-value sf-toolbar-status-yellow">{{ collector.clientErrorsCount }}</b>
+            {% endif %}
+            {% if collector.countSuccessfullRequest %}
+                <b class="sf-toolbar-value sf-toolbar-status-green">{{ collector.countSuccessfullRequest }}</b>
             {% endif %}
 
-            <span>{{ '%0.0f'|format(collector.totalTime) }} s.</span>
+            <span>{{ collector.totalTime|simple_http_format_ms }}</span>
         </span>
 
     </span>
 {% endblock %}
 
 {% block head %}
+
     {{ parent() }}
 
-    {% stylesheets '@SimpleHttpBundle/Resources/public/libs/highlightjs/highlightjs-8.5.css'
-                   '@SimpleHttpBundle/Resources/public/simple-http-bundle.css' %}
-        <link rel="stylesheet" href="{{ asset_url }}"></link>
-    {% endstylesheets %}
+
+    <link rel="stylesheet" href="{{ asset('bundles/simplehttp/libs/highlightjs/highlightjs-8.5.css') }}" />
+    <link rel="stylesheet" href="{{ asset('bundles/simplehttp/simple-http-bundle.css') }}" />
 
 
 {% endblock %}
@@ -160,11 +203,10 @@
         {% include 'SimpleHttpBundle:Collector:partials/call.html.twig' with { 'call': call } %}
     {% endfor %}
 
-    {%  javascripts "@SimpleHttpBundle/Resources/public/libs/jquery/jquery-1.12.1.js"
-                    "@SimpleHttpBundle/Resources/public/libs/highlightjs/highlightjs-8.5.js"
-                    "@SimpleHttpBundle/Resources/public/simple-http-bundle.js" %}
-    <script src="{{ asset_url }}"></script>
-    {% endjavascripts %}
+
+    <script type="text/javascript" src="{{ asset('bundles/simplehttp/libs/jquery/jquery-1.12.1.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/simplehttp/libs/highlightjs/highlightjs-8.5.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/simplehttp/simple-http-bundle.js') }}"></script>
 
 
 {% endblock %}
