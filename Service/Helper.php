@@ -152,10 +152,8 @@ class Helper implements ContainerAwareInterface
         return $service;
     }
 
-
-
     /**
-     * Transform a given url pattern like /status/:code/fetch with parameters array('code' => 200) into /status/200
+     * Transform a given url pattern like /status/{code}/fetch with parameters array('code' => 200) into /status/200
      *
      * @param string $urlPattern
      * @param array $parameters
@@ -172,7 +170,7 @@ class Helper implements ContainerAwareInterface
 
         foreach ($parameters as $key => $value) {
             if (strpos($urlPattern, '{' . $key . '}') !== false) {
-                $urlPattern = str_replace('{' . $key . '}', $value, $urlPattern);
+                $urlPattern = str_replace('{' . $key . '}', urlencode($value), $urlPattern);
                 unset($parameters[$key]);
             }
         }
