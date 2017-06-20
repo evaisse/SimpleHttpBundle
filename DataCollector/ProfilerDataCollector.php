@@ -489,20 +489,26 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      */
     protected function filterCall(array $call)
     {
-        $call['auth'] = false;
+        $call['auth'] = !empty($call['auth']) ? $call['auth'] : [];
+        $call['request']['jwt'] = $call['response']['jwt'] = false;
 
-        if ($requestJwt = $this->fetchJwtInfosFromHeaders($call['request']['headers'])) {
-            $call['request']['jwt'] = $requestJwt;
+        try {
+            if ($requestJwt = $this->fetchJwtInfosFromHeaders($call['request']['headers'])) {
+                $call['request']['jwt'] = $requestJwt;
+            }
+
+            if ($responseJwt = $this->fetchJwtInfosFromHeaders($call['response']['headers'])) {
+                $call['response']['jwt'] = $responseJwt;
+            }
+
+            if ($requestJwt || $responseJwt) {
+                $call['auth']['type'] = "JWT";
+            }
+
+        } catch (\Exception $e) {
+            // prevent
         }
 
-        if ($responseJwt = $this->fetchJwtInfosFromHeaders($call['response']['headers'])) {
-            $call['response']['jwt'] = $responseJwt;
-        }
-
-        if ($requestJwt || $responseJwt) {
-            $call['auth'] = $call['auth'] ? $call['auth'] : [];
-            $call['auth']['type'] = "JWT";
-        }
 
         return $call;
     }
