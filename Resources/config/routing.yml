@@ -1,0 +1,6 @@
+# app/config/routing.yml
+
+simple_http:
+    resource: '@SimpleHttpBundle/Controller/'
+    type:     annotation
+    prefix:   /_profiler/simple-http-bundle

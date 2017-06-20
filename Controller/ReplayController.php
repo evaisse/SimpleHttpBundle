@@ -23,7 +23,7 @@ class ReplayController extends Controller
 {
 
     /**
-     * @Route("/_profiler/http-replay", name="simple_http.replay_request")
+     * @Route("/http-replay", name="simple_http.replay_request")
      * @Template()
      * @param Request $request
      * @return array
