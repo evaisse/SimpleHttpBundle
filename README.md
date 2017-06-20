@@ -32,7 +32,6 @@ try {
 }
 ```
 
-
 Easy routing with replacement syntax (similar to php frameworks like symfony2/laravel)
 
 ```php
@@ -47,6 +46,7 @@ $data = $http->GET('http://httpbin.org/status/{code}', array(
 ));
 // will call http://httpbin.org/status/200?foo=bar
 ```
+
 
 Development features
 ====
@@ -69,6 +69,11 @@ Add this to routing.yml file
         resource: "@SimpleHttpBundle/Controller/"
         type:     annotation
         prefix:   /_profiler/simple-http
+
+or
+
+    _simple_http:
+        resource: '@SimpleHttpBundle/Resources/config/routing.yml'
 
 
 You can now resend an http call directly from the profiler debug panel
