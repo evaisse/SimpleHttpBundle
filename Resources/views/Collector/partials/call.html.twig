@@ -8,6 +8,12 @@
         <span class="http-call__title__webhost">{{ call.request.schemeAndHttpHost }}</span>
     </h3>
 
+    {% if call.response %}
+        {% set dataDecoded = simple_http_decode_body(call.response) %}
+    {% else %}
+        {% set dataDecoded = false %}
+    {% endif %}
+
     <div class="http-call__details tabs">
         <ul class="tabs-nav">
             <li>
@@ -34,6 +40,13 @@
                 <a href="javascript://">Auth <span class="simple-http-badge">{{ call.auth.type }}</span></a>
             </li>
             {% endif %}
+
+            {% if dataDecoded %}
+                <li>
+                    <a href="javascript://">Data <span class="simple-http-badge">{{ dataDecoded.mime }}</span></a>
+                </li>
+            {% endif %}
+
             <li>
                 <a href="javascript://">Raw</a>
             </li>
@@ -69,6 +82,11 @@
                 <div class="tab-content-auth">
                     {% include 'SimpleHttpBundle:Collector:partials/auth.html.twig' with {'call': call} only %}
                 </div>
+            {% endif %}
+            {% if dataDecoded %}
+            <div class="tab-content-data">
+                {% include 'SimpleHttpBundle:Collector:partials/data.html.twig' with {'dataDecoded': dataDecoded} only %}
+            </div>
             {% endif %}
             <div class="tab-content--raw">
                 {{ dump(call) }}

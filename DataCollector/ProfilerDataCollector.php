@@ -501,6 +501,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
                 $call['response']['jwt'] = $responseJwt;
             }
 
+
             if ($requestJwt || $responseJwt) {
                 $call['auth']['type'] = "JWT";
             }
@@ -512,6 +513,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
         return $call;
     }
+
 
     /**
      * @param string[] $headers

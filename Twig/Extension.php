@@ -47,6 +47,16 @@ class Extension extends \Twig_Extension
         ];
     }
 
+
+    public function getFunctions()
+    {
+        $safe = array('is_safe' => array('html'));
+
+        return [
+            new \Twig_SimpleFunction('simple_http_decode_body', array($this, 'decodeBody'), $safe),
+        ];
+    }
+
     /**
      * @param int|float $number
      * @param int       $decimals
@@ -270,5 +280,23 @@ class Extension extends \Twig_Extension
             'code'      => $code,
             'level'     => $level,
         ];
+    }
+
+
+
+    /**
+     * @param array $response
+     */
+    public function decodeBody(array $response)
+    {
+        foreach ($response['headers'] as $h) {
+            if (preg_match('/Content-type:/i', $h, $m)) {
+                return [
+                    'mime' => 'application/json',
+                    'data' => @json_decode($response['body']),
+                ];
+            }
+        }
+        return [];
     }
 }
