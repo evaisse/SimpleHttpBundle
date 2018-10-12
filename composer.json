@@ -4,14 +4,12 @@
     "keywords": ["http", "symfony", "curl", "curlmulti", "httpfoundation", "requests", "simple", "client"],
     "homepage": "https://github.com/evaisse/SimpleHttpBundle",
     "require": {
-        "php": ">=5.6.0",
         "symfony/http-foundation": ">=3.2",
-        "symfony/http-kernel": ">=3.2",
-        "symfony/event-dispatcher": ">=3.2",
         "react/promise": "2.2.*"
     },
     "require-dev": {
-        "satooshi/php-coveralls": "dev-master"
+        "satooshi/php-coveralls": "dev-master",
+        "phpunit/phpunit": ">=5"
     },
     "suggest": {
     },
