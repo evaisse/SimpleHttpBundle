@@ -4,7 +4,7 @@
     "keywords": ["http", "symfony", "curl", "curlmulti", "httpfoundation", "requests", "simple", "client"],
     "homepage": "https://github.com/evaisse/SimpleHttpBundle",
     "require": {
-        "symfony/http-foundation": ">=3.2",
+        "symfony/symfony": ">=3.2",
         "react/promise": "2.2.*"
     },
     "require-dev": {
