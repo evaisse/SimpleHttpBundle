@@ -269,13 +269,6 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      */
     public function fetchResponseInfos(Response $response)
     {
-        if ($response->headers->get('charset', '') == "utf-8"
-            || stripos($response->headers->get('content-type', ''), 'utf-8') !== 0
-        ) {
-            $encoders = array(new LazyJsonEncoder());
-        } else {
-            $encoders = array(new LazyJsonEncoder());
-        }
 
         $normalizers = array(new CustomGetSetNormalizer());
         $encoders = array(new LazyJsonEncoder());
@@ -583,5 +576,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     {
         return str_replace('=', '', strtr(base64_encode($input), '+/', '-_'));
     }
+
+
 
 }

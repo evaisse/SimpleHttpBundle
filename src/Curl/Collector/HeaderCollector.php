@@ -40,11 +40,18 @@ class HeaderCollector implements CollectorInterface
     protected $cookies = [];
 
     /**
+     * @var string
+     */
+    protected $rawHeaders = "";
+
+    /**
      * @return int
      */
     public function collect() {
 
         list($handle, $headerString) = func_get_args();
+
+        $this->rawHeaders .= $headerString;
 
         $cleanHeader = trim($headerString);
 
@@ -74,8 +81,10 @@ class HeaderCollector implements CollectorInterface
 
         $this->transactionHeaders[] = $header;
 
-        // reset headers records since another transaction header has started
-        $this->cookies = $this->headers = [];
+        // reset headers records since another transaction header has started, but keep cookies for redirections
+        $this->headers = [];
+
+
 
         $this->version = $r[1];
         $this->code = (int)$r[2];
@@ -96,37 +105,34 @@ class HeaderCollector implements CollectorInterface
             return;
         }
 
-        $pos = strpos($header, ": ");
+        if (!preg_match('/([a-z0-9][a-z0-9\-]*)\:\s*(.*)/i', $header, $h)) {
+            return;
+        }
 
-        if (false !== $pos) {
+        $name = str_replace(' ', '-', ucwords(str_replace('-', ' ', strtolower($h[1]))));
+        $value = $h[2];
 
-            $name = trim(substr($header, 0, $pos));
-            $value = substr($header, $pos+2);
+        if (strtolower($name) == "set-cookie") {
 
-            if (strtolower($name) == "set-cookie") {
-
-                try {
-                    $cookie = CookieParser::fromString($value);
-                } catch (\InvalidArgumentException $e) {
-                    // skip invalid cookie line
-                    return;
-                }
-
-                $this->cookies[] = new Cookie(
-                    $cookie->getName(),
-                    $cookie->getRawValue(),
-                    (int)$cookie->getExpiresTime(),
-                    $cookie->getPath(),
-                    $cookie->getDomain(),
-                    $cookie->isSecure(),
-                    $cookie->isHttpOnly()
-                );
-
-            } else {
-
-                $this->headers[$name] = $value;
-
+            try {
+                $cookie = CookieParser::fromString($value);
+            } catch (\InvalidArgumentException $e) {
+                // skip invalid cookie line
+                return;
             }
+
+            $this->cookies[] = new Cookie(
+                $cookie->getName(),
+                $cookie->getRawValue(),
+                (int)$cookie->getExpiresTime(),
+                $cookie->getPath(),
+                $cookie->getDomain(),
+                $cookie->isSecure(),
+                $cookie->isHttpOnly()
+            );
+
+        } else {
+            $this->headers[$name] = $value;
         }
 
     }
@@ -188,5 +194,12 @@ class HeaderCollector implements CollectorInterface
         return $this->message;
     }
 
+    /**
+     * @return string
+     */
+    public function getAllTransactionHeaders()
+    {
+        return $this->rawHeaders;
+    }
 
 }

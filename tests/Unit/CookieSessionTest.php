@@ -13,6 +13,7 @@ use evaisse\SimpleHttpBundle\Http\Kernel;
 use evaisse\SimpleHttpBundle\Http\Request;
 use evaisse\SimpleHttpBundle\Http\Statement;
 use evaisse\SimpleHttpBundle\Service\Helper;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\Container;
 
@@ -24,6 +25,11 @@ class CookieSessionTest extends AbstractTests
 
     public function testCookieStore()
     {
+        /**
+         * @var Kernel $httpKernel
+         * @var Helper $helper
+         * @var ContainerInterface $container
+         */
         list($helper, $httpKernel, $container) = $this->createContext();
 
         $i = (int)rand(0,100);
@@ -47,7 +53,6 @@ class CookieSessionTest extends AbstractTests
         $cookies = $cookieSession->allValues(AbstractTests::$baseUrl . '');
 
         $this->assertEquals($cookies['tmp'], 1);
-
 
         /*
          * Set and delete some async

@@ -9,7 +9,6 @@
  */
 namespace evaisse\SimpleHttpBundle\Http;
 
-
 use evaisse\SimpleHttpBundle\Http\Exception\RequestNotSentException;
 use React\Promise\Deferred;
 use React\Promise\Promise;
@@ -37,7 +36,7 @@ class Statement
     /**
      * $error : Error
      *
-     * @var Error
+     * @var \Error
      * @access protected
      */
     protected $error;
@@ -47,6 +46,11 @@ class Statement
      * @access protected
      */
     protected $response;
+
+    /**
+     * @var Response[]
+     */
+    protected $responses = [];
 
     /**
      * @var Promise A Deferred object
