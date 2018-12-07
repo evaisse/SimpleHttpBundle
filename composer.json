@@ -15,7 +15,10 @@
     },
     "license": "MIT",
     "autoload": {
-        "psr-4": { "evaisse\\SimpleHttpBundle\\": "" }
+        "psr-4": {
+            "evaisse\\SimpleHttpBundle\\Tests\\": "tests/",
+            "evaisse\\SimpleHttpBundle\\": "src/"
+        }
     },
     "authors": [
         {
