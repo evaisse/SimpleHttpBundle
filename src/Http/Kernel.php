@@ -9,6 +9,7 @@
 namespace evaisse\SimpleHttpBundle\Http;
 
 
+use evaisse\SimpleHttpBundle\Curl\Collector\HeaderCollector;
 use evaisse\SimpleHttpBundle\Http\Exception\CurlTransportException;
 use evaisse\SimpleHttpBundle\Http\Exception\HostNotFoundException;
 use evaisse\SimpleHttpBundle\Http\Exception\ClientErrorHttpException;
@@ -124,6 +125,11 @@ class Kernel extends RemoteHttpKernel
         $stmt = $value[0];
         $request = $stmt->getRequest();
 
+        /**
+         * @var HeaderCollector  $headersCollector
+         * @var ContentCollector $contentCollector
+         * @var CurlRequest      $curlRequest
+         */
         list($curlRequest, $contentCollector, $headersCollector) = $value[1];
 
         $this->updateRequestHeadersFromCurlInfos($request, $e->getRequest()->getInfo());
@@ -164,7 +170,7 @@ class Kernel extends RemoteHttpKernel
             $response->setStatusCode($headersCollector->getCode(), $headersCollector->getMessage());
 
             $response->setTransferInfos(array_merge($e->getRequest()->getInfo(), [
-               'additionnalProxyHeaders' =>  $headersCollector->getTransactionHeaders()
+               'allHeaders' => $headersCollector->getAllTransactionHeaders()
             ]));
 
             $event = new Event\FilterResponseEvent($this, $request, $requestType, $response);
