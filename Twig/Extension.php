@@ -17,7 +17,7 @@ class Extension extends \Twig_Extension
     /**
      * @param FilesystemLoader $loader
      */
-    function __construct(FilesystemLoader $loader)
+    function __construct($loader)
     {
         $this->loader = $loader;
     }
