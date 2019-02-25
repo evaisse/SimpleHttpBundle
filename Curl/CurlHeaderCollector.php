@@ -60,7 +60,7 @@ class CurlHeaderCollector extends HeaderCollector
      * @param string $header
      */
     private function parseHttp($header) {
-        list($version,$code,$message) = explode(" ", $header);
+        list($version,$code,$message) = array_pad(explode(" ", $header), 3, "");
 
         $this->transactionHeaders[] = $header;
         
