@@ -75,10 +75,10 @@
 
             var $panel = $(this).closest('.http-call'),
                 $butt = $(this);
+            $buttImg = $butt.find('img');
+            $buttImg.addClass('rotating');
 
             $butt.prop('disabled', true);
-
-
 
             replayRequest($(this).data('simpleHttpReplayUrl'), $(this).data('simpleHttpReplay'), function (error, block) {
                 if (error) {
@@ -91,6 +91,7 @@
                 $(block)
                     .appendTo($panel.find('.http-call__replay-calls:first'));
                 $(document).trigger('setup', [block]); // init events
+                $buttImg.removeClass('rotating');
             });
 
         });

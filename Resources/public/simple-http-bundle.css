@@ -1,4 +1,13 @@
 
+@-webkit-keyframes rotating {
+    from{
+        -webkit-transform: rotate(0deg);
+    }
+    to{
+        -webkit-transform: rotate(360deg);
+    }
+}
+
 .tabs-nav {
     margin: 0px;
     padding: 0px;
@@ -213,6 +222,9 @@ button[data-simple-http-replay] img {
     margin-right: 10px;
 }
 
+button[data-simple-http-replay] img.rotating {
+    -webkit-animation: rotating 2s linear infinite;
+}
 
 .tabs-content h5 {
     font-size: 12px;
