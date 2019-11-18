@@ -141,5 +141,14 @@ class RequestBodyTest extends AbstractTests
         $this->assertEquals($res['json'], $args);
     }
 
+    /**
+     *
+     */
+    public function testJsonPUTBodyEmptyPayloads()
+    {
+        list($helper) = $this->createContext();
+        $stmt = $helper->prepare("PUT", AbstractTests::$baseUrl . '/put');
 
+        $this->assertEquals("", $stmt->getRequest()->getContent());
+    }
 }

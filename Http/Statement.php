@@ -239,7 +239,12 @@ class Statement
         $this->request->headers->set('charset', 'utf-8');
         $this->request->headers->set('accept', 'application/json');
         if ($this->request->getMethod() !== "GET") {
-            $json = $json === null ? json_encode($this->request->request->all()) : (string)$json;
+            if ($json === null && !empty($this->request->request->all())) {
+                $json = json_encode($this->request->request->all());
+            } else {
+                $json = (string)$json;
+            }
+
             $this->request->setContent($json);
         }
         return $this;
