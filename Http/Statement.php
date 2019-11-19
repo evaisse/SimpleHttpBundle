@@ -239,8 +239,9 @@ class Statement
         $this->request->headers->set('charset', 'utf-8');
         $this->request->headers->set('accept', 'application/json');
         if ($this->request->getMethod() !== "GET") {
-            if ($json === null && !empty($this->request->request->all())) {
-                $json = json_encode($this->request->request->all());
+            $requestPayload = $this->request->request->all();
+            if ($json === null && !empty($requestPayload)) {
+                $json = json_encode($requestPayload);
             } else {
                 $json = (string)$json;
             }

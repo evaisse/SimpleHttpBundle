@@ -144,7 +144,7 @@ class RequestBodyTest extends AbstractTests
     /**
      *
      */
-    public function testJsonPUTBodyEmptyPayloads()
+    public function testJsonEmpty()
     {
         list($helper) = $this->createContext();
         $stmt = $helper->prepare("PUT", AbstractTests::$baseUrl . '/put');
