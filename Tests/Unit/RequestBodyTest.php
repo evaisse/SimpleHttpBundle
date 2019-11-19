@@ -149,6 +149,6 @@ class RequestBodyTest extends AbstractTests
         list($helper) = $this->createContext();
         $stmt = $helper->prepare("PUT", AbstractTests::$baseUrl . '/put');
 
-        $this->assertEquals("", $stmt->getRequest()->getContent());
+        $this->assertNull(json_decode($stmt->getRequest()->getContent()));
     }
 }

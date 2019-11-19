@@ -240,14 +240,19 @@ class Statement
         $this->request->headers->set('accept', 'application/json');
         if ($this->request->getMethod() !== "GET") {
             $requestPayload = $this->request->request->all();
-            if ($json === null && !empty($requestPayload)) {
+            if(func_num_args() === 0) {
+                if(empty($requestPayload)) {
+                    $requestPayload = (object) $requestPayload;
+                }
                 $json = json_encode($requestPayload);
+            } elseif ($json === null) {
+                $json = json_encode($json);
             } else {
-                $json = (string)$json;
+                $json = (string) $json;
             }
-
             $this->request->setContent($json);
         }
+
         return $this;
     }
 
