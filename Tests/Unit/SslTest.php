@@ -20,7 +20,7 @@ class SslTest extends AbstractTests
 
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $a = $helper->prepare("GET", 'https://www.pcwebshop.co.uk/');
+        $a = $helper->prepare("GET", 'https://invalid-expected-sct.badssl.com/');
         $a->execute($httpKernel);
 
     }
@@ -31,7 +31,7 @@ class SslTest extends AbstractTests
 
         list($helper, $httpKernel, $container) = $this->createContext();
 
-        $a = $helper->prepare("GET", 'https://www.pcwebshop.co.uk/');
+        $a = $helper->prepare("GET", 'https://invalid-expected-sct.badssl.com/');
         $a->setIgnoreSslErrors(true);
         $a->execute($httpKernel);
 
