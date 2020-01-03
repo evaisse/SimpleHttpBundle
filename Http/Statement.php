@@ -19,7 +19,6 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Security\Http\Firewall\ListenerInterface;
 
 class Statement
 {
