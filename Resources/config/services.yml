@@ -12,7 +12,7 @@ services:
 
     simple_http.logger.handler:
         class: Monolog\Handler\StreamHandler
-        arguments: [%kernel.root_dir%/logs/%kernel.environment%.log, 0]
+        arguments: ["%kernel.root_dir%/logs/%kernel.environment%.log", 0]
 
     simple_http.helper:
         class:      evaisse\SimpleHttpBundle\Service\Helper
