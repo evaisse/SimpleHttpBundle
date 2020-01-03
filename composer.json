@@ -4,11 +4,24 @@
     "keywords": ["http", "symfony", "curl", "curlmulti", "httpfoundation", "requests", "simple", "client"],
     "homepage": "https://github.com/evaisse/SimpleHttpBundle",
     "require": {
-        "symfony/symfony": ">=3.2",
-        "react/promise": "2.2.*"
+        "php": ">=7.2",
+        "react/promise": "2.2.*",
+        "symfony/http-foundation": "^4.4|^5.0",
+        "symfony/browser-kit": "^4.4|^5.0",
+        "symfony/event-dispatcher": "^4.4|^5.0",
+        "symfony/serializer": "^4.4|^5.0",
+        "symfony/http-kernel": "^4.4|^5.0",
+        "symfony/stopwatch": "^4.4|^5.0",
+        "symfony/config": "^4.4|^5.0",
+        "symfony/dependency-injection": "^4.4|^5.0",
+        "symfony/security-http": "^4.4|^5.0",
+        "symfony/twig-bundle": "^4.4|^5.0",
+        "sensio/framework-extra-bundle": "^4.4|^5.0",
+        "ext-dom": "*",
+        "ext-json": "*"
     },
     "require-dev": {
-        "satooshi/php-coveralls": "dev-master",
+        "satooshi/php-coveralls": "^2.2",
         "phpunit/phpunit": ">=5"
     },
     "suggest": {
