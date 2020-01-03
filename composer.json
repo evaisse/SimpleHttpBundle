@@ -1,6 +1,6 @@
 {
     "name": "evaisse/simple-http-bundle",
-    "description": "A very simple symfony2 http client bundle built on the httpfoundation component (instead of guzzle), using cURL and cURL multi.",
+    "description": "A very simple symfony http client bundle built on the httpfoundation component (instead of guzzle), using cURL and cURL multi.",
     "keywords": ["http", "symfony", "curl", "curlmulti", "httpfoundation", "requests", "simple", "client"],
     "homepage": "https://github.com/evaisse/SimpleHttpBundle",
     "require": {
