@@ -15,20 +15,20 @@ class CustomGetSetNormalizer extends GetSetMethodNormalizer
     /**
      * {@inheritdoc}
      */
-    public function normalize($object, $format = null, array $context = array())
+    public function normalize($object, string $format = null, array $context = array())
     {
-        if ($object instanceof \Exception) {
-            return $this->normalizeException($object);
+        if ($object instanceof \Throwable) {
+            return $this->normalizeThrowable($object);
         }
         return parent::normalize($object, $format, $context);
     }
 
 
     /**
-     * @param Exception $e exception to normalize
+     * @param \Throwable $e throwable to normalize
      * @return array normalized output
      */
-    protected function normalizeException(\Exception $e)
+    protected function normalizeThrowable(\Throwable $e)
     {
         $data = array(
             'class'   => get_class($e),
@@ -39,7 +39,7 @@ class CustomGetSetNormalizer extends GetSetMethodNormalizer
         );
 
         if ($previous = $e->getPrevious()) {
-            $data['previous'] = $this->normalizeException($previous);
+            $data['previous'] = $this->normalizeThrowable($previous);
         }
 
         return $data;
