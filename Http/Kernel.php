@@ -130,7 +130,7 @@ class Kernel extends RemoteHttpKernel
 
         $this->updateRequestHeadersFromCurlInfos($request, $e->getRequest()->getInfo());
 
-        if (!$headersCollector->getCode()) {
+        if (!$headersCollector->getCode() || $e->getInfo()->getResult() !== CURLE_OK) {
 
             /*
              * Here we need to use return code from multi event because curl_errno return invalid results
