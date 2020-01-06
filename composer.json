@@ -18,7 +18,8 @@
         "symfony/twig-bundle": "^4.4|^5.0",
         "sensio/framework-extra-bundle": "^4.4|^5.0",
         "ext-dom": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ext-curl": "*"
     },
     "require-dev": {
         "satooshi/php-coveralls": "^2.2",
