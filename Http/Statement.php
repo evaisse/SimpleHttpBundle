@@ -362,7 +362,6 @@ class Statement
         $file = new UploadedFile(
             $file->getRealPath(),
             $clientName,
-            $file->getBasename(),
             $file->getMimeType(),
             $file->getSize(),
             0);
