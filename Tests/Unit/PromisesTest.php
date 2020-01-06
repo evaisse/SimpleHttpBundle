@@ -157,7 +157,7 @@ class PromisesTest extends AbstractTests
         $this->assertCount(2, $events);
 
         if (isset($events['success'])) {
-            $this->assertTrue(array_key_exists("success", $events));
+            $this->assertTrue(array_key_exists("success", (array) $events));
         } else {
             $this->assertInstanceOf("\\Symfony\\Component\\HttpKernel\\Exception\\HttpException", $events["error"]);
         }
@@ -197,7 +197,7 @@ class PromisesTest extends AbstractTests
         $this->assertCount(2, $events);
 
         if (isset($events['success'])) {
-            $this->assertTrue(array_key_exists("success", $events));
+            $this->assertTrue(array_key_exists("success", (array) $events));
         } else {
             $this->assertInstanceOf("\\Symfony\\Component\\HttpKernel\\Exception\\HttpException", $events["error"]);
         }
