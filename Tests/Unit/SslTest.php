@@ -9,15 +9,13 @@
 namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
 
+use evaisse\SimpleHttpBundle\Http\Exception\TransportException;
+
 class SslTest extends AbstractTests
 {
-
-    /**
-     * @expectedException evaisse\SimpleHttpBundle\Http\Exception\TransportException
-     */
     public function testSslValidationException()
     {
-
+        $this->expectException(TransportException::class);
         list($helper, $httpKernel, $container) = $this->createContext();
 
         $a = $helper->prepare("GET", 'https://invalid-expected-sct.badssl.com/');

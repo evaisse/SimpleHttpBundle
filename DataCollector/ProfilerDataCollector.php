@@ -10,9 +10,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -55,7 +55,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      * (non-PHPdoc)
      * @see \Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface::collect()
      */
-    public function collect(Request $request, Response $response, \Exception $exception = null)
+    public function collect(Request $request, Response $response, \Throwable $exception = null)
     {
         $this->data = array(
             'countRequests'              => count($this->calls),
@@ -139,7 +139,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     }
 
 
-    public function onRequest(GetResponseEvent $event)
+    public function onRequest(RequestEvent $event)
     {
         $request = $event->getRequest();
 
@@ -174,7 +174,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return null;
     }
 
-    public function onException(GetResponseForExceptionEvent $event)
+    public function onException(ExceptionEvent $event)
     {
         $key = $this->getRequestKey($event->getRequest());
 
@@ -182,14 +182,14 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
         $this->calls[$key] = array_merge($this->calls[$key], array(
             'response' => $event->getResponse(),
-            "error"    => $event->getException(),
+            "error"    => $event->getThrowable(),
             "stop"     => microtime(true),
         ));
 
         $this->finishEvent($key);
     }
 
-    public function onResponse(FilterResponseEvent $event)
+    public function onResponse(ResponseEvent $event)
     {
         $key = $this->getRequestKey($event->getRequest());
 
@@ -584,4 +584,11 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return str_replace('=', '', strtr(base64_encode($input), '+/', '-_'));
     }
 
+    public function reset()
+    {
+        $this->data = [];
+        $this->calls = [];
+        $this->errors = [];
+        $this->stopwatch->reset();
+    }
 }

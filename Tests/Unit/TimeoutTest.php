@@ -12,6 +12,8 @@ namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
 
 
+use evaisse\SimpleHttpBundle\Http\Exception\TimeoutException;
+
 class TimeoutTest extends AbstractTests
 {
 
@@ -31,12 +33,9 @@ class TimeoutTest extends AbstractTests
         $this->assertEquals($a->getResponse(), null);
     }
 
-
-    /**
-     * @expectedException evaisse\SimpleHttpBundle\Http\Exception\TimeoutException
-     */
     public function testTimeoutExecutionWithError()
     {
+        $this->expectException(TimeoutException::class);
         list($helper, $httpKernel, $container) = $this->createContext();
 
         $a = $helper->prepare("GET", AbstractTests::$baseUrl . '/delay/1');

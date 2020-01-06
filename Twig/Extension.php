@@ -2,11 +2,13 @@
 
 namespace evaisse\SimpleHttpBundle\Twig;
 
-
-use Symfony\Bundle\TwigBundle\Loader\FilesystemLoader;
 use Symfony\Component\HttpFoundation\Response;
+use Twig\Extension\ExtensionInterface;
+use Twig\Loader\FilesystemLoader;
+use Twig\TwigFilter;
+use Twig\TwigFunction;
 
-class Extension extends \Twig_Extension
+class Extension implements ExtensionInterface
 {
 
     /**
@@ -22,7 +24,6 @@ class Extension extends \Twig_Extension
         $this->loader = $loader;
     }
 
-
     /**
      * @return string
      */
@@ -37,13 +38,13 @@ class Extension extends \Twig_Extension
         $safe = array('is_safe' => array('html'));
 
         return [
-            new \Twig_SimpleFilter('simple_http_beautify', array($this, 'format'), $safe),
-            new \Twig_SimpleFilter('simple_http_format_http_code', array($this, 'formatHttpCode'), $safe),
-            new \Twig_SimpleFilter('simple_http_format_http_code_as_badge', array($this, 'formatHttpCodeAsSfBadge'), $safe),
-            new \Twig_SimpleFilter('simple_http_md5', array($this, 'md5')),
-            new \Twig_SimpleFilter('simple_http_include_asset', array($this, 'assetInclude'), $safe),
-            new \Twig_SimpleFilter('simple_http_format_ms', array($this, 'formatMilliseconds')),
-            new \Twig_SimpleFilter('simple_http_format_num', array($this, 'numberFormat')),
+            new TwigFilter('simple_http_beautify', array($this, 'format'), $safe),
+            new TwigFilter('simple_http_format_http_code', array($this, 'formatHttpCode'), $safe),
+            new TwigFilter('simple_http_format_http_code_as_badge', array($this, 'formatHttpCodeAsSfBadge'), $safe),
+            new TwigFilter('simple_http_md5', array($this, 'md5')),
+            new TwigFilter('simple_http_include_asset', array($this, 'assetInclude'), $safe),
+            new TwigFilter('simple_http_format_ms', array($this, 'formatMilliseconds')),
+            new TwigFilter('simple_http_format_num', array($this, 'numberFormat')),
         ];
     }
 
@@ -53,7 +54,7 @@ class Extension extends \Twig_Extension
         $safe = array('is_safe' => array('html'));
 
         return [
-            new \Twig_SimpleFunction('simple_http_decode_body', array($this, 'decodeBody'), $safe),
+            new TwigFunction('simple_http_decode_body', array($this, 'decodeBody'), $safe),
         ];
     }
 
@@ -282,10 +283,9 @@ class Extension extends \Twig_Extension
         ];
     }
 
-
-
     /**
      * @param array $response
+     * @return array
      */
     public function decodeBody(array $response)
     {
@@ -297,6 +297,38 @@ class Extension extends \Twig_Extension
                 ];
             }
         }
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getTokenParsers()
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getNodeVisitors()
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getTests()
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getOperators()
+    {
         return [];
     }
 }
