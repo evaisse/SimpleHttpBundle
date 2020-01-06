@@ -9,7 +9,7 @@
 
 namespace evaisse\SimpleHttpBundle\Curl;
 
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Manage the execution of multiple Curl\Request objects in parallel
@@ -149,7 +149,7 @@ class MultiManager implements CurlRequest
         $info = false;
         $active = false;
         $status = false;
-        
+
         do {
             $status = curl_multi_exec($this->handle, $active);
 
@@ -159,7 +159,6 @@ class MultiManager implements CurlRequest
             }
         } while ($status === CURLM_CALL_MULTI_PERFORM || $active);
 
-        
         // We shouldn't do any processing if the multi handle blows up
         $this->errorCheck($status);
 
@@ -194,12 +193,12 @@ class MultiManager implements CurlRequest
 
         if(isset($this->dispatcher) && false !== $request) {
             $this->dispatcher->dispatch(
-                CurlEvents::MULTI_INFO, 
                 new MultiInfoEvent(
                     $this, 
                     $request, 
                     new MultiInfo($info)
-                )
+                ),
+                CurlEvents::MULTI_INFO
             );
         }
     }

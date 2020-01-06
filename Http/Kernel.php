@@ -23,13 +23,14 @@ use evaisse\SimpleHttpBundle\Http\Kernel\RemoteHttpKernel;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
+use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Symfony\Component\HttpFoundation\HeaderBag;
@@ -43,6 +44,7 @@ use evaisse\SimpleHttpBundle\Curl\RequestGenerator;
 use evaisse\SimpleHttpBundle\Curl\MultiManager;
 use evaisse\SimpleHttpBundle\Curl\CurlEvents;
 use evaisse\SimpleHttpBundle\Curl\MultiInfoEvent;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 
 /**
@@ -63,7 +65,7 @@ class Kernel extends RemoteHttpKernel
 
 
     /**
-     * @var \Symfony\Component\EventDispatcher\EventDispatcher
+     * @var EventDispatcherInterface
      */
     protected $eventDispatcher;
 
@@ -93,7 +95,7 @@ class Kernel extends RemoteHttpKernel
     {
         $this->setContainer($container);
         $this->generator = $generator;
-        $this->setEventDispatcher(new \Symfony\Component\EventDispatcher\EventDispatcher());
+        $this->setEventDispatcher(new EventDispatcher());
 
         if ($this->container->has('simple_http.profiler.data_collector')) {
             $this->getEventDispatcher()->addSubscriber($this->container->get('simple_http.profiler.data_collector'));
@@ -133,20 +135,19 @@ class Kernel extends RemoteHttpKernel
             /*
              * Here we need to use return code from multi event because curl_errno return invalid results
              */
-            $error = new CurlTransportException(curl_error($curlRequest->getHandle()),
-                                                $e->getInfo()->getResult());
+            $error = new CurlTransportException(curl_error($curlRequest->getHandle()), $e->getInfo()->getResult());
 
             $error = $error->transformToGenericTransportException();
 
             $stmt->setError($error);
 
-            $event = new Event\GetResponseForExceptionEvent(
+            $event = new Event\ExceptionEvent(
                     $this,
                     $request,
                     $requestType,
                     $error);
 
-            $this->getEventDispatcher()->dispatch(KernelEvents::EXCEPTION, $event);
+            $this->getEventDispatcher()->dispatch($event, KernelEvents::EXCEPTION);
 
         } else {
 
@@ -167,16 +168,16 @@ class Kernel extends RemoteHttpKernel
                'additionnalProxyHeaders' =>  $headersCollector->getTransactionHeaders()
             ]));
 
-            $event = new Event\FilterResponseEvent($this, $request, $requestType, $response);
-            $this->getEventDispatcher()->dispatch(KernelEvents::RESPONSE, $event);
+            $event = new Event\ResponseEvent($this, $request, $requestType, $response);
+            $this->getEventDispatcher()->dispatch($event, KernelEvents::RESPONSE);
 
             /*
                 populate response for service
              */
             $stmt->setResponse($response);
 
-            $event = new Event\PostResponseEvent($this, $request, $response);
-            $this->getEventDispatcher()->dispatch(KernelEvents::TERMINATE);
+            $event = new Event\TerminateEvent($this, $request, $response);
+            $this->getEventDispatcher()->dispatch($event, KernelEvents::TERMINATE);
 
         }
 
@@ -206,8 +207,8 @@ class Kernel extends RemoteHttpKernel
 
             try {
 
-                $event = new Event\GetResponseEvent($this, $request, $requestType);
-                $this->getEventDispatcher()->dispatch(KernelEvents::REQUEST, $event);
+                $event = new Event\RequestEvent($this, $request, $requestType);
+                $this->getEventDispatcher()->dispatch($event, KernelEvents::REQUEST);
 
                 list($curlHandler, $contentCollector, $headerCollector) = $this->prepareRawCurlHandler($stmt);
 
@@ -222,11 +223,11 @@ class Kernel extends RemoteHttpKernel
 
                 $stmt->setError(new Exception\CurlTransportException("CURL connection error", 1, $e));
 
-                $event = new Event\GetResponseForExceptionEvent(
+                $event = new Event\ExceptionEvent(
                     $this, $request, 
                     $requestType,
                     $stmt->getError());
-                $this->getEventDispatcher()->dispatch(KernelEvents::EXCEPTION, $event);
+                $this->getEventDispatcher()->dispatch($event, KernelEvents::EXCEPTION);
                 continue;
             }
 
@@ -506,7 +507,7 @@ class Kernel extends RemoteHttpKernel
     /**
      * Gets the [$eventDispatcher description].
      *
-     * @return \Symfony\Component\EventDispatcher\EventDispatcher
+     * @return EventDispatcherInterface
      */
     public function getEventDispatcher()
     {
@@ -516,7 +517,7 @@ class Kernel extends RemoteHttpKernel
     /**
      * Sets the [$eventDispatcher description].
      *
-     * @param \Symfony\Component\EventDispatcher\EventDispatcher $eventDispatcher the event dispatcher
+     * @param EventDispatcherInterface $eventDispatcher the event dispatcher
      *
      * @return self
      */
