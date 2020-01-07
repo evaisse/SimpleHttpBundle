@@ -16,7 +16,7 @@ class SslTest extends AbstractTests
     public function testSslValidationException()
     {
         $this->expectException(TransportException::class);
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $a = $helper->prepare("GET", 'https://invalid-expected-sct.badssl.com/');
         $a->execute($httpKernel);
@@ -27,7 +27,7 @@ class SslTest extends AbstractTests
     public function testDisablingSslVerif()
     {
 
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $a = $helper->prepare("GET", 'https://invalid-expected-sct.badssl.com/');
         $a->setIgnoreSslErrors(true);

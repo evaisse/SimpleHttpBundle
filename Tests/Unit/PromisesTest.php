@@ -31,7 +31,7 @@ class PromisesTest extends AbstractTests
      */
     public function testPromises($code, $expectedResults)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', array(
             'code' => $code
@@ -65,7 +65,7 @@ class PromisesTest extends AbstractTests
      */
     public function testProxiedPromises($code, $expectedResults)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', array(
             'code' => $code
@@ -100,7 +100,7 @@ class PromisesTest extends AbstractTests
      */
     public function testPromisesOnTimeout()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare("GET", 'https://httpbin.org/delay/1');
 
@@ -134,7 +134,7 @@ class PromisesTest extends AbstractTests
      */
     public function testPromisesValues($code, $events)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', [
             'code' => $code,
@@ -172,7 +172,7 @@ class PromisesTest extends AbstractTests
      */
     public function testPromisesAfterwards($code, $events)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', [
             'code' => $code,
@@ -212,7 +212,7 @@ class PromisesTest extends AbstractTests
      */
     public function testAllPromisesFulfillsMultipleTimesAfterwards($code, $events)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', [
             'code' => $code,

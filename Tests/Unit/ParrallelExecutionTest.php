@@ -25,7 +25,7 @@ class ParrallelExecutionTest extends AbstractTests
      */
     public function testParrelelExecution()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $a = $helper->prepare("GET", AbstractTests::$baseUrl . '/ip');
         $b = $helper->prepare("PUT", AbstractTests::$baseUrl . '/put');
@@ -48,7 +48,7 @@ class ParrallelExecutionTest extends AbstractTests
      */
     public function testParrellelExecutionWithError()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $a = $helper->prepare("GET", AbstractTests::$baseUrl . '/delay/3');
         $a->setTimeout(800);
@@ -72,7 +72,7 @@ class ParrallelExecutionTest extends AbstractTests
      */
     public function testSequenceExecution()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $a = $helper->prepare("GET", AbstractTests::$baseUrl . '/ip');
         $b = $helper->prepare("PUT", AbstractTests::$baseUrl . '/put');

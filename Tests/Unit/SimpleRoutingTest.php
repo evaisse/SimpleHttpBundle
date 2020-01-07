@@ -29,7 +29,7 @@ class SimpleRoutingTest extends AbstractTests {
      */
     public function testCallsWithRouteArguments($code)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $args = [
             "code" => $code,
@@ -46,7 +46,7 @@ class SimpleRoutingTest extends AbstractTests {
 
     public function testUrlTransformation()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $result = $helper->transformUrl('/foo/doh');
         $this->assertEquals($result[0], '/foo/doh');

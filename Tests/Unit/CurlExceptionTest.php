@@ -18,7 +18,7 @@ class CurlExceptionTest extends AbstractTests
     public function testHostNotFoundTransportException()
     {
         $this->expectException(HostNotFoundException::class);
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
 
         $helper->GET('http://fooooooooooooooooooooooooooooooooooooooooooooo/');
@@ -31,7 +31,7 @@ class CurlExceptionTest extends AbstractTests
      */
     public function testUnknownTransportException()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $e = new CurlTransportException("test", 5000);
 

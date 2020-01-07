@@ -19,6 +19,6 @@ class CurlRequestGeneratorTest extends AbstractTests
      */
     public function testRequestGenerator()
     {
-
+        
     }
 }

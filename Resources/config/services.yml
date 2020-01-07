@@ -1,4 +1,9 @@
 services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        public: false
 
     http:
         alias: simple_http.helper
@@ -16,11 +21,11 @@ services:
 
     simple_http.helper:
         class:      evaisse\SimpleHttpBundle\Service\Helper
-        arguments:  ["@service_container"]
+        arguments:
+            $httpKernel: '@simple_http.kernel'
 
     simple_http.kernel:
         class:      evaisse\SimpleHttpBundle\Http\Kernel
-        arguments:  ["@service_container"]
 
     simple_http.profiler.data_collector:
         class: evaisse\SimpleHttpBundle\DataCollector\ProfilerDataCollector

@@ -17,7 +17,7 @@ use evaisse\SimpleHttpBundle\Service\Helper;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\Container;
-
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 
 class AbstractTests extends TestCase
@@ -28,14 +28,11 @@ class AbstractTests extends TestCase
 
     protected function createContext()
     {
-        $container = new Container(new ParameterBag());
-        $helper = new Helper($container);
-        $httpKernel = new Kernel($container);
+        $eventDispatcher = new EventDispatcher();
+        $httpKernel = new Kernel($eventDispatcher);
+        $helper = new Helper($httpKernel, $eventDispatcher);
 
-        $container->set('simple_http.helper', $helper);
-        $container->set('simple_http.kernel', $httpKernel);
-
-        return [$helper, $httpKernel, $container];
+        return [$helper, $httpKernel];
     }
 
 

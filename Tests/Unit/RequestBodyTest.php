@@ -31,7 +31,7 @@ class RequestBodyTest extends AbstractTests
      */
     public function testAutomaticDecodingResult()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $res = $helper->prepare("GET", AbstractTests::$baseUrl . '/ip')
             ->execute($httpKernel)
@@ -46,7 +46,7 @@ class RequestBodyTest extends AbstractTests
      */
     public function testClassicPostBodyPayloads($args)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $statement = $helper->prepare("POST", AbstractTests::$baseUrl . '/post', $args);
         $statement->execute($httpKernel);
@@ -60,7 +60,7 @@ class RequestBodyTest extends AbstractTests
      */
     public function testJsonPostBodyPayloads($args)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
         $stmt = $helper->prepare("POST", AbstractTests::$baseUrl . '/post', $args);
 
         $res = $stmt->json()
@@ -79,7 +79,7 @@ class RequestBodyTest extends AbstractTests
      */
     public function testClassicPUTBodyPayloads($args)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
         $statement = $helper->prepare("PUT", AbstractTests::$baseUrl . '/put', $args);
         $statement->execute($httpKernel);
         $res = $statement->getResult();
@@ -94,7 +94,7 @@ class RequestBodyTest extends AbstractTests
      */
     public function testJsonPUTBodyPayloads($args)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
         $stmt = $helper->prepare("PUT", AbstractTests::$baseUrl . '/put', $args);
 
         $res = $stmt->json()
@@ -114,7 +114,7 @@ class RequestBodyTest extends AbstractTests
      */
     public function testClassicDeleteBodyPayloads($args)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
         $statement = $helper->prepare("DELETE", AbstractTests::$baseUrl . '/delete', $args);
         $statement->execute($httpKernel);
         $res = $statement->getResult();
@@ -129,7 +129,7 @@ class RequestBodyTest extends AbstractTests
      */
     public function testJsonDeleteBodyPayloads($args)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
         $stmt = $helper->prepare("DELETE", AbstractTests::$baseUrl . '/delete', $args);
 
         $res = $stmt->json()
