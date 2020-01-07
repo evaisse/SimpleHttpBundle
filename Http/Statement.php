@@ -19,12 +19,13 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class Statement
 {
-
-    use ContainerAwareTrait;
-
+    /** @var Kernel */
+    protected $httpKernel;
+    
     /**
      * $request : Service Request
      *
@@ -76,7 +77,7 @@ class Statement
 
 
     /**
-     * @var EventDispatcher dispatcher for http transaction events
+     * @var EventDispatcherInterface dispatcher for http transaction events
      */
     protected $eventDispatcher;
 
@@ -114,15 +115,24 @@ class Statement
     }
 
     /**
+     * @param Kernel $httpKernel
+     */
+    public function setHttpKernel(Kernel $httpKernel): void
+    {
+        $this->httpKernel = $httpKernel;
+    }
+    
+    /**
      *
      * @param Request $request An http request object to send
      */
-    public function __construct(Request $request)
+    public function __construct(Request $request, EventDispatcherInterface $eventDispatcher, Kernel $httpKernel = null)
     {
         $this->setRequest($request);
         $this->deferred = new Deferred();
         $this->promise = $this->deferred->promise();
-        $this->eventDispatcher = new EventDispatcher();
+        $this->eventDispatcher = $eventDispatcher;
+        $this->httpKernel = $httpKernel;
     }
 
 
@@ -179,7 +189,7 @@ class Statement
 
 
     /**
-     * @return EventDispatcher event dispatcher for internal http transactions events
+     * @return EventDispatcherInterface event dispatcher for internal http transactions events
      */
     public function getEventDispatcher()
     {
@@ -319,7 +329,7 @@ class Statement
     public function execute(Kernel $httpKernel = null)
     {
         $this->sent = true;
-        $http = $httpKernel ? $httpKernel : $this->container->get('simple_http.kernel');
+        $http = $httpKernel ? $httpKernel : $this->httpKernel;
         $http->execute([$this]);
 
         if ($this->hasError()) {
@@ -363,7 +373,6 @@ class Statement
             $file->getRealPath(),
             $clientName,
             $file->getMimeType(),
-            $file->getSize(),
             0);
 
         $this->getRequest()->files->set($key, $file);

@@ -16,7 +16,7 @@ abstract class OAuthClientTest extends AbstractTests
     public function testOAuthUnauthorizedAccess()
     {
         $this->expectException(UnauthorizedHttpException::class);
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $host = "http://127.0.0.1:8008";
 
@@ -29,7 +29,7 @@ abstract class OAuthClientTest extends AbstractTests
      */
     public function testPersistOAuthClientCredentials()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $host = "http://127.0.0.1:8008";
 
@@ -61,7 +61,7 @@ abstract class OAuthClientTest extends AbstractTests
      */
     public function testOAuth2driver()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $host = "http://127.0.0.1:8008";
 

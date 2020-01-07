@@ -64,7 +64,7 @@ class FacadeTest extends AbstractTests
      */
     public function testCalls($method, $url, $code = 200)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $statement = $helper->prepare($method, $url);
         $request = $statement->getRequest();
@@ -86,7 +86,7 @@ class FacadeTest extends AbstractTests
      */
     public function testCallsWithArgs($method, $url, $code = 200)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $args = array_slice($_SERVER, 0, 3);
         $statement = $helper->prepare($method, $url, $args);
@@ -108,10 +108,7 @@ class FacadeTest extends AbstractTests
      */
     public function testFacadeCalls($method, $url, $code = 200)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
-
-        $container->set('simple_http.helper', $helper);
-        $container->set('simple_http.kernel', $httpKernel);
+        list($helper, $httpKernel) = $this->createContext();
 
         $method = strtoupper($method);
 

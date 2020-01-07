@@ -21,7 +21,7 @@ class TimeoutTest extends AbstractTests
 
     public function testEmptyResponseOnTransportErrors()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $a = $helper->prepare("GET", AbstractTests::$baseUrl . '/delay/1');
         $a->setTimeout(800);
@@ -36,7 +36,7 @@ class TimeoutTest extends AbstractTests
     public function testTimeoutExecutionWithError()
     {
         $this->expectException(TimeoutException::class);
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $a = $helper->prepare("GET", AbstractTests::$baseUrl . '/delay/1');
         $a->setTimeout(800);

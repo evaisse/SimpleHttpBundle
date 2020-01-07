@@ -15,7 +15,7 @@ class KernelTests extends AbstractTests
 
     public function testClassicKernelApi()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/');
 

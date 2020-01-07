@@ -2,6 +2,11 @@
 
 namespace evaisse\SimpleHttpBundle\DataCollector;
 
+use evaisse\SimpleHttpBundle\Http\Event\AbstractStatementPrepareEvent;
+use evaisse\SimpleHttpBundle\Http\Event\StatementErrorEvent;
+use evaisse\SimpleHttpBundle\Http\Event\StatementPrepareEvent;
+use evaisse\SimpleHttpBundle\Http\Event\StatementSuccessEventInterface;
+use evaisse\SimpleHttpBundle\Http\StatementEventMap;
 use evaisse\SimpleHttpBundle\Serializer\CustomGetSetNormalizer;
 use evaisse\SimpleHttpBundle\Http\Exception;
 
@@ -32,7 +37,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     /**
      * List of emitted requests
-     * 
+     *
      * @var array
      */
     protected $calls = array();
@@ -65,7 +70,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         );
     }
 
-    /** 
+    /**
      * @return array collected infos
      */
     public function getData()
@@ -95,9 +100,9 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     public static function getSubscribedEvents()
     {
         return [
-            'kernel.request'   => array('onRequest', 9999),
-            'kernel.exception' => array('onException', 9999),
-            'kernel.response'  => array('onResponse', 9999),
+            StatementEventMap::KEY_PREPARE => 'onPrepare',
+            StatementEventMap::KEY_ERROR => 'onError',
+            StatementEventMap::KEY_SUCCESS => 'onSuccess',
         ];
     }
 
@@ -139,7 +144,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     }
 
 
-    public function onRequest(RequestEvent $event)
+    public function onPrepare(RequestEvent $event)
     {
         $request = $event->getRequest();
 
@@ -174,7 +179,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return null;
     }
 
-    public function onException(ExceptionEvent $event)
+    public function onError(ExceptionEvent $event)
     {
         $key = $this->getRequestKey($event->getRequest());
 
@@ -189,7 +194,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         $this->finishEvent($key);
     }
 
-    public function onResponse(ResponseEvent $event)
+    public function onSuccess(ResponseEvent $event)
     {
         $key = $this->getRequestKey($event->getRequest());
 

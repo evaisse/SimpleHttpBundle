@@ -24,7 +24,7 @@ class CookieSessionTest extends AbstractTests
 
     public function testCookieStore()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $i = (int)rand(0,100);
         $j = (int)rand(0,100);

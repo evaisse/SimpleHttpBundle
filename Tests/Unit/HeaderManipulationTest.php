@@ -15,7 +15,7 @@ class HeaderManipulationTest extends AbstractTests
 
     public function testHeaderManipulation()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare('GET', 'http://127.0.0.1:8008/verify');
 

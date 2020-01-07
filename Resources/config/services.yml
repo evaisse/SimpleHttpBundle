@@ -1,4 +1,9 @@
 services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        public: false
 
     http:
         alias: simple_http.helper
@@ -16,18 +21,19 @@ services:
 
     simple_http.helper:
         class:      evaisse\SimpleHttpBundle\Service\Helper
-        arguments:  ["@service_container"]
+        arguments:
+            $httpKernel: '@simple_http.kernel'
 
     simple_http.kernel:
         class:      evaisse\SimpleHttpBundle\Http\Kernel
-        arguments:  ["@service_container"]
 
     simple_http.profiler.data_collector:
         class: evaisse\SimpleHttpBundle\DataCollector\ProfilerDataCollector
         calls:
             - [ setStopWatch, [ "@debug.stopwatch" ] ]
         tags:
-            - { name: data_collector, template: "SimpleHttpBundle:Collector:profiler", id: "simplehttpprofiler" }
+            - { name: kernel.event_subscriber }
+            - { name: data_collector, template: "@SimpleHttp/Collector/profiler", id: "simplehttpprofiler" }
 
     simple_http.twig.extension:
         class: evaisse\SimpleHttpBundle\Twig\Extension
