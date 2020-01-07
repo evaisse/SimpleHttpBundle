@@ -249,7 +249,7 @@ class Extension implements ExtensionInterface
         $fromCache = false;
         if (is_array($codeOrResponse)) {
             $response = $codeOrResponse;
-            $code = $response['statusCode'];
+            $code = array_key_exists('statusCode', $response)?$response['statusCode']:'N/A';
             $fromCache = !empty($response['fromHttpCache']);
         } else {
             $code = (int)$codeOrResponse;
@@ -289,12 +289,14 @@ class Extension implements ExtensionInterface
      */
     public function decodeBody(array $response)
     {
-        foreach ($response['headers'] as $h) {
-            if (preg_match('/Content-type:/i', $h, $m)) {
-                return [
-                    'mime' => 'application/json',
-                    'data' => @json_decode($response['body']),
-                ];
+        if (array_key_exists('headers', $response)) {
+            foreach ($response['headers'] as $h) {
+                if (preg_match('/Content-type:/i', $h, $m)) {
+                    return [
+                        'mime' => 'application/json',
+                        'data' => @json_decode($response['body']),
+                    ];
+                }
             }
         }
         return [];
