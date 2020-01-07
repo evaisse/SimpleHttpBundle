@@ -93,14 +93,16 @@ class CurlHeaderCollector extends HeaderCollector
             if (strtolower($name) == "set-cookie") {
 
                 $cookie = CookieParser::fromString($value);
-                $this->cookies[] = new Cookie(
+                $this->cookies[] = Cookie::create(
                     $cookie->getName(),
                     $cookie->getRawValue(),
                     (int)$cookie->getExpiresTime(),
                     $cookie->getPath(),
                     $cookie->getDomain(),
                     $cookie->isSecure(),
-                    $cookie->isHttpOnly()
+                    $cookie->isHttpOnly(),
+                    true,
+                    $cookie->getSameSite()
                 );
 
             } else {
