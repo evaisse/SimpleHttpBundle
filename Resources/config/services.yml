@@ -27,7 +27,8 @@ services:
         calls:
             - [ setStopWatch, [ "@debug.stopwatch" ] ]
         tags:
-            - { name: data_collector, template: "SimpleHttpBundle:Collector:profiler", id: "simplehttpprofiler" }
+            - { name: kernel.event_subscriber }
+            - { name: data_collector, template: "@SimpleHttp/Collector/profiler", id: "simplehttpprofiler" }
 
     simple_http.twig.extension:
         class: evaisse\SimpleHttpBundle\Twig\Extension

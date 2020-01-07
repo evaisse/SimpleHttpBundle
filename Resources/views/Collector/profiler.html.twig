@@ -1,4 +1,4 @@
-{% extends 'WebProfilerBundle:Profiler:layout.html.twig' %}
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
 
 {% macro css_custom_status_styles() %}
 
@@ -210,7 +210,7 @@
 
     {% for index, call in collector.calls %}
         <a name="request{{ index }}"></a>
-        {% include 'SimpleHttpBundle:Collector:partials/call.html.twig' with { 'call': call } %}
+        {% include '@SimpleHttp/Collector/partials/call.html.twig' with { 'call': call } %}
     {% endfor %}
 
 
