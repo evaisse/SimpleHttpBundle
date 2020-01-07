@@ -127,7 +127,7 @@
         {% set status = 'green' %}
     {% endif %}
 
-    {% include 'WebProfilerBundle:Profiler:toolbar_item.html.twig' with { link: "simplehttpprofiler", status: status } %}
+    {% include '@WebProfiler/Profiler/toolbar_item.html.twig' with { link: "simplehttpprofiler", status: status } %}
 
 {% endblock %}
 
