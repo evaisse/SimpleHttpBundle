@@ -120,6 +120,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
                 'error'         => !empty($v['error']) ? $this->fetchErrorInfos($v['error']) : false,
                 'debugLink'     => false,
                 'trace'         => array_slice($v['trace'], 3),
+                'curlCommand'   => $this->buildCurlCommand($v['request']),
             );
 
             if ($v['response']) {
@@ -229,6 +230,25 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         unset($this->calls[$key]['stopWatchEvent']);
     }
 
+    /**
+     * @param Request $request
+     * @return string
+     */
+    public function buildCurlCommand(Request $request)
+    {
+        $command = 'curl -i
+-X '.$request->getRealMethod();
+        foreach($request->headers->all() as $headerName => $headerValues) {
+            foreach($headerValues as $headerValue) {
+                $command .= "
+-H \"$headerName: " . (string)$headerValue . "\"";
+            }
+        }
+
+        $command.='
+"'.$request->getSchemeAndHttpHost().$request->getRequestUri().'"';
+        return str_replace("\n", " \\\n", $command);
+    }
 
     public function fetchTransferInfos(array $call)
     {
@@ -423,6 +443,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     {
         return array_filter($this->getCalls(), function ($call) {
             if ($call['response']
+                && array_key_exists('statusCode', $call['response'])
                 && $call['response']['statusCode'] < 500
                 && $call['response']['statusCode'] >= 400) {
                 return true;
@@ -456,7 +477,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     public function getServerErrors()
     {
         return array_filter($this->getCalls(), function ($call) {
-            if ($call['response'] && $call['response']['statusCode'] >= 500) {
+            if (is_array($call['response']) && array_key_exists('statusCode', $call['response']) && $call['response']['statusCode'] >= 500) {
                 return true;
             }
         });

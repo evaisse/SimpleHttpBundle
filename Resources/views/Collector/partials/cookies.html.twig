@@ -37,7 +37,7 @@
 </table>
 
 
-{% if response %}
+{% if response  and response.cookies is defined %}
 <h5>Response Cookies ({{ response.cookies | length  }})</h5>
 
 <table>

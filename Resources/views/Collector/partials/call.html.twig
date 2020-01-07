@@ -22,7 +22,7 @@
             <li>
                 <a href="javascript://">Request</a>
             </li>
-            {% if call.response %}
+            {% if call.response and call.response.headers is defined %}
             <li>
                 <a href="javascript://">Response {{ call.response | simple_http_format_http_code }}</a>
             </li>
@@ -50,6 +50,11 @@
             <li>
                 <a href="javascript://">Raw</a>
             </li>
+            {%  if call.curlCommand is defined %}
+                <li>
+                    <a href="javascript://">Curl</a>
+                </li>
+            {% endif %}
         </ul>
 
         <div class="tabs-content">
@@ -65,7 +70,7 @@
                 {% include '@SimpleHttp/Collector/partials/request.html.twig' with {'index':index, 'request': call.request, 'time': call.time} %}
             </div>
 
-            {% if call.response %}
+            {% if call.response and call.response.headers is defined %}
                 <div>
                     {% include '@SimpleHttp/Collector/partials/response.html.twig' with {'index':index, 'response': call.response} %}
                 </div>
@@ -91,6 +96,22 @@
             <div class="tab-content--raw">
                 {{ dump(call) }}
             </div>
+            {%  if call.curlCommand is defined %}
+                <div class="tab-content--curl">
+                    <div class="active" style="display:block;">
+                        <table>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <pre>{{ call.curlCommand | raw }}</pre>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            {% endif %}
         </div>
 
         <div class="http-call__replays">
