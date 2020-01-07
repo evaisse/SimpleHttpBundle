@@ -5,7 +5,8 @@ namespace evaisse\SimpleHttpBundle\DataCollector;
 use evaisse\SimpleHttpBundle\Http\Event\AbstractStatementPrepareEvent;
 use evaisse\SimpleHttpBundle\Http\Event\StatementErrorEvent;
 use evaisse\SimpleHttpBundle\Http\Event\StatementPrepareEvent;
-use evaisse\SimpleHttpBundle\Http\Event\StatementSuccessEvent;
+use evaisse\SimpleHttpBundle\Http\Event\StatementSuccessEventInterface;
+use evaisse\SimpleHttpBundle\Http\StatementEventMap;
 use evaisse\SimpleHttpBundle\Serializer\CustomGetSetNormalizer;
 use evaisse\SimpleHttpBundle\Http\Exception;
 
@@ -99,9 +100,9 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     public static function getSubscribedEvents()
     {
         return [
-            StatementPrepareEvent::KEY => 'onPrepare',
-            StatementErrorEvent::KEY => 'onError',
-            StatementSuccessEvent::KEY => 'onSuccess',
+            StatementEventMap::KEY_PREPARE => 'onPrepare',
+            StatementEventMap::KEY_ERROR => 'onError',
+            StatementEventMap::KEY_SUCCESS => 'onSuccess',
         ];
     }
 
@@ -143,7 +144,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     }
 
 
-    public function onPrepare(StatementPrepareEvent $event)
+    public function onPrepare(RequestEvent $event)
     {
         $request = $event->getRequest();
 
@@ -178,7 +179,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return null;
     }
 
-    public function onError(StatementErrorEvent $event)
+    public function onError(ExceptionEvent $event)
     {
         $key = $this->getRequestKey($event->getRequest());
 
@@ -193,7 +194,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         $this->finishEvent($key);
     }
 
-    public function onSuccess(StatementSuccessEvent $event)
+    public function onSuccess(ResponseEvent $event)
     {
         $key = $this->getRequestKey($event->getRequest());
 
