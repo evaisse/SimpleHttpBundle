@@ -584,4 +584,14 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return str_replace('=', '', strtr(base64_encode($input), '+/', '-_'));
     }
 
+    /**
+     *
+     */
+    public function reset()
+    {
+        $this->data = [];
+        $this->calls = [];
+        $this->errors = [];
+        $this->stopwatch->reset();
+    }
 }
