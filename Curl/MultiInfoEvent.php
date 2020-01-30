@@ -9,7 +9,7 @@
 
 namespace evaisse\SimpleHttpBundle\Curl;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class MultiInfoEvent extends Event
 {

@@ -13,14 +13,10 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 abstract class OAuthClientTest extends AbstractTests
 {
-
-
-    /**
-     * @expectedException \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException
-     */
     public function testOAuthUnauthorizedAccess()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        $this->expectException(UnauthorizedHttpException::class);
+        list($helper, $httpKernel) = $this->createContext();
 
         $host = "http://127.0.0.1:8008";
 
@@ -33,7 +29,7 @@ abstract class OAuthClientTest extends AbstractTests
      */
     public function testPersistOAuthClientCredentials()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $host = "http://127.0.0.1:8008";
 
@@ -65,7 +61,7 @@ abstract class OAuthClientTest extends AbstractTests
      */
     public function testOAuth2driver()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $host = "http://127.0.0.1:8008";
 

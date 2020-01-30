@@ -18,7 +18,7 @@ class FileUploadsTest extends AbstractTests
 
     public function testPutFiles()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare("PUT", AbstractTests::$baseUrl . '/put');
 
@@ -37,7 +37,7 @@ class FileUploadsTest extends AbstractTests
 
     public function testPostFiles()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare("POST", AbstractTests::$baseUrl . '/post');
 
@@ -57,7 +57,7 @@ class FileUploadsTest extends AbstractTests
     {
         $arg = 'é"("("(éù%"';
 
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare("POST", AbstractTests::$baseUrl . '/post', array(
             'exemple' => $arg,

@@ -2,6 +2,11 @@
 
 namespace evaisse\SimpleHttpBundle\DataCollector;
 
+use evaisse\SimpleHttpBundle\Http\Event\AbstractStatementPrepareEvent;
+use evaisse\SimpleHttpBundle\Http\Event\StatementErrorEvent;
+use evaisse\SimpleHttpBundle\Http\Event\StatementPrepareEvent;
+use evaisse\SimpleHttpBundle\Http\Event\StatementSuccessEventInterface;
+use evaisse\SimpleHttpBundle\Http\StatementEventMap;
 use evaisse\SimpleHttpBundle\Serializer\CustomGetSetNormalizer;
 use evaisse\SimpleHttpBundle\Http\Exception;
 
@@ -10,9 +15,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -32,7 +37,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     /**
      * List of emitted requests
-     * 
+     *
      * @var array
      */
     protected $calls = array();
@@ -55,7 +60,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      * (non-PHPdoc)
      * @see \Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface::collect()
      */
-    public function collect(Request $request, Response $response, \Exception $exception = null)
+    public function collect(Request $request, Response $response, \Throwable $exception = null)
     {
         $this->data = array(
             'countRequests'              => count($this->calls),
@@ -65,7 +70,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         );
     }
 
-    /** 
+    /**
      * @return array collected infos
      */
     public function getData()
@@ -95,9 +100,9 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     public static function getSubscribedEvents()
     {
         return [
-            'kernel.request'   => array('onRequest', 9999),
-            'kernel.exception' => array('onException', 9999),
-            'kernel.response'  => array('onResponse', 9999),
+            StatementEventMap::KEY_PREPARE => 'onPrepare',
+            StatementEventMap::KEY_ERROR => 'onError',
+            StatementEventMap::KEY_SUCCESS => 'onSuccess',
         ];
     }
 
@@ -115,6 +120,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
                 'error'         => !empty($v['error']) ? $this->fetchErrorInfos($v['error']) : false,
                 'debugLink'     => false,
                 'trace'         => array_slice($v['trace'], 3),
+                'curlCommand'   => $this->buildCurlCommand($v['request']),
             );
 
             if ($v['response']) {
@@ -139,7 +145,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     }
 
 
-    public function onRequest(GetResponseEvent $event)
+    public function onPrepare(RequestEvent $event)
     {
         $request = $event->getRequest();
 
@@ -174,7 +180,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return null;
     }
 
-    public function onException(GetResponseForExceptionEvent $event)
+    public function onError(ExceptionEvent $event)
     {
         $key = $this->getRequestKey($event->getRequest());
 
@@ -182,14 +188,14 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
         $this->calls[$key] = array_merge($this->calls[$key], array(
             'response' => $event->getResponse(),
-            "error"    => $event->getException(),
+            "error"    => $event->getThrowable(),
             "stop"     => microtime(true),
         ));
 
         $this->finishEvent($key);
     }
 
-    public function onResponse(FilterResponseEvent $event)
+    public function onSuccess(ResponseEvent $event)
     {
         $key = $this->getRequestKey($event->getRequest());
 
@@ -224,6 +230,25 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         unset($this->calls[$key]['stopWatchEvent']);
     }
 
+    /**
+     * @param Request $request
+     * @return string
+     */
+    public function buildCurlCommand(Request $request)
+    {
+        $command = 'curl -i
+-X '.$request->getRealMethod();
+        foreach($request->headers->all() as $headerName => $headerValues) {
+            foreach($headerValues as $headerValue) {
+                $command .= "
+-H \"$headerName: " . (string)$headerValue . "\"";
+            }
+        }
+
+        $command.='
+"'.$request->getSchemeAndHttpHost().$request->getRequestUri().'"';
+        return str_replace("\n", " \\\n", $command);
+    }
 
     public function fetchTransferInfos(array $call)
     {
@@ -418,6 +443,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     {
         return array_filter($this->getCalls(), function ($call) {
             if ($call['response']
+                && array_key_exists('statusCode', $call['response'])
                 && $call['response']['statusCode'] < 500
                 && $call['response']['statusCode'] >= 400) {
                 return true;
@@ -451,7 +477,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     public function getServerErrors()
     {
         return array_filter($this->getCalls(), function ($call) {
-            if ($call['response'] && $call['response']['statusCode'] >= 500) {
+            if (is_array($call['response']) && array_key_exists('statusCode', $call['response']) && $call['response']['statusCode'] >= 500) {
                 return true;
             }
         });
@@ -585,7 +611,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     }
 
     /**
-     *
+     * 
      */
     public function reset()
     {

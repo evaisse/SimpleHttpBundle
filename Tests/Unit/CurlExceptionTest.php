@@ -10,16 +10,15 @@ namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
 
 use evaisse\SimpleHttpBundle\Http\Exception\CurlTransportException;
+use evaisse\SimpleHttpBundle\Http\Exception\HostNotFoundException;
 
 class CurlExceptionTest extends AbstractTests
 {
 
-    /**
-     * @expectedException evaisse\SimpleHttpBundle\Http\Exception\HostNotFoundException
-     */
     public function testHostNotFoundTransportException()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        $this->expectException(HostNotFoundException::class);
+        list($helper, $httpKernel) = $this->createContext();
 
 
         $helper->GET('http://fooooooooooooooooooooooooooooooooooooooooooooo/');
@@ -32,7 +31,7 @@ class CurlExceptionTest extends AbstractTests
      */
     public function testUnknownTransportException()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $e = new CurlTransportException("test", 5000);
 

@@ -38,7 +38,7 @@ class ContentTypesTest extends AbstractTests
 
     public function testContentTypesDetection()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/ip');
 
@@ -53,7 +53,7 @@ class ContentTypesTest extends AbstractTests
 
     public function testFileObjectDetection()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/image/png');
 
@@ -69,7 +69,7 @@ class ContentTypesTest extends AbstractTests
      */
     public function testInvalidJsonData($contentType, $body)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $response = new Response($body, 200, [
             'Content-Type' => $contentType,

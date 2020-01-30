@@ -62,9 +62,14 @@ class Response extends \Symfony\Component\HttpFoundation\Response
         }
 
         if (fnmatch("application/json*", $this->headers->get('content-type'))) {
-            $result = json_decode($this->getContent(), true);
-            if (json_last_error()) {
-                $this->error = new InvalidResponseBodyException($this, 'Invalid Json response body. ' . $this->getJsonLastErrorMessage());
+            $content = $this->getContent();
+            if (!empty($content)) {
+                $result = json_decode($content, true);
+                if (json_last_error()) {
+                    $this->error = new InvalidResponseBodyException($this, 'Invalid Json response body. ' . $this->getJsonLastErrorMessage());
+                }
+            } else {
+                $result = null;
             }
             $this->setResult($result);
         }

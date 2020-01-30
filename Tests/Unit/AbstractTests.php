@@ -14,12 +14,13 @@ use evaisse\SimpleHttpBundle\Http\Kernel;
 use evaisse\SimpleHttpBundle\Http\Request;
 use evaisse\SimpleHttpBundle\Http\Statement;
 use evaisse\SimpleHttpBundle\Service\Helper;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 
-
-class AbstractTests extends \PHPUnit_Framework_TestCase
+class AbstractTests extends TestCase
 {
 
 //    public static $baseUrl = "http://127.0.0.1:8989";
@@ -27,14 +28,11 @@ class AbstractTests extends \PHPUnit_Framework_TestCase
 
     protected function createContext()
     {
-        $container = new Container(new ParameterBag());
-        $helper = new Helper($container);
-        $httpKernel = new Kernel($container);
+        $eventDispatcher = new EventDispatcher();
+        $httpKernel = new Kernel($eventDispatcher);
+        $helper = new Helper($httpKernel, $eventDispatcher);
 
-        $container->set('simple_http.helper', $helper);
-        $container->set('simple_http.kernel', $httpKernel);
-
-        return [$helper, $httpKernel, $container];
+        return [$helper, $httpKernel];
     }
 
 

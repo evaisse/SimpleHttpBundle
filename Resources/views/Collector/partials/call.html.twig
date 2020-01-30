@@ -22,7 +22,7 @@
             <li>
                 <a href="javascript://">Request</a>
             </li>
-            {% if call.response %}
+            {% if call.response and call.response.headers is defined %}
             <li>
                 <a href="javascript://">Response {{ call.response | simple_http_format_http_code }}</a>
             </li>
@@ -50,11 +50,16 @@
             <li>
                 <a href="javascript://">Raw</a>
             </li>
+            {%  if call.curlCommand is defined %}
+                <li>
+                    <a href="javascript://">Curl</a>
+                </li>
+            {% endif %}
         </ul>
 
         <div class="tabs-content">
             <div class="active">
-                {% include 'SimpleHttpBundle:Collector:partials/summary.html.twig' with {
+                {% include '@SimpleHttp/Collector/partials/summary.html.twig' with {
                     time: call.time,
                     response: call.response,
                     error: call.error,
@@ -62,35 +67,51 @@
                 } only %}
             </div>
             <div>
-                {% include 'SimpleHttpBundle:Collector:partials/request.html.twig' with {'index':index, 'request': call.request, 'time': call.time} %}
+                {% include '@SimpleHttp/Collector/partials/request.html.twig' with {'index':index, 'request': call.request, 'time': call.time} %}
             </div>
 
-            {% if call.response %}
+            {% if call.response and call.response.headers is defined %}
                 <div>
-                    {% include 'SimpleHttpBundle:Collector:partials/response.html.twig' with {'index':index, 'response': call.response} %}
+                    {% include '@SimpleHttp/Collector/partials/response.html.twig' with {'index':index, 'response': call.response} %}
                 </div>
             {% endif %}
             {% if call.error %}
                 <div>
-                    {% include 'SimpleHttpBundle:Collector:partials/error.html.twig' with {'index':index, 'error': call.error} %}
+                    {% include '@SimpleHttp/Collector/partials/error.html.twig' with {'index':index, 'error': call.error} %}
                 </div>
             {% endif %}
             <div class="tab-content-cookies">
-                {% include 'SimpleHttpBundle:Collector:partials/cookies.html.twig' with {'request': call.request, 'response': call.response} %}
+                {% include '@SimpleHttp/Collector/partials/cookies.html.twig' with {'request': call.request, 'response': call.response} %}
             </div>
             {% if call.auth %}
                 <div class="tab-content-auth">
-                    {% include 'SimpleHttpBundle:Collector:partials/auth.html.twig' with {'call': call} only %}
+                    {% include '@SimpleHttp/Collector/partials/auth.html.twig' with {'call': call} only %}
                 </div>
             {% endif %}
             {% if dataDecoded %}
             <div class="tab-content-data">
-                {% include 'SimpleHttpBundle:Collector:partials/data.html.twig' with {'dataDecoded': dataDecoded} only %}
+                {% include '@SimpleHttp/Collector/partials/data.html.twig' with {'dataDecoded': dataDecoded} only %}
             </div>
             {% endif %}
             <div class="tab-content--raw">
                 {{ dump(call) }}
             </div>
+            {%  if call.curlCommand is defined %}
+                <div class="tab-content--curl">
+                    <div class="active" style="display:block;">
+                        <table>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <pre>{{ call.curlCommand | raw }}</pre>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            {% endif %}
         </div>
 
         <div class="http-call__replays">

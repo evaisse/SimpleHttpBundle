@@ -1,7 +1,10 @@
 SimpleHttpBundle
 ======
 
-A symfony2 2.7+ http client bundle built on the httpfoundation component (instead of guzzle), using cURL as engine.
+
+### While Still maintained, I recommand you to replace this bundle with the [http-plug bundle](https://github.com/php-http/HttplugBundle) with has better support and a handy plug-in support.
+
+A symfony2/3/4/5 http client bundle built on the httpfoundation component (instead of guzzle), using cURL as engine.
 
 
 [![testing](https://travis-ci.org/evaisse/SimpleHttpBundle.svg?branch=master)](https://travis-ci.org/evaisse/SimpleHttpBundle)

@@ -2,11 +2,13 @@
 
 namespace evaisse\SimpleHttpBundle\Twig;
 
-
-use Symfony\Bundle\TwigBundle\Loader\FilesystemLoader;
 use Symfony\Component\HttpFoundation\Response;
+use Twig\Extension\ExtensionInterface;
+use Twig\Loader\FilesystemLoader;
+use Twig\TwigFilter;
+use Twig\TwigFunction;
 
-class Extension extends \Twig_Extension
+class Extension implements ExtensionInterface
 {
 
     /**
@@ -17,11 +19,10 @@ class Extension extends \Twig_Extension
     /**
      * @param FilesystemLoader $loader
      */
-    function __construct(FilesystemLoader $loader)
+    function __construct($loader)
     {
         $this->loader = $loader;
     }
-
 
     /**
      * @return string
@@ -37,13 +38,13 @@ class Extension extends \Twig_Extension
         $safe = array('is_safe' => array('html'));
 
         return [
-            new \Twig_SimpleFilter('simple_http_beautify', array($this, 'format'), $safe),
-            new \Twig_SimpleFilter('simple_http_format_http_code', array($this, 'formatHttpCode'), $safe),
-            new \Twig_SimpleFilter('simple_http_format_http_code_as_badge', array($this, 'formatHttpCodeAsSfBadge'), $safe),
-            new \Twig_SimpleFilter('simple_http_md5', array($this, 'md5')),
-            new \Twig_SimpleFilter('simple_http_include_asset', array($this, 'assetInclude'), $safe),
-            new \Twig_SimpleFilter('simple_http_format_ms', array($this, 'formatMilliseconds')),
-            new \Twig_SimpleFilter('simple_http_format_num', array($this, 'numberFormat')),
+            new TwigFilter('simple_http_beautify', array($this, 'format'), $safe),
+            new TwigFilter('simple_http_format_http_code', array($this, 'formatHttpCode'), $safe),
+            new TwigFilter('simple_http_format_http_code_as_badge', array($this, 'formatHttpCodeAsSfBadge'), $safe),
+            new TwigFilter('simple_http_md5', array($this, 'md5')),
+            new TwigFilter('simple_http_include_asset', array($this, 'assetInclude'), $safe),
+            new TwigFilter('simple_http_format_ms', array($this, 'formatMilliseconds')),
+            new TwigFilter('simple_http_format_num', array($this, 'numberFormat')),
         ];
     }
 
@@ -53,7 +54,7 @@ class Extension extends \Twig_Extension
         $safe = array('is_safe' => array('html'));
 
         return [
-            new \Twig_SimpleFunction('simple_http_decode_body', array($this, 'decodeBody'), $safe),
+            new TwigFunction('simple_http_decode_body', array($this, 'decodeBody'), $safe),
         ];
     }
 
@@ -248,7 +249,7 @@ class Extension extends \Twig_Extension
         $fromCache = false;
         if (is_array($codeOrResponse)) {
             $response = $codeOrResponse;
-            $code = $response['statusCode'];
+            $code = array_key_exists('statusCode', $response)?$response['statusCode']:'N/A';
             $fromCache = !empty($response['fromHttpCache']);
         } else {
             $code = (int)$codeOrResponse;
@@ -282,21 +283,54 @@ class Extension extends \Twig_Extension
         ];
     }
 
-
-
     /**
      * @param array $response
+     * @return array
      */
     public function decodeBody(array $response)
     {
-        foreach ($response['headers'] as $h) {
-            if (preg_match('/Content-type:/i', $h, $m)) {
-                return [
-                    'mime' => 'application/json',
-                    'data' => @json_decode($response['body']),
-                ];
+        if (array_key_exists('headers', $response)) {
+            foreach ($response['headers'] as $h) {
+                if (preg_match('/Content-type:/i', $h, $m)) {
+                    return [
+                        'mime' => 'application/json',
+                        'data' => @json_decode($response['body']),
+                    ];
+                }
             }
         }
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getTokenParsers()
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getNodeVisitors()
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getTests()
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getOperators()
+    {
         return [];
     }
 }

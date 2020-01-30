@@ -9,6 +9,9 @@
 namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
 
+use evaisse\SimpleHttpBundle\Http\Exception\RequestNotSentException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
 class ExceptionsTest extends AbstractTests
 {
 
@@ -68,13 +71,10 @@ class ExceptionsTest extends AbstractTests
         ];
     }
 
-    /**
-     * @expectedException \evaisse\SimpleHttpBundle\Http\Exception\RequestNotSentException
-     */
     public function testResultException()
     {
-
-        list($helper, $httpKernel, $container) = $this->createContext();
+        $this->expectException(RequestNotSentException::class);
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/ip');
 
@@ -84,11 +84,11 @@ class ExceptionsTest extends AbstractTests
 
     /**
      * @dataProvider provideClientErrorHttpExceptionCodes
-     * @expectedException \Symfony\Component\HttpKernel\Exception\HttpException
      */
     public function testResultWithClientErrorException($code)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        $this->expectException(HttpException::class);
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/status/{code}', array(
             'code' => $code,
@@ -105,11 +105,12 @@ class ExceptionsTest extends AbstractTests
 
     /**
      * @dataProvider provideServerErrorHttpExceptionCodes
-     * @expectedException \Symfony\Component\HttpKernel\Exception\HttpException
      */
     public function testResultWithServerErrorException($code)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        $this->expectException(HttpException::class);
+        $this->expectException(HttpException::class);
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/status/{code}', array(
             'code' => $code,
@@ -131,7 +132,7 @@ class ExceptionsTest extends AbstractTests
      */
     public function testExpectedInstancesOfExceptions($code, $cls)
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/status/{code}', array(
             'code' => $code,
@@ -163,7 +164,7 @@ class ExceptionsTest extends AbstractTests
      */
     public function testAllowedMethodsFor405()
     {
-        list($helper, $httpKernel, $container) = $this->createContext();
+        list($helper, $httpKernel) = $this->createContext();
 
         $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/put');
 

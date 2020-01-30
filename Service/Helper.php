@@ -18,16 +18,26 @@ use Symfony\Component\BrowserKit\CookieJar;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 
-class Helper implements ContainerAwareInterface
+class Helper
 {
+    /** @var Kernel */
+    protected $httpKernel;
 
-    use ContainerAwareTrait;
+    /** @var EventDispatcherInterface */
+    protected $eventDispatcher;
 
-    public function __construct(ContainerInterface $container)
+    /**
+     * Helper constructor.
+     * @param Kernel $httpKernel
+     * @param EventDispatcherInterface $eventDispatcher
+     */
+    public function __construct(Kernel $httpKernel, EventDispatcherInterface $eventDispatcher)
     {
-        $this->setContainer($container);
+        $this->httpKernel = $httpKernel;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -61,7 +71,7 @@ class Helper implements ContainerAwareInterface
      */
     public function execute(array $servicesList, SessionCookieJar $cookieJar = null, Kernel $client = null)
     {
-        $httpClient = $client ? $client : $this->container->get("simple_http.kernel");
+        $httpClient = $client ? $client : $this->httpKernel;
         
         /*
             Fetch Cookie jar from session
@@ -106,7 +116,7 @@ class Helper implements ContainerAwareInterface
      */
     protected function createStatement(Request $request)
     {
-        return new Statement($request);
+        return new Statement($request, $this->eventDispatcher, $this->httpKernel);
     }
 
 
@@ -148,7 +158,6 @@ class Helper implements ContainerAwareInterface
         list($url, $parameters) = $this->transformUrl($url, $parameters);
         $request = $this->createRequest($url, $method, $parameters, $cookies, $files, array(), $content);
         $service = $this->createStatement($request);
-        $service->setContainer($this->container);
         return $service;
     }
 
