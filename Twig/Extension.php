@@ -3,6 +3,7 @@
 namespace evaisse\SimpleHttpBundle\Twig;
 
 use Symfony\Component\HttpFoundation\Response;
+use Twig\Environment;
 use Twig\Extension\ExtensionInterface;
 use Twig\Loader\FilesystemLoader;
 use Twig\TwigFilter;
@@ -330,6 +331,23 @@ class Extension implements ExtensionInterface
      * @inheritDoc
      */
     public function getOperators()
+    {
+        return [];
+    }
+
+    /**
+     * For legacy purpose with Twig 1.*
+     * @param Environment $environment
+     */
+    public function initRuntime(Environment $environment)
+    {
+    }
+
+    /**
+     * For legacy purpose with Twig 1.*
+     * @return array
+     */
+    public function getGlobals()
     {
         return [];
     }
