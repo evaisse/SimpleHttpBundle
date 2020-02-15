@@ -45,7 +45,7 @@ abstract class ErrorHttpException extends HttpException
                 $e = new BadRequestHttpException($response->getContent(), $previous, $response->getStatusCode());
                 break;
             case 401:
-                $e = new UnauthorizedHttpException($response->headers->get('WWW-Authenticate'), $response->getContent(), $previous, $response->getStatusCode());
+                $e = new UnauthorizedHttpException($response->headers->get('WWW-Authenticate', ''), $response->getContent(), $previous, $response->getStatusCode());
                 break;
             case 403:
                 $e = new ForbiddenHttpException($response->getContent(), $previous, $response->getStatusCode());
