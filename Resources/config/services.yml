@@ -29,6 +29,7 @@ services:
 
     simple_http.profiler.data_collector:
         class: evaisse\SimpleHttpBundle\DataCollector\ProfilerDataCollector
+        public: true
         calls:
             - [ setStopWatch, [ "@debug.stopwatch" ] ]
         tags:
