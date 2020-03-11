@@ -106,9 +106,19 @@ class CurlHeaderCollector extends HeaderCollector
                 );
 
             } else {
-
-                $this->headers[$name] = $value;
-
+                if (array_key_exists($name, $this->headers)) {
+                    // maybe we can have more than one header with same key (ex: set-cookie, xkey, ykey)
+                    if (is_array($this->headers[$name])) {
+                        $this->headers[$name] = array_merge($this->headers[$name], [$name]);
+                    } else {
+                        $this->headers[$name] = [
+                            $this->headers[$name],
+                            $name,
+                        ];
+                    }
+                } else {
+                    $this->headers[$name] = $value;
+                }
             }
         }
 
