@@ -83,14 +83,14 @@ class CurlHeaderCollector extends HeaderCollector
             return;
         }
 
-        $pos = strpos($header, ": ");
+        $pos = strpos($header, ': ');
 
         if (false !== $pos) {
 
             $name = trim(substr($header, 0, $pos));
             $value = substr($header, $pos+2);
 
-            if (strtolower($name) == "set-cookie") {
+            if (strtolower($name) === 'set-cookie') {
 
                 $cookie = CookieParser::fromString($value);
                 $this->cookies[] = new Cookie(
@@ -105,15 +105,10 @@ class CurlHeaderCollector extends HeaderCollector
 
             } else {
                 if (array_key_exists($name, $this->headers)) {
-                    // maybe we can have more than one header with same key (ex: set-cookie, xkey, ykey)
-                    if (is_array($this->headers[$name])) {
-                        $this->headers[$name] = array_merge($this->headers[$name], [$name]);
-                    } else {
-                        $this->headers[$name] = [
-                            $this->headers[$name],
-                            $name,
-                        ];
+                    if (!is_array($this->headers[$name])) {
+                        $this->headers[$name] = [$this->headers[$name]];
                     }
+                    $this->headers[$name][] = $value;
                 } else {
                     $this->headers[$name] = $value;
                 }
@@ -139,7 +134,7 @@ class CurlHeaderCollector extends HeaderCollector
     }
 
     /**
-     * @return array|Cookie get a list of Cookie instances
+     * @return Cookie[] get a list of Cookie instances
      */
     public function getCookies()
     {
