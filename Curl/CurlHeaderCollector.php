@@ -83,14 +83,14 @@ class CurlHeaderCollector extends HeaderCollector
             return;
         }
 
-        $pos = strpos($header, ": ");
+        $pos = strpos($header, ': ');
 
         if (false !== $pos) {
 
             $name = trim(substr($header, 0, $pos));
             $value = substr($header, $pos+2);
 
-            if (strtolower($name) == "set-cookie") {
+            if (strtolower($name) === 'set-cookie') {
 
                 $cookie = CookieParser::fromString($value);
                 $this->cookies[] = new Cookie(
@@ -134,7 +134,7 @@ class CurlHeaderCollector extends HeaderCollector
     }
 
     /**
-     * @return array|Cookie get a list of Cookie instances
+     * @return Cookie[] get a list of Cookie instances
      */
     public function getCookies()
     {
