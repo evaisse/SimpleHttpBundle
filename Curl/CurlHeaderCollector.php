@@ -112,8 +112,8 @@ class CurlHeaderCollector extends HeaderCollector
                         $this->headers[$name] = array_merge($this->headers[$name], [$value]);
                     } else {
                         $this->headers[$name] = [
-                            $this->headers[$value],
-                            $name,
+                            $this->headers[$name],
+                            $value,
                         ];
                     }
                 } else {
