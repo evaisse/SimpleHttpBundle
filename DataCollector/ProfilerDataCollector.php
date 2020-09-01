@@ -119,6 +119,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
                 'response'      => !empty($v['response']) ? $this->fetchResponseInfos($v['response']) : false,
                 'error'         => !empty($v['error']) ? $this->fetchErrorInfos($v['error']) : false,
                 'debugLink'     => false,
+                'sfDebugLink'   => false,
                 'trace'         => array_slice($v['trace'], 3),
                 'curlCommand'   => $this->buildCurlCommand($v['request']),
             );
@@ -134,6 +135,12 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
                             break;
                         }
                     }
+
+                    if (stripos($h, 'x-debug-token-link:') === 0) {
+                        list($hv, $url) = explode(':', $h, 2);
+                        $calls[$k]['sfDebugLink'] = trim($url);
+                    }
+
                     if (stripos($h, "X-Cache:") !== false && strpos($h, "HIT") !== false) {
                         $calls[$k]['response']['fromHttpCache'] = true;
                     }

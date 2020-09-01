@@ -6,8 +6,14 @@
     <tbody>
         <tr>
             <td>
+                {% if sfDebugLink %}
+                    <a style="float: right;display: inline-block;" href="{{ sfDebugLink }}" target="_blank">
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAgElEQVQYV5XQMQpCQQxF0fNX4G60stFGdyBYuSE3InwQBG20URDclPKKkSAfxXST3FxepvO9nm3c/QDHOGAU8IxZWXhggkB7bHAMGP0clwI3aN36DawRAvVY4VYzxljBHba444pp4CFjve8t+Rtc4vTxVYtc22LFmEeaQ5XlSLwAJVAaAqoDe/cAAAAASUVORK5CYII=" />
+                        Symfony External debug link
+                    </a>
+                {% endif %}
                 {% if debugLink %}
-                    <a style="float: right;display: inline-block" href="{{ debugLink }}" target="_blank">
+                    <a style="float: right;display: inline-block;margin-left: 1em;" href="{{ debugLink }}" target="_blank">
                         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAgElEQVQYV5XQMQpCQQxF0fNX4G60stFGdyBYuSE3InwQBG20URDclPKKkSAfxXST3FxepvO9nm3c/QDHOGAU8IxZWXhggkB7bHAMGP0clwI3aN36DawRAvVY4VYzxljBHba444pp4CFjve8t+Rtc4vTxVYtc22LFmEeaQ5XlSLwAJVAaAqoDe/cAAAAASUVORK5CYII=" />
                         External debug link
                     </a>
