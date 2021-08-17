@@ -4,8 +4,10 @@ namespace evaisse\SimpleHttpBundle\Twig;
 
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
+use Twig\Error\LoaderError;
 use Twig\Extension\ExtensionInterface;
 use Twig\Loader\FilesystemLoader;
+use Twig\Loader\LoaderInterface;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
@@ -20,7 +22,7 @@ class Extension implements ExtensionInterface
     /**
      * @param FilesystemLoader $loader
      */
-    function __construct($loader)
+    function __construct(LoaderInterface $loader)
     {
         $this->loader = $loader;
     }
@@ -28,13 +30,13 @@ class Extension implements ExtensionInterface
     /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return 'simple_http_extension';
     }
 
 
-    public function getFilters()
+    public function getFilters(): array
     {
         $safe = array('is_safe' => array('html'));
 
@@ -50,7 +52,7 @@ class Extension implements ExtensionInterface
     }
 
 
-    public function getFunctions()
+    public function getFunctions(): array
     {
         $safe = array('is_safe' => array('html'));
 
@@ -64,7 +66,7 @@ class Extension implements ExtensionInterface
      * @param int       $decimals
      * @return string
      */
-    public function numberFormat($number, $decimals = 0)
+    public function numberFormat($number, $decimals = 0): string
     {
         static $locale;
 
@@ -77,7 +79,7 @@ class Extension implements ExtensionInterface
      * @param $ms
      * @return string
      */
-    public function formatMilliseconds($ms)
+    public function formatMilliseconds($ms): string
     {
         if ($ms >= 1) {
             return $this->numberFormat($ms, 1) .  ' s';
@@ -90,26 +92,29 @@ class Extension implements ExtensionInterface
      * @param $str
      * @return string
      */
-    public function md5($str)
+    public function md5($str): string
     {
         return md5($str);
     }
-
 
     /**
      * @param $file
      * @return string
      */
-    public function assetInclude($file)
+    public function assetInclude($file): string
     {
-        return $this->loader->getSource($file);
+        try {
+            return $this->loader->getSourceContext($file)->getCode();
+        } catch (LoaderError $e) {
+            return '';
+        }
     }
 
     /**
      * @param int|array $codeOrResponse response data or just an http code
      * @return string
      */
-    public function formatHttpCode($codeOrResponse)
+    public function formatHttpCode($codeOrResponse): string
     {
         $d = $this->fetchInfosFromCodeOrResponse($codeOrResponse);
         return '<span class="http-status badge '.$d['level'].' '.($d['fromCache']?'http-cache-hit':'').'"><abbr title="' . htmlentities($d['text']) . '">'.$d['code'].($d['fromCache']?' <small>+cached</small>':'').'</abbr></span>';
@@ -120,7 +125,7 @@ class Extension implements ExtensionInterface
      * @param int|array $codeOrResponse response data or just an http code
      * @return string
      */
-    public function formatHttpCodeAsSfBadge($codeOrResponse)
+    public function formatHttpCodeAsSfBadge($codeOrResponse): string
     {
         $d = $this->fetchInfosFromCodeOrResponse($codeOrResponse);
         return '<span class="http-status sf-toolbar-status sf-toolbar-status-' . $d['color'].' '.($d['fromCache']?'http-cache-hit':'').'">'
