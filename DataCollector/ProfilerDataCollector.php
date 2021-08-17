@@ -166,7 +166,10 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
         $this->calls[] = array(
             "start"          => microtime(true),
+            'stop'           => 0,
             "request"        => $request,
+            'response'       => null,
+            "error"          => null,
             'stopWatchEvent' => $this->getStopwatch()->start($eventName, 'doctrine'),
             "trace"          => $trace
         );
@@ -252,6 +255,11 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
             }
         }
 
+        if (in_array($request->getRealMethod(), ['POST', 'PUT', 'PATCH']) && !empty($request->getContent())) {
+            $command.= '
+--data "'.addcslashes($request->getContent(), '"').'"';
+        }
+
         $command.='
 "'.$request->getSchemeAndHttpHost().$request->getRequestUri().'"';
         return str_replace("\n", " \\\n", $command);
@@ -263,7 +271,8 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
             'start'      => $call['start'],
             'stop'       => $call['stop'],
             'connection' => 0,
-            'total'      => $call['stop'] - $call['start'],
+            // Stop can be equal to 0 if transaction is still in progress
+            'total'      => $call['stop'] !== 0 ? $call['stop'] - $call['start'] : 0,
         );
 
         if (!empty($call['response']) && method_exists($call['response'], 'getTransferInfos')) {
