@@ -2,10 +2,7 @@
  *
  */
 (function ($) {
-
-
     function replayRequest(url, request, callback) {
-
         window.console && console.log('Replay request :', request);
 
         $.post({
@@ -14,14 +11,17 @@
                 request: JSON.stringify(request)
             }
         }).done(function (data, success, xhr) {
-            $.get({
-                url: xhr.getResponseHeader('X-Debug-Token-Link'),
-                data: {
-                    panel: 'simplehttpprofiler',
-                }
-            }).always(function (html) {
-                callback(null, $(html).find('.http-call'));
-            });
+            // Wait 1 second to be sure the profiler has been generated and can be accessed
+            setTimeout(() => {
+                $.get({
+                    url: xhr.getResponseHeader('X-Debug-Token-Link'),
+                    data: {
+                        panel: 'simplehttpprofiler',
+                    }
+                }).always(function (html) {
+                    callback(null, $(html).find('.http-call'));
+                });
+            }, 1000);
         }).fail(function (err) {
             callback(err, null);
         });
@@ -45,8 +45,6 @@
 
 
     $(document).on('setup', function (event, element) {
-
-        console.log('couou', element);
 
         $(element).find('.tabs').each(function () {
             // tabs

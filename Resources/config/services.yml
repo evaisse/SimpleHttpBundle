@@ -5,9 +5,15 @@ services:
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         public: false
 
+    evaisse\SimpleHttpBundle\Controller\ReplayController: ~
+    evaisse\SimpleHttpBundle\Http\Kernel: ~
+    evaisse\SimpleHttpBundle\Service\Helper: ~
+
+    simple_http.helper: '@evaisse\SimpleHttpBundle\Service\Helper'
+    simple_http.kernel: '@evaisse\SimpleHttpBundle\Http\Kernel'
+
     http:
         alias: simple_http.helper
-
 
     simple_http.logger:
         class: Symfony\Bridge\Monolog\Logger
@@ -19,13 +25,6 @@ services:
         class: Monolog\Handler\StreamHandler
         arguments: ["%kernel.root_dir%/logs/%kernel.environment%.log", 0]
 
-    simple_http.helper:
-        class:      evaisse\SimpleHttpBundle\Service\Helper
-        arguments:
-            $httpKernel: '@simple_http.kernel'
-
-    simple_http.kernel:
-        class:      evaisse\SimpleHttpBundle\Http\Kernel
 
     simple_http.profiler.data_collector:
         class: evaisse\SimpleHttpBundle\DataCollector\ProfilerDataCollector
@@ -36,9 +35,7 @@ services:
             - { name: kernel.event_subscriber }
             - { name: data_collector, template: "@SimpleHttp/Collector/profiler", id: "simplehttpprofiler" }
 
-    simple_http.twig.extension:
-        class: evaisse\SimpleHttpBundle\Twig\Extension
+    evaisse\SimpleHttpBundle\Twig\Extension:
         arguments: ["@twig.loader"]
-        public: false
         tags:
             - { name: twig.extension }
