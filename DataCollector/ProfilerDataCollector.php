@@ -124,7 +124,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
                 'curlCommand'   => $this->buildCurlCommand($v['request']),
             );
 
-            if ($v['response']) {
+            if (isset($v['response'])) {
                 $calls[$k]['response']['fromHttpCache'] = false;
                 foreach ($calls[$k]['response']['headers'] as $h) {
                     foreach(['x-debug-uri:', 'x-debug-link:'] as $hk) {
@@ -259,6 +259,8 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     public function fetchTransferInfos(array $call)
     {
+        $call['stop'] = isset($call['stop']) ? $call['stop'] : 0;
+
         $timing = array(
             'start'      => $call['start'],
             'stop'       => $call['stop'],
