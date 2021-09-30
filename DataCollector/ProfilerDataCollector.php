@@ -33,7 +33,8 @@ use Symfony\Component\Stopwatch\Stopwatch;
  */
 class ProfilerDataCollector extends DataCollector implements EventSubscriberInterface
 {
-
+    /** @var bool */
+    protected $debug;
 
     /**
      * List of emitted requests
@@ -55,6 +56,13 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      */
     protected $stopwatch;
 
+    /**
+     * @param bool $debug
+     */
+    public function __construct(bool $debug)
+    {
+        $this->debug = $debug;
+    }
 
     /**
      * (non-PHPdoc)
@@ -147,6 +155,9 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     public function onPrepare(RequestEvent $event)
     {
+        if (!$this->debug) {
+            return;
+        }
         $request = $event->getRequest();
 
         $eventName = "#" . count($this->calls) . ' ' . $request->getMethod() . ' ' . $request->getUri();
@@ -182,6 +193,9 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     public function onError(ExceptionEvent $event)
     {
+        if (!$this->debug) {
+            return;
+        }
         $key = $this->getRequestKey($event->getRequest());
 
         $this->errors++;
@@ -197,6 +211,9 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     public function onSuccess(ResponseEvent $event)
     {
+        if (!$this->debug) {
+            return;
+        }
         $key = $this->getRequestKey($event->getRequest());
 
         $this->calls[$key] = array_merge($this->calls[$key], array(
