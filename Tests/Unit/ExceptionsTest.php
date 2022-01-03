@@ -74,7 +74,7 @@ class ExceptionsTest extends AbstractTests
     public function testResultException()
     {
         $this->expectException(RequestNotSentException::class);
-        list($helper, $httpKernel) = $this->createContext();
+        [$helper, $httpKernel] = $this->createContext();
 
         $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/ip');
 
@@ -88,7 +88,7 @@ class ExceptionsTest extends AbstractTests
     public function testResultWithClientErrorException($code)
     {
         $this->expectException(HttpException::class);
-        list($helper, $httpKernel) = $this->createContext();
+        [$helper, $httpKernel] = $this->createContext();
 
         $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/status/{code}', array(
             'code' => $code,
@@ -110,7 +110,7 @@ class ExceptionsTest extends AbstractTests
     {
         $this->expectException(HttpException::class);
         $this->expectException(HttpException::class);
-        list($helper, $httpKernel) = $this->createContext();
+        [$helper, $httpKernel] = $this->createContext();
 
         $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/status/{code}', array(
             'code' => $code,
@@ -132,7 +132,7 @@ class ExceptionsTest extends AbstractTests
      */
     public function testExpectedInstancesOfExceptions($code, $cls)
     {
-        list($helper, $httpKernel) = $this->createContext();
+        [$helper, $httpKernel] = $this->createContext();
 
         $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/status/{code}', array(
             'code' => $code,
@@ -164,7 +164,7 @@ class ExceptionsTest extends AbstractTests
      */
     public function testAllowedMethodsFor405()
     {
-        list($helper, $httpKernel) = $this->createContext();
+        [$helper, $httpKernel] = $this->createContext();
 
         $stmt = $helper->prepare('GET', AbstractTests::$baseUrl . '/put');
 

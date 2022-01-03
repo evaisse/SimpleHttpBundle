@@ -7,11 +7,11 @@ use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 
 class RequestNormalizer extends GetSetMethodNormalizer
 {
-    protected function getAttributeValue(object $object, string $attribute, string $format = null, array $context = [])
+    protected function getAttributeValue(object $object, string $attribute, string $format = null, array $context = []): mixed
     {
         $ucfirsted = ucfirst($attribute);
 
-        $haser = 'has'.$ucfirsted;
+        $haser = 'has' . $ucfirsted;
         if ($object instanceof Request && $attribute === 'session' && !$object->$haser()) {
             return null;
         }

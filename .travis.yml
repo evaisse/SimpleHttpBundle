@@ -1,14 +1,10 @@
 language: php
 
 php:
-  - 7.2
-  - 7.3
-  - 7.4
-  - hhvm
+  - 8.0
+  - 8.1
 
 matrix:
-  allow_failures:
-    - php: hhvm
   fast_finish: true
 
 

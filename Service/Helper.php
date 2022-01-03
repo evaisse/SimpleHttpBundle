@@ -7,17 +7,8 @@ use evaisse\SimpleHttpBundle\Http\Kernel;
 use evaisse\SimpleHttpBundle\Http\Request;
 use evaisse\SimpleHttpBundle\Http\SessionCookieJar;
 use evaisse\SimpleHttpBundle\Http\Statement;
-
-
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-
 use Symfony\Component\BrowserKit\CookieJar;
-
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 
@@ -44,7 +35,7 @@ class Helper
      *
      * @return CookieJar
      */
-    public function getDefaultCookieJar()
+    public function getDefaultCookieJar(): SessionCookieJar|CookieJar
     {
         return $this->createCookieJar();
     }
@@ -53,7 +44,7 @@ class Helper
      * @param SessionInterface $session session to store the cookies
      * @return SessionCookieJar
      */
-    public function createCookieJar(SessionInterface $session = null)
+    public function createCookieJar(SessionInterface $session = null): SessionCookieJar
     {
         return new SessionCookieJar($session);
     }
@@ -62,21 +53,19 @@ class Helper
      * Send a batch of services request and returns given list with
      * services populated with responses & results
      *
-     * @throws Exception
-     *
-     * @param  array            $servicesList   A simple array of ServiceInstance
-     * @param  SessionCookieJar $cookieJar      cookie store session
-     * @param  Kernel           $client         http client proxy to use
-     * @return array  given service list
+     * @param array $servicesList A simple array of ServiceInstance
+     * @param SessionCookieJar|null $cookieJar cookie store session
+     * @param Kernel|null $client http client proxy to use
+     * @return Helper given service list
      */
-    public function execute(array $servicesList, SessionCookieJar $cookieJar = null, Kernel $client = null)
+    public function execute(array $servicesList, SessionCookieJar $cookieJar = null, Kernel $client = null): static
     {
         $httpClient = $client ? $client : $this->httpKernel;
-        
+
         /*
             Fetch Cookie jar from session
          */
-        $cookieJar =  $cookieJar ? $cookieJar : $this->getDefaultCookieJar();
+        $cookieJar = $cookieJar ? $cookieJar : $this->getDefaultCookieJar();
 
         foreach ($servicesList as $service) {
             $sessionCookies = $cookieJar->allValues($service->getRequest()->getUri());
@@ -114,7 +103,7 @@ class Helper
      * @param Request $request request to start a statement
      * @return Statement
      */
-    protected function createStatement(Request $request)
+    protected function createStatement(Request $request): Statement
     {
         return new Statement($request, $this->eventDispatcher, $this->httpKernel);
     }
@@ -126,17 +115,17 @@ class Helper
      * The information contained in the URI always take precedence
      * over the other information (server and parameters).
      *
-     * @param string $uri        The URI
-     * @param string $method     The HTTP method
-     * @param array  $parameters The query (GET) or request (POST) parameters
-     * @param array  $cookies    The request cookies ($_COOKIE)
-     * @param array  $files      The request files ($_FILES)
-     * @param array  $server     The server parameters ($_SERVER)
-     * @param string $content    The raw body data
+     * @param string $uri The URI
+     * @param string $method The HTTP method
+     * @param array $parameters The query (GET) or request (POST) parameters
+     * @param array $cookies The request cookies ($_COOKIE)
+     * @param array $files The request files ($_FILES)
+     * @param array $server The server parameters ($_SERVER)
+     * @param string $content The raw body data
      *
      * @return \Symfony\Component\HttpFoundation\Request
      */
-    protected function createRequest($uri, $method = 'GET', $parameters = array(), $cookies = array(), $files = array(), $server = array(), $content = null)
+    protected function createRequest($uri, $method = 'GET', $parameters = array(), $cookies = array(), $files = array(), $server = array(), $content = null): \Symfony\Component\HttpFoundation\Request
     {
         return Request::create($uri, $method, $parameters, $cookies, $files, array(), $content);
     }
@@ -153,12 +142,11 @@ class Helper
      * @param string $content optionnal RAW body content
      * @return \evaisse\SimpleHttpBundle\Http\Statement
      */
-    public function prepare($method, $url, $parameters = array(), $cookies = array(), $files = array(), $server = array(), $content = NULL)
+    public function prepare($method, $url, $parameters = array(), $cookies = array(), $files = array(), $server = array(), $content = NULL): Statement
     {
-        list($url, $parameters) = $this->transformUrl($url, $parameters);
+        [$url, $parameters] = $this->transformUrl($url, $parameters);
         $request = $this->createRequest($url, $method, $parameters, $cookies, $files, array(), $content);
-        $service = $this->createStatement($request);
-        return $service;
+        return $this->createStatement($request);
     }
 
     /**
@@ -169,7 +157,7 @@ class Helper
      *
      * @return array transformed url and remainings params
      */
-    public function transformUrl($urlPattern, array $parameters = array())
+    public function transformUrl(string $urlPattern, array $parameters = array()): array
     {
         if (empty($parameters)
             || !preg_match('/\{[a-z+][a-z0-9_]+\}/i', $urlPattern)
@@ -178,7 +166,7 @@ class Helper
         }
 
         foreach ($parameters as $key => $value) {
-            if (strpos($urlPattern, '{' . $key . '}') !== false) {
+            if (str_contains($urlPattern, '{' . $key . '}')) {
                 $urlPattern = str_replace('{' . $key . '}', urlencode($value), $urlPattern);
                 unset($parameters[$key]);
             }
@@ -193,7 +181,7 @@ class Helper
      * @param array $parameters a list of parameters interpolated with url route if needed
      * @return mixed http transaction body result, automaticaly parsed if json is returned
      */
-    protected function fire($method, $url, array $parameters = array())
+    protected function fire(string $method, string $url, array $parameters = array()): mixed
     {
         $transaction = $this->prepare($method, $url, $parameters);
 
@@ -214,7 +202,7 @@ class Helper
      * @param array $parameters a list of parameters interpolated with url route if needed
      * @return mixed http transaction body result, automaticaly parsed if json is returned
      */
-    public function GET($url, array $parameters = array())
+    public function GET($url, array $parameters = array()): mixed
     {
         return $this->fire('GET', $url, $parameters);
     }
@@ -224,7 +212,7 @@ class Helper
      * @param array $parameters a list of parameters interpolated with url route if needed
      * @return mixed http transaction body result, automaticaly parsed if json is returned
      */
-    public function POST($url, array $parameters = array())
+    public function POST($url, array $parameters = array()): mixed
     {
         return $this->fire('POST', $url, $parameters);
     }
@@ -234,7 +222,7 @@ class Helper
      * @param array $parameters a list of parameters interpolated with url route if needed
      * @return mixed http transaction body result, automaticaly parsed if json is returned
      */
-    public function PUT($url, array $parameters = array())
+    public function PUT($url, array $parameters = array()): mixed
     {
         return $this->fire('PUT', $url, $parameters);
     }
@@ -244,7 +232,7 @@ class Helper
      * @param array $parameters a list of parameters interpolated with url route if needed
      * @return mixed http transaction body result, automaticaly parsed if json is returned
      */
-    public function PATCH($url, array $parameters = array())
+    public function PATCH($url, array $parameters = array()): mixed
     {
         return $this->fire('PATCH', $url, $parameters);
     }
@@ -254,11 +242,10 @@ class Helper
      * @param array $parameters a list of parameters interpolated with url route if needed
      * @return mixed http transaction body result, automaticaly parsed if json is returned
      */
-    public function DELETE($url, array $parameters = array())
+    public function DELETE($url, array $parameters = array()): mixed
     {
         return $this->fire('DELETE', $url, $parameters);
     }
-
 
 
 }

@@ -9,17 +9,15 @@
 
 namespace evaisse\SimpleHttpBundle\Http\Kernel;
 
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-
+use evaisse\SimpleHttpBundle\Curl\Collector\ContentCollector;
+use evaisse\SimpleHttpBundle\Curl\Collector\HeaderCollector;
+use evaisse\SimpleHttpBundle\Curl\CurlErrorException;
+use evaisse\SimpleHttpBundle\Curl\Request as CurlRequest;
+use evaisse\SimpleHttpBundle\Curl\RequestGenerator;
+use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\HeaderBag;
-
-use evaisse\SimpleHttpBundle\Curl\Request as CurlRequest;
-use evaisse\SimpleHttpBundle\Curl\Collector\HeaderCollector;
-use evaisse\SimpleHttpBundle\Curl\Collector\ContentCollector;
-use evaisse\SimpleHttpBundle\Curl\CurlErrorException;
-use evaisse\SimpleHttpBundle\Curl\RequestGenerator;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 
 /**
@@ -39,7 +37,8 @@ class RemoteHttpKernel implements HttpKernelInterface
 
     private $lastCurlRequest;
 
-    public function __construct(RequestGenerator $generator = null) {
+    public function __construct(RequestGenerator $generator = null)
+    {
         $this->generator = $generator;
     }
 
@@ -50,16 +49,17 @@ class RemoteHttpKernel implements HttpKernelInterface
      * When $catch is true, the implementation must catch all exceptions
      * and do its best to convert them to a Response instance.
      *
-     * @param  Request $request A Request instance
-     * @param  integer $type    The type of the request
+     * @param Request $request A Request instance
+     * @param integer $type The type of the request
      *                          (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
-     * @param  Boolean $catch   Whether to catch exceptions or not
+     * @param Boolean $catch Whether to catch exceptions or not
      *
      * @return Response A Response instance
      *
      * @throws \Exception When an Exception occurs during processing
      */
-    public function handle(Request $request, $type = HttpKernelInterface::SUB_REQUEST, $catch = true) {
+    public function handle(Request $request, int $type = HttpKernelInterface::SUB_REQUEST, bool $catch = true): Response
+    {
         try {
             return $this->handleRaw($request);
         } catch (\Exception $e) {
@@ -71,20 +71,22 @@ class RemoteHttpKernel implements HttpKernelInterface
         }
     }
 
-    
-    private function handleException(\Exception $e, Request $request) {
+
+    private function handleException(\Exception $e, Request $request)
+    {
         return new Response(
             $e->getMessage(),
             500
         );
     }
 
-    private function getCurlRequest() {
-        if(isset($this->generator)) {
+    private function getCurlRequest()
+    {
+        if (isset($this->generator)) {
             return $this->generator->getRequest();
-        } else {
-            return new CurlRequest();
         }
+
+        return new CurlRequest();
     }
 
     /**
@@ -95,15 +97,16 @@ class RemoteHttpKernel implements HttpKernelInterface
      *
      * @return Response
      *
-     * @throws CurlErrorException 
+     * @throws CurlErrorException
      */
-    private function handleRaw(Request $request) {
+    private function handleRaw(Request $request)
+    {
         $curl = $this->lastCurlRequest = $this->getCurlRequest();
         $curl->setOptionArray(
             array(
-                CURLOPT_URL=>$request->getUri(),
-                CURLOPT_HTTPHEADER=>$this->buildHeadersArray($request->headers),
-                CURLINFO_HEADER_OUT=>true
+                CURLOPT_URL => $request->getUri(),
+                CURLOPT_HTTPHEADER => $this->buildHeadersArray($request->headers),
+                CURLINFO_HEADER_OUT => true
             )
         );
 
@@ -113,13 +116,13 @@ class RemoteHttpKernel implements HttpKernelInterface
             $this->setPostFields($curl, $request);
         }
 
-        if("PUT" === $request->getMethod() && count($request->files->all()) > 0) {
+        if ("PUT" === $request->getMethod() && count($request->files->all()) > 0) {
             $file = current($request->files->all());
 
             $curl->setOptionArray(
                 array(
-                    CURLOPT_INFILE=>'@'.$file->getRealPath(),
-                    CURLOPT_INFILESIZE=>$file->getSize()
+                    CURLOPT_INFILE => '@' . $file->getRealPath(),
+                    CURLOPT_INFILESIZE => $file->getSize()
                 )
             );
         }
@@ -130,8 +133,8 @@ class RemoteHttpKernel implements HttpKernelInterface
         // These options must not be tampered with to ensure proper functionality
         $curl->setOptionArray(
             array(
-                CURLOPT_HEADERFUNCTION=>array($headers, "collect"),
-                CURLOPT_WRITEFUNCTION=>array($content, "collect"),
+                CURLOPT_HEADERFUNCTION => array($headers, "collect"),
+                CURLOPT_WRITEFUNCTION => array($content, "collect"),
             )
         );
 
@@ -156,7 +159,8 @@ class RemoteHttpKernel implements HttpKernelInterface
      * @param CurlRequest $curl cURL request object
      * @param Request $request the Request object we're populating
      */
-    private function setPostFields(CurlRequest $curl, Request $request) {
+    private function setPostFields(CurlRequest $curl, Request $request)
+    {
         $postfields = null;
         $content = $request->getContent();
 
@@ -176,11 +180,13 @@ class RemoteHttpKernel implements HttpKernelInterface
      *
      * @return array An array of header strings
      */
-    private function buildHeadersArray(HeaderBag $headerBag) {
-        return explode("\r\n",$headerBag);
+    private function buildHeadersArray(HeaderBag $headerBag)
+    {
+        return explode("\r\n", $headerBag);
     }
 
-    public function getLastCurlRequest() {
+    public function getLastCurlRequest()
+    {
         return $this->lastCurlRequest;
     }
 }

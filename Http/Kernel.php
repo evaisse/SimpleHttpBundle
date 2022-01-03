@@ -9,6 +9,7 @@
 namespace evaisse\SimpleHttpBundle\Http;
 
 
+use CURLFile;
 use evaisse\SimpleHttpBundle\Curl\Collector\ContentCollector;
 use evaisse\SimpleHttpBundle\Curl\CurlErrorException;
 use evaisse\SimpleHttpBundle\Curl\CurlEvents;
@@ -18,12 +19,12 @@ use evaisse\SimpleHttpBundle\Curl\MultiManager;
 use evaisse\SimpleHttpBundle\Curl\Request as CurlRequest;
 use evaisse\SimpleHttpBundle\Curl\RequestGenerator;
 use evaisse\SimpleHttpBundle\Http\Exception\CurlTransportException;
-use evaisse\SimpleHttpBundle\Http\Exception\HttpError;
 use evaisse\SimpleHttpBundle\Http\Kernel\RemoteHttpKernel;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request as HttpRequest;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -40,37 +41,35 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 class Kernel extends RemoteHttpKernel
 {
     /**
-     * @var RequestGenerator An instance of Curl\RequestGenerator for getting preconfigured Curl\Request objects
+     * @var RequestGenerator|null An instance of Curl\RequestGenerator for getting preconfigured Curl\Request objects
      */
-    protected $generator = null;
-
+    protected ?RequestGenerator $generator = null;
 
     /**
      * @var EventDispatcherInterface
      */
-    protected $eventDispatcher;
-
+    protected EventDispatcherInterface $eventDispatcher;
 
     /**
      * @var array a statement pool that contains statements during multicurl
      */
-    protected $stmts;
+    protected array $stmts;
 
 
     /**
      * @var string a tmp cookie filepath
      */
-    protected $tmpCookieFile;
+    protected string $tmpCookieFile;
 
 
     /**
      * @var Statement[]
      */
-    protected $services = [];
+    protected array $services = [];
 
     /**
      * @param EventDispatcherInterface $eventDispatcher
-     * @param RequestGenerator $generator Optionnal generator to construct curlrequest
+     * @param RequestGenerator|null $generator Optionnal generator to construct curlrequest
      */
     public function __construct(EventDispatcherInterface $eventDispatcher, RequestGenerator $generator = null)
     {
@@ -81,7 +80,7 @@ class Kernel extends RemoteHttpKernel
     /**
      * @param MultiInfoEvent $e
      */
-    public function handleMultiInfoEvent(MultiInfoEvent $e)
+    public function handleMultiInfoEvent(MultiInfoEvent $e): void
     {
         $r = $e->getRequest();
 
@@ -154,9 +153,9 @@ class Kernel extends RemoteHttpKernel
     /**
      * handle multi curl
      * @param Statement[] $stmts a list of Service instances
-     * @return HttpKernel current httpkernel for method chaining
+     * @return Kernel current httpkernel for method chaining
      */
-    public function execute(array $stmts)
+    public function execute(array $stmts): static
     {
         $dispatcher = new EventDispatcher();
         $dispatcher->addListener(
@@ -228,21 +227,17 @@ class Kernel extends RemoteHttpKernel
      *
      * @throws \Exception When an Exception occurs during processing
      */
-    public function handle(HttpRequest $request, $type = HttpKernelInterface::SUB_REQUEST, $catch = true) 
+    public function handle(HttpRequest $request, int $type = HttpKernelInterface::SUB_REQUEST, bool $catch = true): HttpResponse 
     {
         try {
-            $stmt = new Statement($request);
+            $stmt = new Statement($request, $this->eventDispatcher);
 
             $this->execute([
                 $stmt
             ]);
 
             if ($stmt->hasError()) {
-                if ($stmt->getError() instanceof HttpError) {
-                    throw $stmt->getError()->createHttpFoundationException();
-                } else {
-                    throw $stmt->getError();
-                }
+                throw $stmt->getError();
             }
 
             return $stmt->getResponse();
@@ -262,7 +257,7 @@ class Kernel extends RemoteHttpKernel
      * @param  HttpRequest $request [description]
      * @return Response http response 
      */
-    protected function handleException(\Exception $e, HttpRequest $request) 
+    protected function handleException(\Exception $e, HttpRequest $request): Response
     {
         return new Response(
             $e->getMessage(),
@@ -275,13 +270,13 @@ class Kernel extends RemoteHttpKernel
      * Get generated curl request
      * @return CurlRequest generated curl request
      */
-    protected function getCurlRequest() 
+    protected function getCurlRequest(): CurlRequest
     {
         if ($this->generator !== null) {
             return $this->generator->getRequest();
-        } else {
-            return new CurlRequest();
         }
+
+        return new CurlRequest();
     }
 
     /**
@@ -289,11 +284,11 @@ class Kernel extends RemoteHttpKernel
      *
      * @param Statement $stmt the request to execute
      *
-     * @return Response
+     * @return array
      *
      * @throws CurlErrorException 
      */
-    protected function prepareRawCurlHandler(Statement $stmt)
+    protected function prepareRawCurlHandler(Statement $stmt): array
     {
         $request = $stmt->getRequest();
 
@@ -312,6 +307,7 @@ class Kernel extends RemoteHttpKernel
         }
 
         if ($stmt->getIgnoreSslErrors()) {
+            /** @noinspection CurlSslServerSpoofingInspection */
             $curl->setOptionArray([
                 CURLOPT_SSL_VERIFYHOST => 0,
                 CURLOPT_SSL_VERIFYPEER => false,
@@ -319,7 +315,7 @@ class Kernel extends RemoteHttpKernel
         }
 
 
-        if ($request->getMethod() != "GET") {
+        if ($request->getMethod() !== "GET") {
             /*
              * When body is sent as a raw string, we need to use customrequest option
              */
@@ -364,14 +360,14 @@ class Kernel extends RemoteHttpKernel
      *
      * @return mixed|string|CURLFile if version >= 5.5, CURLFile instance will be return, otherwise a string resource
      */
-    protected function createCurlFile($filename, $mimetype, $postname = null)
+    protected function createCurlFile(string $filename, string $mimetype, string $postname = null): mixed
     {
         if (!realpath($filename) && is_file($filename)) {
             throw new \InvalidArgumentException('invalid given filepath : ' . $filename);
         }
 
         if (function_exists('curl_file_create')) {
-            return new \CURLFile($filename, $mimetype, $postname);
+            return new CURLFile($filename, $mimetype, $postname);
         }
 
         $postname = $postname ? $postname : basename($filename);
@@ -384,7 +380,7 @@ class Kernel extends RemoteHttpKernel
      * @param CurlRequest $curl cURL request object
      * @param Request $request the Request object we're populating
      */
-    protected function setPostFields(CurlRequest $curl, HttpRequest $request)
+    protected function setPostFields(CurlRequest $curl, HttpRequest $request): void
     {
         $postfields = null;
         $content = $request->getContent();
@@ -423,7 +419,7 @@ class Kernel extends RemoteHttpKernel
      *
      * @return string
      */
-    protected function buildCookieString(ParameterBag $cookiesBag)
+    protected function buildCookieString(ParameterBag $cookiesBag): string
     {
         $cookies = [];
 
@@ -431,7 +427,7 @@ class Kernel extends RemoteHttpKernel
             $cookies[] = "$key=$value";
         }
 
-        return join(';', $cookies);
+        return implode(';', $cookies);
     }
 
 
@@ -442,7 +438,7 @@ class Kernel extends RemoteHttpKernel
      * @param Request $request request object after being sent
      * @param array $curlInfo curl info needed to update the request object with final curl headers sent
      */
-    protected function updateRequestHeadersFromCurlInfos(Request $request, array $curlInfo)
+    protected function updateRequestHeadersFromCurlInfos(Request $request, array $curlInfo): void
     {
         if (!isset($curlInfo['request_header'])) {
             return;
@@ -452,7 +448,7 @@ class Kernel extends RemoteHttpKernel
         $replacementsHeaders = array();
         foreach ($headers as $header) {
             if (strpos($header, ':')) {
-                list($k, $v) = explode(':', $header, 2);
+                [$k, $v] = explode(':', $header, 2);
                 $v = trim($v);
                 $k = trim($k);
                 $replacementsHeaders[$k] = $v;
@@ -468,7 +464,7 @@ class Kernel extends RemoteHttpKernel
      *
      * @return array An array of header strings
      */
-    protected function buildHeadersArray(HeaderBag $headerBag) 
+    protected function buildHeadersArray(HeaderBag $headerBag): array
     {
         return explode("\r\n", $headerBag);
     }
@@ -479,7 +475,7 @@ class Kernel extends RemoteHttpKernel
      *
      * @return EventDispatcherInterface
      */
-    public function getEventDispatcher()
+    public function getEventDispatcher(): EventDispatcherInterface
     {
         return $this->eventDispatcher;
     }
@@ -491,7 +487,7 @@ class Kernel extends RemoteHttpKernel
      *
      * @return self
      */
-    protected function setEventDispatcher(EventDispatcherInterface $eventDispatcher)
+    protected function setEventDispatcher(EventDispatcherInterface $eventDispatcher): static
     {
         $this->eventDispatcher = $eventDispatcher;
 

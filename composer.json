@@ -1,40 +1,52 @@
 {
-    "name": "evaisse/simple-http-bundle",
-    "description": "A very simple symfony http client bundle built on the httpfoundation component (instead of guzzle), using cURL and cURL multi.",
-    "keywords": ["http", "symfony", "curl", "curlmulti", "httpfoundation", "requests", "simple", "client"],
-    "homepage": "https://github.com/evaisse/SimpleHttpBundle",
-    "require": {
-        "php": ">=7.2",
-        "react/promise": "2.2.*",
-        "symfony/http-foundation": "^4.4|^5.0",
-        "symfony/browser-kit": "^4.4|^5.0",
-        "symfony/event-dispatcher": "^4.4|^5.0",
-        "symfony/serializer": "^4.4|^5.0",
-        "symfony/http-kernel": "^4.4|^5.0",
-        "symfony/stopwatch": "^4.4|^5.0",
-        "symfony/config": "^4.4|^5.0",
-        "symfony/dependency-injection": "^4.4|^5.0",
-        "symfony/security-http": "^4.4|^5.0",
-        "symfony/twig-bundle": "^4.4|^5.0",
-        "sensio/framework-extra-bundle": "^4.4|^5.0",
-        "ext-dom": "*",
-        "ext-json": "*",
-        "ext-curl": "*"
-    },
-    "require-dev": {
-        "satooshi/php-coveralls": "^2.2",
-        "phpunit/phpunit": ">=5"
-    },
-    "suggest": {
-    },
-    "license": "MIT",
-    "autoload": {
-        "psr-4": { "evaisse\\SimpleHttpBundle\\": "" }
-    },
-    "authors": [
-        {
-            "name": "Emmanuel VAÏSSE",
-            "email": "evaisse@gmail.com"
-        }
-    ]
+  "name": "evaisse/simple-http-bundle",
+  "description": "A very simple symfony http client bundle built on the httpfoundation component (instead of guzzle), using cURL and cURL multi.",
+  "keywords": [
+    "http",
+    "symfony",
+    "curl",
+    "curlmulti",
+    "httpfoundation",
+    "requests",
+    "simple",
+    "client"
+  ],
+  "homepage": "https://github.com/evaisse/SimpleHttpBundle",
+  "require": {
+    "php": "^8.0",
+    "react/promise": "2.2.*",
+    "symfony/http-foundation": "^6.0",
+    "symfony/browser-kit": "^6.0",
+    "symfony/event-dispatcher": "^6.0",
+    "symfony/serializer": "^6.0",
+    "symfony/http-kernel": "^6.0",
+    "symfony/stopwatch": "^6.0",
+    "symfony/config": "^6.0",
+    "symfony/dependency-injection": "^6.0",
+    "symfony/security-http": "^6.0",
+    "symfony/twig-bundle": "^6.0",
+    "sensio/framework-extra-bundle": "^6.0",
+    "ext-dom": "*",
+    "ext-json": "*",
+    "ext-curl": "*"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest",
+    "php-coveralls/php-coveralls": "^2.5.2",
+    "phpunit/phpunit": ">=5"
+  },
+  "suggest": {
+  },
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "evaisse\\SimpleHttpBundle\\": ""
+    }
+  },
+  "authors": [
+    {
+      "name": "Emmanuel VAÏSSE",
+      "email": "evaisse@gmail.com"
+    }
+  ]
 }
