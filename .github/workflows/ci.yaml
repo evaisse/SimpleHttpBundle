@@ -1,0 +1,35 @@
+name: CI
+
+on: [ "push", "pull_request" ]
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        php-versions: [ '7.4', '8.0', '8.1' ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: php-actions/composer@v6
+        with:
+          php_version: ${{ matrix.php-versions }}
+          php_extensions: pcov
+          version: 2
+          dev: yes
+          args: --no-interaction --no-progress --prefer-dist
+      - name: "Run php -l on all bundle files"
+        run: >
+          find . -not -path "./vendor/*" -type f -name '*.php' -exec php -l {} \;
+      - uses: php-actions/phpstan@v3
+        with:
+          path: src
+          memory_limit: 1G
+          level: 0
+          php_version: ${{ matrix.php-versions }}
+      - name: Run phpunit
+        run: XDEBUG_MODE=coverage php ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+      - name: Upload coverage results to Coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          php vendor/bin/coveralls -v

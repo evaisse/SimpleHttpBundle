@@ -18,6 +18,7 @@ use evaisse\SimpleHttpBundle\Curl\MultiManager;
 use evaisse\SimpleHttpBundle\Curl\Request as CurlRequest;
 use evaisse\SimpleHttpBundle\Curl\RequestGenerator;
 use evaisse\SimpleHttpBundle\Http\Exception\CurlTransportException;
+use evaisse\SimpleHttpBundle\Http\Exception\ErrorHttpException;
 use evaisse\SimpleHttpBundle\Http\Exception\HttpError;
 use evaisse\SimpleHttpBundle\Http\Kernel\RemoteHttpKernel;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -231,17 +232,18 @@ class Kernel extends RemoteHttpKernel
     public function handle(HttpRequest $request, $type = HttpKernelInterface::SUB_REQUEST, $catch = true) 
     {
         try {
-            $stmt = new Statement($request);
+            $stmt = new Statement($request, $this->eventDispatcher, $this);
 
             $this->execute([
                 $stmt
             ]);
 
             if ($stmt->hasError()) {
-                if ($stmt->getError() instanceof HttpError) {
-                    throw $stmt->getError()->createHttpFoundationException();
+                $error = $stmt->getError();
+                if ($error instanceof ErrorHttpException) {
+                    throw $error->createHttpFoundationException();
                 } else {
-                    throw $stmt->getError();
+                    throw $error;
                 }
             }
 
