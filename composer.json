@@ -36,7 +36,6 @@
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
-    "php-coveralls/php-coveralls": "^2.5.2",
     "phpunit/phpunit": ">=9.5.11"
   },
   "suggest": {
