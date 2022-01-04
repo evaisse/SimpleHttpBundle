@@ -22,8 +22,8 @@
         "ext-curl": "*"
     },
     "require-dev": {
-        "satooshi/php-coveralls": "^2.2",
-        "phpunit/phpunit": ">=5"
+        "phpunit/phpunit": ">=5",
+        "php-coveralls/php-coveralls": "^2.5"
     },
     "suggest": {
     },
