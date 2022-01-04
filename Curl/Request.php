@@ -87,7 +87,6 @@ class Request implements CurlRequest
      */
     public function execute() {
         $value = curl_exec($this->handle);
-
         $error_no = curl_errno($this->handle);
 
         if (0 !== $error_no) {

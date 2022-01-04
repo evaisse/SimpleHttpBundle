@@ -23,7 +23,6 @@ class CustomGetSetNormalizer extends GetSetMethodNormalizer
         return parent::normalize($object, $format, $context);
     }
 
-
     /**
      * @param \Throwable $e throwable to normalize
      * @return array normalized output
@@ -44,5 +43,4 @@ class CustomGetSetNormalizer extends GetSetMethodNormalizer
 
         return $data;
     }
-
 }

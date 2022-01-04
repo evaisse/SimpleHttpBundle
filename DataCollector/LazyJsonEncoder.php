@@ -4,6 +4,7 @@
  * Date: 29/11/2016
  * Time: 15:05
  */
+
 namespace evaisse\SimpleHttpBundle\DataCollector;
 
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -14,11 +15,10 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
  */
 class LazyJsonEncoder extends JsonEncoder
 {
-
     /**
      * @var string
      */
-    protected $encoding;
+    protected string $encoding;
 
     /**
      * LazyJsonEncoder constructor.
@@ -37,18 +37,21 @@ class LazyJsonEncoder extends JsonEncoder
      * @param mixed $data data to encode
      * @return mixed data encoded
      */
-    public function utf8Encode($data)
+    public function utf8Encode(mixed $data): mixed
     {
         if (is_string($data)) {
             return utf8_encode($data);
-        } else if ($data instanceof \ArrayObject) {
+        }
+
+        if ($data instanceof \ArrayObject) {
             $data = $data->getArrayCopy();
-        } else if($data instanceof \Exception) {
+        } elseif ($data instanceof \Exception) {
             return $data->__toString();
-        } else if (is_object($data)) {
+        }
+        if (is_object($data)) {
             $ovs = get_object_vars($data);
             $new = clone $data;
-            foreach ($ovs as $k => $v)    {
+            foreach ($ovs as $k => $v) {
                 if ($new instanceof \ArrayObject) {
                     $new[$k] = $this->utf8Encode($new[$k]);
                 } else {
@@ -56,7 +59,8 @@ class LazyJsonEncoder extends JsonEncoder
                 }
             }
             return $new;
-        } else if (!is_array($data)) {
+        }
+        if (!is_array($data)) {
             return $data;
         }
 
@@ -72,7 +76,7 @@ class LazyJsonEncoder extends JsonEncoder
     /**
      * {@inheritdoc}
      */
-    public function encode($data, $format, array $context = array())
+    public function encode(mixed $data, string $format, array $context = array()): string
     {
         try {
             if ($this->encoding !== 'utf-8') {
@@ -82,7 +86,7 @@ class LazyJsonEncoder extends JsonEncoder
         } catch (\Exception $e) {
             $data = $this->utf8Encode($data); // safely try to force encoding
             try {
-                return json_encode($data);
+                return json_encode($data, JSON_THROW_ON_ERROR);
             } catch (\Exception $e) {
                 return "{}";
             }
@@ -92,14 +96,12 @@ class LazyJsonEncoder extends JsonEncoder
     /**
      * {@inheritdoc}
      */
-    public function decode($data, $format, array $context = array())
+    public function decode(string $data, string $format, array $context = array()): mixed
     {
         try {
             return $this->decodingImpl->decode($data, self::FORMAT, $context);
         } catch (\Exception $e) {
-            return json_decode($data);
+            return json_decode($data, false, 512, JSON_THROW_ON_ERROR);
         }
     }
-
-
 }
