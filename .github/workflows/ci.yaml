@@ -14,11 +14,15 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: pcov, composer:v1, phpstan:0.x
+          extensions: pcov, phpstan:0.x
         env:
           fail-fast: true
-      - name: "Composer install"
-        run: "composer install --no-interaction --no-progress --prefer-dist"
+      - uses: php-actions/composer@v6
+        with:
+          php_version: ${{ matrix.php-versions }}
+          version: 2
+          dev: yes
+          args: --no-interaction --no-progress --prefer-dist
       - name: "Run php -l on all bundle files"
         run: find . -not -path "./vendor/*" -type f -name '*.php' -exec php -l {} \;
       - name: "PHPSTAN"
