@@ -31,6 +31,9 @@
     "ext-curl": "*",
     "symfony/mime": "^6.0"
   },
+  "conflict": {
+    "symfony/serializer": "6.0.0"
+  },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
     "php-coveralls/php-coveralls": "^2.5.2",
