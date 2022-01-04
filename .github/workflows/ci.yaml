@@ -22,7 +22,7 @@ jobs:
           find . -not -path "./vendor/*" -type f -name '*.php' -exec php -l {} \;
       - uses: php-actions/phpstan@v3
         with:
-          path: src
+          path: .
           memory_limit: 1G
           level: 0
           php_version: ${{ matrix.php-versions }}
