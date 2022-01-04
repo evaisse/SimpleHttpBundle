@@ -14,7 +14,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: pcov, phpstan:0.x
+          extensions: pcov
         env:
           fail-fast: true
       - uses: php-actions/composer@v6
@@ -25,8 +25,12 @@ jobs:
           args: --no-interaction --no-progress --prefer-dist
       - name: "Run php -l on all bundle files"
         run: find . -not -path "./vendor/*" -type f -name '*.php' -exec php -l {} \;
-      - name: "PHPSTAN"
-        run: "phpstan analyse --level=0 --memory-limit=1G ."
+      - uses: php-actions/phpstan@v3
+        with:
+          path: .
+          memory_limit: 1G
+          level: 0
+          php_version: ${{ matrix.php-versions }}
       - name: "Run phpunit"
         run: "XDEBUG_MODE=coverage php ./vendor/bin/phpunit --coverage-text --coverage-clover build/logs/clover.xml"
       - name: "Upload coverage results to Coveralls"
