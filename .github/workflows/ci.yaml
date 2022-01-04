@@ -7,6 +7,7 @@ jobs:
     strategy:
       matrix:
         php-versions: [ '7.4' ]
+        composer-options: [ '--prefer-lowest', '']
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -17,12 +18,14 @@ jobs:
           extensions: pcov
         env:
           fail-fast: true
+      - name: "Remove composer.lock file"
+        run: rm composer.lock || true
       - uses: php-actions/composer@v6
         with:
           php_version: ${{ matrix.php-versions }}
           version: 2
           dev: yes
-          args: --no-interaction --no-progress --prefer-dist
+          args: --no-interaction --no-progress --prefer-dist ${{ matrix.composer-options }}
       - name: "Run php -l on all bundle files"
         run: find . -not -path "./vendor/*" -type f -name '*.php' -exec php -l {} \;
       - uses: php-actions/phpstan@v3
