@@ -14,7 +14,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: pcov, composer:v2, phpstan
+          extensions: pcov, composer:v1, phpstan:0.x
+        env:
+          fail-fast: true
       - name: "Composer install"
         run: "composer install --no-interaction --no-progress --prefer-dist"
       - name: "Run php -l on all bundle files"
