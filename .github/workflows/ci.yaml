@@ -36,4 +36,4 @@ jobs:
           level: 0
           php_version: ${{ matrix.php-versions }}
       - name: "Run phpunit"
-        run: "XDEBUG_MODE=coverage php ./vendor/bin/phpunit --coverage-text
+        run: "XDEBUG_MODE=coverage php ./vendor/bin/phpunit --coverage-text"
