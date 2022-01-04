@@ -22,6 +22,7 @@ jobs:
         run: rm composer.lock || true
       - uses: php-actions/composer@v6
         with:
+          command: update # use update to use --prefer-lowest parameter
           php_version: ${{ matrix.php-versions }}
           version: 2
           dev: yes
