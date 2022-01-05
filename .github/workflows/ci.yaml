@@ -1,0 +1,39 @@
+name: CI
+
+on: [ "pull_request" ]
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        php-versions: [ '8.0', '8.1' ]
+        composer-options: [ '--prefer-lowest', '']
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: pcov
+        env:
+          fail-fast: true
+      - name: "Remove composer.lock file"
+        run: rm composer.lock || true
+      - uses: php-actions/composer@v6
+        with:
+          command: update # use update to use --prefer-lowest parameter
+          php_version: ${{ matrix.php-versions }}
+          version: 2
+          dev: yes
+          args: --no-interaction --no-progress --prefer-dist ${{ matrix.composer-options }}
+      - name: "Run php -l on all bundle files"
+        run: find . -not -path "./vendor/*" -type f -name '*.php' -exec php -l {} \;
+      - uses: php-actions/phpstan@v3
+        with:
+          path: .
+          memory_limit: 1G
+          level: 0
+          php_version: ${{ matrix.php-versions }}
+      - name: "Run phpunit"
+        run: "XDEBUG_MODE=coverage php ./vendor/bin/phpunit --coverage-text"

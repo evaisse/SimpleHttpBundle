@@ -2,12 +2,10 @@ SimpleHttpBundle
 ======
 
 
-### While Still maintained, I recommand you to replace this bundle with the [http-plug bundle](https://github.com/php-http/HttplugBundle) with has better support and a handy plug-in support.
+### While Still maintained, I recommand you to replace this bundle with the [symfony/http-client](https://github.com/symfony/http-client) with has better support and a handy plug-in support.
 
 A symfony2/3/4/5 http client bundle built on the httpfoundation component (instead of guzzle), using cURL as engine.
 
-
-[![testing](https://travis-ci.org/evaisse/SimpleHttpBundle.svg?branch=master)](https://travis-ci.org/evaisse/SimpleHttpBundle)
 [![Coverage Status](https://coveralls.io/repos/evaisse/SimpleHttpBundle/badge.svg?branch=master)](https://coveralls.io/r/evaisse/SimpleHttpBundle?branch=master)
 
 Quickstart

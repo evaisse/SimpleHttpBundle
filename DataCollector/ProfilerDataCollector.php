@@ -465,7 +465,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      */
     public function getClientErrors()
     {
-        return array_filter($this->getCalls(), function ($call) {
+        return array_filter($this->getCalls(), static function ($call) {
             if ($call['response']
                 && array_key_exists('statusCode', $call['response'])
                 && $call['response']['statusCode'] < 500
@@ -500,7 +500,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      */
     public function getServerErrors()
     {
-        return array_filter($this->getCalls(), function ($call) {
+        return array_filter($this->getCalls(), static function ($call) {
             if (is_array($call['response']) && array_key_exists('statusCode', $call['response']) && $call['response']['statusCode'] >= 500) {
                 return true;
             }

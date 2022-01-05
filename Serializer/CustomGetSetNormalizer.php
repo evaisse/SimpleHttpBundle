@@ -15,14 +15,13 @@ class CustomGetSetNormalizer extends GetSetMethodNormalizer
     /**
      * {@inheritdoc}
      */
-    public function normalize($object, $format = null, array $context = [])
+    public function normalize(mixed $object, string $format = null, array $context = [])
     {
         if ($object instanceof \Throwable) {
             return $this->normalizeThrowable($object);
         }
         return parent::normalize($object, $format, $context);
     }
-
 
     /**
      * @param \Throwable $e throwable to normalize
@@ -44,5 +43,4 @@ class CustomGetSetNormalizer extends GetSetMethodNormalizer
 
         return $data;
     }
-
 }
