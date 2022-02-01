@@ -10,7 +10,6 @@ use evaisse\SimpleHttpBundle\Http\StatementEventMap;
 use evaisse\SimpleHttpBundle\Serializer\CustomGetSetNormalizer;
 use evaisse\SimpleHttpBundle\Http\Exception;
 
-use evaisse\SimpleHttpBundle\Serializer\RequestNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
@@ -305,7 +304,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     public function fetchRequestInfos(Request $request)
     {
-        $normalizers = array(new RequestNormalizer());
+        $normalizers = array(new CustomGetSetNormalizer());
         $encoders = array(new JsonEncoder());
         $serializer = new Serializer($normalizers, $encoders);
 
@@ -330,6 +329,18 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      */
     public function fetchResponseInfos(Response $response)
     {
+        if ($response->headers->get('charset', '') == "utf-8"
+            || stripos($response->headers->get('content-type', ''), 'utf-8') !== 0
+        ) {
+            $encoders = array(new LazyJsonEncoder());
+        } else {
+            $encoders = array(new LazyJsonEncoder());
+        }
+
+        $normalizers = array(new CustomGetSetNormalizer());
+        $encoders = array(new LazyJsonEncoder());
+        $serializer = new Serializer($normalizers, $encoders);
+
         $data = [
             'statusCode' => $response->getStatusCode(),
         ];
@@ -361,7 +372,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return $data;
     }
 
-    public function fetchErrorInfos(\Throwable $error)
+    public function fetchErrorInfos(\Exception $error)
     {
         return array(
             'class'         => get_class($error),
