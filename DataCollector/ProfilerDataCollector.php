@@ -10,6 +10,7 @@ use evaisse\SimpleHttpBundle\Http\StatementEventMap;
 use evaisse\SimpleHttpBundle\Serializer\CustomGetSetNormalizer;
 use evaisse\SimpleHttpBundle\Http\Exception;
 
+use evaisse\SimpleHttpBundle\Serializer\RequestNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
@@ -304,7 +305,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     public function fetchRequestInfos(Request $request)
     {
-        $normalizers = array(new CustomGetSetNormalizer());
+        $normalizers = array(new RequestNormalizer());
         $encoders = array(new JsonEncoder());
         $serializer = new Serializer($normalizers, $encoders);
 
@@ -337,7 +338,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
             $encoders = array(new LazyJsonEncoder());
         }
 
-        $normalizers = array(new CustomGetSetNormalizer());
+        $normalizers = array(new RequestNormalizer());
         $encoders = array(new LazyJsonEncoder());
         $serializer = new Serializer($normalizers, $encoders);
 
