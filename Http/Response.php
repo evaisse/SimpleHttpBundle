@@ -9,7 +9,7 @@ use evaisse\SimpleHttpBundle\Http\Exception\InvalidResponseBodyException;
 
 class Response extends \Symfony\Component\HttpFoundation\Response
 {
- 
+
     /**
      * Service response result var
      * @var mixed
@@ -61,7 +61,7 @@ class Response extends \Symfony\Component\HttpFoundation\Response
             $this->error = ErrorHttpException::createHttpException($this);
         }
 
-        if (fnmatch("application/json*", $this->headers->get('content-type'))) {
+        if (fnmatch("application/json*", $this->headers->get('content-type') ?? '')) {
             $content = $this->getContent();
             if (!empty($content)) {
                 $result = json_decode($content, true);
