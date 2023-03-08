@@ -278,7 +278,7 @@ class Extension implements ExtensionInterface
             $level = 'default';
         }
 
-        $statusText = Response::$statusTexts[$code];
+        $statusText = Response::$statusTexts[$code] ?? null;
 
         return [
             'fromCache' => $fromCache,
