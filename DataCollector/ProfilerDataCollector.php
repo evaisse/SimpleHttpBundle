@@ -58,6 +58,25 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     protected $stopwatch;
 
     /**
+     * blackfire instance id
+     * @var string
+     */
+    protected string $blackfireClientId;
+
+    /**
+     * Access key to blackfire instance
+     * @var string
+     */
+    protected string $blackfireClientToken;
+
+    /**
+     * sample amount used by blackfire commande
+     * number of times that the curl will be executed
+     * @var int
+     */
+    protected int $blackfireSamples;
+
+    /**
      * @param bool $debug
      */
     public function __construct(bool $debug)
@@ -131,6 +150,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
                 'sfDebugLink'   => false,
                 'trace'         => array_slice($v['trace'], 3),
                 'curlCommand'   => $this->buildCurlCommand($v['request']),
+                'blackfireCommand'   => $this->buildBlackfireCommand($v['request']),
             );
 
             if (isset($v['response'])) {
@@ -281,6 +301,25 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         $command.='
 "'.$request->getSchemeAndHttpHost().$request->getRequestUri().'"';
         return str_replace("\n", " \\\n", $command);
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    public function buildBlackfireCommand(Request $request)
+    {
+        $command = "blackfire \\\n";
+        if (!empty($this->blackfireClientId)) {
+            $command .= "--client-id=\"$this->blackfireClientId\" \\\n";
+        }
+        if (!empty($this->blackfireClientToken)) {
+            $command .= "--client-token=\"$this->blackfireClientToken\" \\\n";
+        }
+        $command .= "--samples $this->blackfireSamples \\\n";
+
+        $curl = $this->buildCurlCommand($request);
+        return $command . $curl;
     }
 
     public function fetchTransferInfos(array $call)
@@ -640,5 +679,17 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         $this->calls = [];
         $this->errors = [];
         $this->stopwatch->reset();
+    }
+
+    /**
+     * Set blackfire properties
+     * @param $config array of items that can be used to set blackfire config
+     * @return void
+     */
+    public function setBlackfireConfig(array $config): void
+    {
+        $this->blackfireClientId = $config["client_id"] ?? "";
+        $this->blackfireClientToken = $config["client_token"] ?? "";
+        $this->blackfireSamples = $config["samples"] ?? 10;
     }
 }

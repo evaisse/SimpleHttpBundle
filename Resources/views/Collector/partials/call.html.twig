@@ -1,6 +1,6 @@
 
 <div id="call-{{ index }}" class="http-call http-call--{{ call.request.method | lower }} {{ call.request.schemeAndHttpHost | simple_http_md5 }}">
-    
+
     <h3 class="http-call__title">
         {#<span style="float: right"><a href="#" class="replay" data-request="{{ call.request|json_encode }}" data-index="{{ index }}">Replay</a></span>#}
         <span class="http-call__title__method">{{ call.request.method }}</span>
@@ -23,22 +23,22 @@
                 <a href="javascript://">Request</a>
             </li>
             {% if call.response and call.response.headers is defined %}
-            <li>
-                <a href="javascript://">Response {{ call.response | simple_http_format_http_code }}</a>
-            </li>
+                <li>
+                    <a href="javascript://">Response {{ call.response | simple_http_format_http_code }}</a>
+                </li>
             {% endif %}
             {% if call.error %}
-            <li>
-                <a href="javascript://">Error</a>
-            </li>
+                <li>
+                    <a href="javascript://">Error</a>
+                </li>
             {% endif %}
             <li>
                 <a href="javascript://">Cookies</a>
             </li>
             {% if call.auth %}
-            <li>
-                <a href="javascript://">Auth <span class="simple-http-badge">{{ call.auth.type }}</span></a>
-            </li>
+                <li>
+                    <a href="javascript://">Auth <span class="simple-http-badge">{{ call.auth.type }}</span></a>
+                </li>
             {% endif %}
 
             {% if dataDecoded %}
@@ -53,6 +53,11 @@
             {%  if call.curlCommand is defined %}
                 <li>
                     <a href="javascript://">Curl</a>
+                </li>
+            {% endif %}
+            {%  if call.blackfireCommand is defined %}
+                <li>
+                    <a href="javascript://">Blackfire</a>
                 </li>
             {% endif %}
         </ul>
@@ -90,9 +95,9 @@
                 </div>
             {% endif %}
             {% if dataDecoded %}
-            <div class="tab-content-data">
-                {% include '@SimpleHttp/Collector/partials/data.html.twig' with {'dataDecoded': dataDecoded} only %}
-            </div>
+                <div class="tab-content-data">
+                    {% include '@SimpleHttp/Collector/partials/data.html.twig' with {'dataDecoded': dataDecoded} only %}
+                </div>
             {% endif %}
             <div class="tab-content--raw">
                 {{ dump(call) }}
@@ -109,7 +114,21 @@
                             </tr>
                             </tbody>
                         </table>
-
+                    </div>
+                </div>
+            {% endif %}
+            {%  if call.blackfireCommand is defined %}
+                <div class="tab-content--curl">
+                    <div class="active" style="display:block;">
+                        <table>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <pre>{{ call.blackfireCommand | raw }}</pre>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             {% endif %}
