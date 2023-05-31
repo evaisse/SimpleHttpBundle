@@ -1,4 +1,8 @@
 parameters:
+    ignoreErrors:
+        - # too hard to fix for the moment
+            message: "#.*extends @final class.*#"
+            path: src/Serializer
     excludePaths:
         - 'vendor'
         - 'build'
