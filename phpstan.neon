@@ -2,7 +2,7 @@ parameters:
     ignoreErrors:
         - # too hard to fix for the moment
             message: "#.*extends.*#"
-            path: src/Serializer
+            path: Serializer
     excludePaths:
         - 'vendor'
         - 'build'
