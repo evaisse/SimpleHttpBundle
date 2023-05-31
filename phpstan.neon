@@ -4,3 +4,4 @@ parameters:
     excludePaths:
         - 'vendor'
         - 'build'
+    reportUnmatchedIgnoredErrors: false
