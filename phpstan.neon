@@ -1,6 +1,6 @@
 parameters:
     ignoreErrors:
-        - '#.*extends @Final class.*#'
+        - '#.*Serializer.*extends @final class.*#'
     excludePaths:
         - 'vendor'
         - 'build'
