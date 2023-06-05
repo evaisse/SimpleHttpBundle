@@ -10,6 +10,11 @@
             <directory>./Tests</directory>
         </testsuite>
     </testsuites>
+    <coverage>
+        <include>
+            <directory suffix=".php">.</directory>
+        </include>
+    </coverage>
     <filter>
         <whitelist addUncoveredFilesFromWhitelist="true">
             <directory>./Http</directory>
