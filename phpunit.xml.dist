@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<phpunit colors="true" processIsolation="false" stopOnFailure="false" bootstrap="./Tests/autoload.php.dist">
+<phpunit colors="true"
+         processIsolation="false"
+         convertWarningsToExceptions="false"
+         stopOnFailure="false"
+         bootstrap="./Tests/autoload.php.dist">
     <testsuites>
         <testsuite name="RedisBundle Test Suite">
             <directory>./Tests</directory>
