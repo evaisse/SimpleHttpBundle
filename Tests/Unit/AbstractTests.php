@@ -15,7 +15,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class AbstractTests extends TestCase
 {
-    public static $baseUrl = "http://httpbin.org";
+    public static $baseUrl = null;
 
     public function __construct(?string $name = null, array $data = [], $dataName = '')
     {
