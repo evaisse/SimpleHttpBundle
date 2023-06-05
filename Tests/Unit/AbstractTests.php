@@ -19,7 +19,7 @@ class AbstractTests extends TestCase
 
     public function __construct(?string $name = null, array $data = [], $dataName = '')
     {
-        self::__construct($name, $data, $dataName);
+        parent::__construct($name, $data, $dataName);
         self::$baseUrl = self::$baseUrl ?? getenv('HTTP_BIN_URL');
     }
 
