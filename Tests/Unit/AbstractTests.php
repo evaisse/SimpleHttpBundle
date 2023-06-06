@@ -8,23 +8,21 @@
 
 namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
-
-
 use evaisse\SimpleHttpBundle\Http\Kernel;
-use evaisse\SimpleHttpBundle\Http\Request;
-use evaisse\SimpleHttpBundle\Http\Statement;
 use evaisse\SimpleHttpBundle\Service\Helper;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-
 
 class AbstractTests extends TestCase
 {
+    public static $baseUrl = null;
 
-//    public static $baseUrl = "http://127.0.0.1:8989";
-    public static $baseUrl = "http://httpbin.org";
+    public function __construct(?string $name = null, array $data = [], $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+        self::$baseUrl = self::$baseUrl ?? getenv('HTTP_BIN_URL');
+    }
+
 
     protected function createContext()
     {

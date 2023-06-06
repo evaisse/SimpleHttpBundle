@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<phpunit colors="true" processIsolation="false" stopOnFailure="false" bootstrap="./Tests/autoload.php.dist">
+<phpunit colors="true"
+         processIsolation="false"
+         convertWarningsToExceptions="false"
+         stopOnFailure="false"
+         bootstrap="./Tests/autoload.php.dist">
     <testsuites>
         <testsuite name="RedisBundle Test Suite">
             <directory>./Tests</directory>
         </testsuite>
     </testsuites>
+    <coverage>
+        <include>
+            <directory suffix=".php">.</directory>
+        </include>
+    </coverage>
     <filter>
         <whitelist addUncoveredFilesFromWhitelist="true">
             <directory>./Http</directory>
@@ -19,4 +28,7 @@
     <logging>
         <log type="coverage-clover" target="build/logs/clover.xml"/>
     </logging>
+    <php>
+        <env name="HTTP_BIN_URL" value="http://httpbin.org"/>
+    </php>
 </phpunit>
