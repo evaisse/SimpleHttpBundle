@@ -352,6 +352,17 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         $data['headers'] = explode("\r\n\r\n", (string)$request, 2)[0];
         $data['headers'] = explode("\r\n", $data['headers']);
 
+        //Obfuscate sensitive hearders
+        //Currently, there is only one header to obfuscate, if we need to add another one, just add it in the array bellow.
+        $obfuscatedHeaders = ["Authorization"];
+        foreach ($data['headers'] as $keyHeader => $header) {
+            foreach ($obfuscatedHeaders as $obfuscatedHeader) {
+                if (str_contains($header, $obfuscatedHeader)) {
+                    $data['headers'][$keyHeader] = $obfuscatedHeader . ": ****";
+                }
+            }
+        }
+
         $content = $request->getContent();
         if (empty($content)) {
             $data['content'] = http_build_query($request->request->all());
