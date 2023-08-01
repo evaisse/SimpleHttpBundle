@@ -7,8 +7,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-
-    public function getConfigTreeBuilder() : TreeBuilder
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('simple_http');
         $rootNode = $treeBuilder->getRootNode();
@@ -26,6 +25,7 @@ class Configuration implements ConfigurationInterface
                             ->defaultValue(10)
                         ->end()
                     ->end()
+                    ->addDefaultsIfNotSet()
                 ->end()
             ->end();
 
