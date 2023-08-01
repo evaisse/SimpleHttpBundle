@@ -29,6 +29,6 @@
         <log type="coverage-clover" target="build/logs/clover.xml"/>
     </logging>
     <php>
-        <env name="HTTP_BIN_URL" value="http://httpbin.org"/>
+        <env name="HTTP_BIN_URL" value="https://httpbin.org"/>
     </php>
 </phpunit>

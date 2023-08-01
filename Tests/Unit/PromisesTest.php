@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Testing promises
  * User: evaisse
@@ -7,9 +8,6 @@
 
 namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
-
-use evaisse\SimpleHttpBundle\Http\Statement;
-use React\Promise\Deferred;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PromisesTest extends AbstractTests
@@ -33,7 +31,7 @@ class PromisesTest extends AbstractTests
     {
         list($helper, $httpKernel) = $this->createContext();
 
-        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', array(
+        $stmt = $helper->prepare("GET", AbstractTests::$baseUrl . '/status/{code}', array(
             'code' => $code
         ));
 
@@ -56,7 +54,6 @@ class PromisesTest extends AbstractTests
         foreach ($expectedResults as $expectedResult) {
             $this->assertContains($expectedResult, $events);
         }
-
     }
 
 
@@ -67,12 +64,11 @@ class PromisesTest extends AbstractTests
     {
         list($helper, $httpKernel) = $this->createContext();
 
-        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', array(
+        $stmt = $helper->prepare("GET", AbstractTests::$baseUrl . '/status/{code}', array(
             'code' => $code
         ));
 
         $events = new \ArrayObject();
-
 
         $stmt->onSuccess(function () use ($events) {
             $events[] = 'success';
@@ -81,7 +77,6 @@ class PromisesTest extends AbstractTests
         })->onFinish(function () use ($events) {
             $events[] = 'done';
         });
-
 
         $httpKernel->execute([
             $stmt
@@ -92,7 +87,6 @@ class PromisesTest extends AbstractTests
         foreach ($expectedResults as $expectedResult) {
             $this->assertContains($expectedResult, $events);
         }
-
     }
 
     /**
@@ -102,7 +96,7 @@ class PromisesTest extends AbstractTests
     {
         list($helper, $httpKernel) = $this->createContext();
 
-        $stmt = $helper->prepare("GET", 'https://httpbin.org/delay/1');
+        $stmt = $helper->prepare("GET", AbstractTests::$baseUrl . '/delay/1');
 
         $stmt->setTimeout(400);
 
@@ -123,11 +117,7 @@ class PromisesTest extends AbstractTests
         $this->assertCount(2, $events);
         $this->assertContains("error", $events);
         $this->assertContains("done", $events);
-
-
     }
-
-
 
     /**
      * @dataProvider provideErrors
@@ -136,7 +126,7 @@ class PromisesTest extends AbstractTests
     {
         list($helper, $httpKernel) = $this->createContext();
 
-        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', [
+        $stmt = $helper->prepare("GET", AbstractTests::$baseUrl . '/status/{code}', [
             'code' => $code,
         ]);
 
@@ -165,8 +155,6 @@ class PromisesTest extends AbstractTests
         $this->assertTrue($events["finish"]);
     }
 
-
-
     /**
      * @dataProvider provideErrors
      */
@@ -174,7 +162,7 @@ class PromisesTest extends AbstractTests
     {
         list($helper, $httpKernel) = $this->createContext();
 
-        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', [
+        $stmt = $helper->prepare("GET", AbstractTests::$baseUrl . '/status/{code}', [
             'code' => $code,
         ]);
 
@@ -214,7 +202,7 @@ class PromisesTest extends AbstractTests
     {
         list($helper, $httpKernel) = $this->createContext();
 
-        $stmt = $helper->prepare("GET", 'https://httpbin.org/status/{code}', [
+        $stmt = $helper->prepare("GET", AbstractTests::$baseUrl . '/status/{code}', [
             'code' => $code,
         ]);
 
@@ -242,5 +230,4 @@ class PromisesTest extends AbstractTests
 
         $this->assertCount(4, $events);
     }
-
 }
