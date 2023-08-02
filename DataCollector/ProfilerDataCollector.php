@@ -2,32 +2,18 @@
 
 namespace evaisse\SimpleHttpBundle\DataCollector;
 
-use evaisse\SimpleHttpBundle\Http\Event\AbstractStatementPrepareEvent;
-use evaisse\SimpleHttpBundle\Http\Event\StatementErrorEvent;
-use evaisse\SimpleHttpBundle\Http\Event\StatementPrepareEvent;
-use evaisse\SimpleHttpBundle\Http\Event\StatementSuccessEventInterface;
 use evaisse\SimpleHttpBundle\Http\StatementEventMap;
-use evaisse\SimpleHttpBundle\Serializer\CustomGetSetNormalizer;
-use evaisse\SimpleHttpBundle\Http\Exception;
-
 use evaisse\SimpleHttpBundle\Serializer\RequestNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
-
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
-use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
-
 use Symfony\Component\Stopwatch\Stopwatch;
-
-
 
 /*
  * @author Emmanuel VAISSE
@@ -61,13 +47,13 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      * blackfire instance id
      * @var string
      */
-    protected string $blackfireClientId;
+    protected ?string $blackfireClientId;
 
     /**
      * Access key to blackfire instance
      * @var string
      */
-    protected string $blackfireClientToken;
+    protected ?string $blackfireClientToken;
 
     /**
      * sample amount used by blackfire commande
@@ -140,7 +126,6 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         $calls = array();
 
         foreach ($this->calls as $k => $v) {
-
             $calls[$k] = array(
                 'time'          => $this->fetchTransferInfos($v),
                 'request'       => $this->fetchRequestInfos($v['request']),
@@ -156,7 +141,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
             if (isset($v['response'])) {
                 $calls[$k]['response']['fromHttpCache'] = false;
                 foreach ($calls[$k]['response']['headers'] as $h) {
-                    foreach(['x-debug-uri:', 'x-debug-link:'] as $hk) {
+                    foreach (['x-debug-uri:', 'x-debug-link:'] as $hk) {
                         if (stripos($h, $hk) === 0) {
                             list($hv, $url) = explode(':', $h, 2);
                             $url = trim($url);
@@ -261,7 +246,8 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
          *  If there is some cache hit informative headers,
          *  we set cache infos for the timeline
          */
-        if ($event->getResponse()
+        if (
+            $event->getResponse()
             && $event->getResponse()->headers->get('X-Cache')
             && stripos($event->getResponse()->headers->get('X-Cache')[0], 'HIT') !== false
         ) {
@@ -278,36 +264,28 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         unset($this->calls[$key]['stopWatchEvent']);
     }
 
-    /**
-     * @param Request $request
-     * @return string
-     */
-    public function buildCurlCommand(Request $request)
+    public function buildCurlCommand(Request $request): string
     {
         $command = 'curl -i
--X '.$request->getRealMethod();
-        foreach($request->headers->all() as $headerName => $headerValues) {
-            foreach($headerValues as $headerValue) {
+-X ' . $request->getRealMethod();
+        foreach ($request->headers->all() as $headerName => $headerValues) {
+            foreach ($headerValues as $headerValue) {
                 $command .= "
 -H \"$headerName: " . (string)$headerValue . "\"";
             }
         }
 
         if (in_array($request->getRealMethod(), ['POST', 'PUT', 'PATCH']) && !empty($request->getContent())) {
-            $command.= '
---data "'.addcslashes($request->getContent(), '"').'"';
+            $command .= '
+--data "' . addcslashes($request->getContent(), '"') . '"';
         }
 
-        $command.='
-"'.$request->getSchemeAndHttpHost().$request->getRequestUri().'"';
+        $command .= '
+"' . $request->getSchemeAndHttpHost() . $request->getRequestUri() . '"';
         return str_replace("\n", " \\\n", $command);
     }
 
-    /**
-     * @param Request $request
-     * @return string
-     */
-    public function buildBlackfireCommand(Request $request)
+    public function buildBlackfireCommand(Request $request): string
     {
         $command = "blackfire \\\n";
         if (!empty($this->blackfireClientId)) {
@@ -391,7 +369,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
                 "secure"    => $c->isSecure(),
                 "httpOnly"  => $c->isHttpOnly(),
                 "cleared"   => $c->getExpiresTime() !== 0
-                            && time() > $c->getExpiresTime(),
+                    && time() > $c->getExpiresTime(),
             );
         }
 
@@ -505,10 +483,12 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     public function getClientErrors()
     {
         return array_filter($this->getCalls(), static function ($call) {
-            if ($call['response']
+            if (
+                $call['response']
                 && array_key_exists('statusCode', $call['response'])
                 && $call['response']['statusCode'] < 500
-                && $call['response']['statusCode'] >= 400) {
+                && $call['response']['statusCode'] >= 400
+            ) {
                 return true;
             }
         });
@@ -594,7 +574,6 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
             if ($requestJwt || $responseJwt) {
                 $call['auth']['type'] = "JWT";
             }
-
         } catch (\Exception $e) {
             // prevent
         }
@@ -688,8 +667,8 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      */
     public function setBlackfireConfig(array $config): void
     {
-        $this->blackfireClientId = $config["client_id"] ?? "";
-        $this->blackfireClientToken = $config["client_token"] ?? "";
-        $this->blackfireSamples = $config["samples"] ?? 10;
+        $this->blackfireClientId = $config['client_id'] ?? '';
+        $this->blackfireClientToken = $config['client_token'] ?? '';
+        $this->blackfireSamples = $config['samples'] ?? 10;
     }
 }
