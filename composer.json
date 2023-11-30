@@ -14,7 +14,7 @@
   "homepage": "https://github.com/evaisse/SimpleHttpBundle",
   "require": {
     "php": "^8.0",
-    "react/promise": "2.2.*",
+    "react/promise": "^2.2",
     "symfony/http-foundation": "^5.4 || ^6.0",
     "symfony/browser-kit": "^5.4 || ^6.0",
     "symfony/event-dispatcher": "^5.4 || ^6.0",
