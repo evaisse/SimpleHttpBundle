@@ -32,9 +32,8 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     /**
      * list of potential errors indexed by requests
-     * @var array
      */
-    protected $errors = 0;
+    protected int $errors = 0;
 
 
     /**
@@ -656,7 +655,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     {
         $this->data = [];
         $this->calls = [];
-        $this->errors = [];
+        $this->errors = 0;
         $this->stopwatch->reset();
     }
 
