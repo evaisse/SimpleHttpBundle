@@ -3,26 +3,15 @@
 namespace evaisse\SimpleHttpBundle\Twig;
 
 use Symfony\Component\HttpFoundation\Response;
-use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Extension\ExtensionInterface;
-use Twig\Loader\FilesystemLoader;
 use Twig\Loader\LoaderInterface;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class Extension implements ExtensionInterface
 {
-
-    /**
-     * @var FilesystemLoader
-     */
-    protected $loader;
-
-    /**
-     * @param FilesystemLoader $loader
-     */
-    function __construct(LoaderInterface $loader)
+    public function __construct(protected LoaderInterface $loader)
     {
         $this->loader = $loader;
     }
@@ -311,7 +300,7 @@ class Extension implements ExtensionInterface
     /**
      * @inheritDoc
      */
-    public function getTokenParsers()
+    public function getTokenParsers(): array
     {
         return [];
     }
@@ -319,7 +308,7 @@ class Extension implements ExtensionInterface
     /**
      * @inheritDoc
      */
-    public function getNodeVisitors()
+    public function getNodeVisitors(): array
     {
         return [];
     }
@@ -327,7 +316,7 @@ class Extension implements ExtensionInterface
     /**
      * @inheritDoc
      */
-    public function getTests()
+    public function getTests(): array
     {
         return [];
     }
@@ -335,24 +324,7 @@ class Extension implements ExtensionInterface
     /**
      * @inheritDoc
      */
-    public function getOperators()
-    {
-        return [];
-    }
-
-    /**
-     * For legacy purpose with Twig 1.*
-     * @param Environment $environment
-     */
-    public function initRuntime(Environment $environment)
-    {
-    }
-
-    /**
-     * For legacy purpose with Twig 1.*
-     * @return array
-     */
-    public function getGlobals()
+    public function getOperators(): array
     {
         return [];
     }

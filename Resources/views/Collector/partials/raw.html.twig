@@ -1,0 +1,35 @@
+{% macro display_array_recursive(array, separator = ', ', opening_char = '[', closing_char = ']') -%}
+    {{ opening_char }}
+    {%- for key, value in array -%}
+        {%- if value is iterable -%}
+            {{ key }} => {{ _self.display_array_recursive(value, separator, opening_char, closing_char) }}
+        {%- else -%}
+            {{ key }} => {{ value }}
+            {%- if not loop.last %}{{ separator }}{% endif -%}
+        {%- endif -%}
+    {%- endfor -%}
+    {{ closing_char }}
+{%- endmacro %}
+
+<table>
+    <thead>
+    <th scope="col" colspan="2">JWT Payload</th>
+    </thead>
+    <tbody>
+
+    <tr>
+        <td>Request</td>
+        <td>
+            {{ dump(call.request.jwt.decoded.payload|json_decode) }}
+        </td>
+    </tr>
+    <tr>
+        <td>Response</td>
+        <td>
+            {% if call.response and call.response.jwt|default(false) %}
+                {{ dump(call.response.jwt.decoded.payload|json_decode) }}
+            {% endif %}
+        </td>
+    </tr>
+    </tbody>
+</table>
