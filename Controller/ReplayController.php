@@ -8,7 +8,6 @@
 
 namespace evaisse\SimpleHttpBundle\Controller;
 
-use evaisse\SimpleHttpBundle\DataCollector\ProfilerDataCollector;
 use evaisse\SimpleHttpBundle\Service\Helper;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;

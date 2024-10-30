@@ -20,60 +20,39 @@ use Symfony\Component\Stopwatch\Stopwatch;
  */
 class ProfilerDataCollector extends DataCollector implements EventSubscriberInterface
 {
-    /** @var bool */
-    protected $debug;
-
     /**
      * List of emitted requests
-     *
-     * @var array
      */
-    protected $calls = array();
+    protected array $calls = [];
 
     /**
      * list of potential errors indexed by requests
      */
     protected int $errors = 0;
 
-
-    /**
-     * Stopwatch component
-     * @var StopWatch
-     */
-    protected $stopwatch;
+    protected null|Stopwatch $stopwatch = null;
 
     /**
      * blackfire instance id
-     * @var string
      */
     protected ?string $blackfireClientId;
 
     /**
      * Access key to blackfire instance
-     * @var string
      */
     protected ?string $blackfireClientToken;
 
     /**
      * sample amount used by blackfire commande
      * number of times that the curl will be executed
-     * @var int
      */
     protected int $blackfireSamples;
 
-    /**
-     * @param bool $debug
-     */
-    public function __construct(bool $debug)
+    public function __construct(protected bool $debug)
     {
-        $this->debug = $debug;
     }
 
-    /**
-     * (non-PHPdoc)
-     * @see \Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface::collect()
-     */
-    public function collect(Request $request, Response $response, \Throwable $exception = null)
+    public function collect(Request $request, Response $response, \Throwable $exception = null): void
     {
         $this->data = array(
             'countRequests'              => count($this->calls),
@@ -86,31 +65,22 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     /**
      * @return array collected infos
      */
-    public function getData()
+    public function getData(): array
     {
         return $this->data;
     }
 
-    /**
-     * @param  [type] $key          [description]
-     * @param  [type] $defaultValue [description]
-     * @return [type]               [description]
-     */
-    public function get($key, $defaultValue = null)
+    public function get(string $key, mixed $defaultValue = null): mixed
     {
-        return isset($this->data[$key]) ? $this->data[$key] : $defaultValue;
+        return $this->data[$key] ?? $defaultValue;
     }
 
-    /**
-     * (non-PHPdoc)
-     * @see \Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface::getName()
-     */
-    public function getName()
+    public function getName(): string
     {
         return 'simplehttpprofiler';
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             StatementEventMap::KEY_PREPARE => 'onPrepare',
@@ -120,7 +90,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     }
 
 
-    public function normalizeCalls()
+    public function normalizeCalls(): array
     {
         $calls = array();
 
@@ -142,7 +112,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
                 foreach ($calls[$k]['response']['headers'] as $h) {
                     foreach (['x-debug-uri:', 'x-debug-link:'] as $hk) {
                         if (stripos($h, $hk) === 0) {
-                            list($hv, $url) = explode(':', $h, 2);
+                            [, $url] = explode(':', $h, 2);
                             $url = trim($url);
                             $calls[$k]['debugLink'] = $url;
                             break;
@@ -150,11 +120,11 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
                     }
 
                     if (stripos($h, 'x-debug-token-link:') === 0) {
-                        list($hv, $url) = explode(':', $h, 2);
+                        [, $url]  = explode(':', $h, 2);
                         $calls[$k]['sfDebugLink'] = trim($url);
                     }
 
-                    if (stripos($h, "X-Cache:") !== false && strpos($h, "HIT") !== false) {
+                    if (stripos($h, "X-Cache:") !== false && str_contains($h, "HIT")) {
                         $calls[$k]['response']['fromHttpCache'] = true;
                     }
                 }
@@ -165,7 +135,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     }
 
 
-    public function onPrepare(RequestEvent $event)
+    public function onPrepare(RequestEvent $event): void
     {
         if (!$this->debug) {
             return;
@@ -174,12 +144,6 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
         $eventName = "#" . count($this->calls) . ' ' . $request->getMethod() . ' ' . $request->getUri();
 
-        try {
-            throw new \Exception("");
-        } catch (\Exception $e) {
-            $trace = explode("\n", $e->getTraceAsString());
-        }
-
         $this->calls[] = array(
             "start"          => microtime(true),
             'stop'           => 0,
@@ -187,26 +151,22 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
             'response'       => null,
             "error"          => null,
             'stopWatchEvent' => $this->getStopwatch()->start($eventName, 'doctrine'),
-            "trace"          => $trace
+            "trace"          => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
         );
     }
 
-
-    /**
-     * @param $request
-     * @return int|null|string
-     */
-    public function getRequestKey($request)
+    public function getRequestKey(Request $request): int|null|string
     {
         foreach ($this->calls as $key => $value) {
             if ($request === $value['request']) {
                 return $key;
             }
         }
+
         return null;
     }
 
-    public function onError(ExceptionEvent $event)
+    public function onError(ExceptionEvent $event): void
     {
         if (!$this->debug) {
             return;
@@ -224,7 +184,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         $this->finishEvent($key);
     }
 
-    public function onSuccess(ResponseEvent $event)
+    public function onSuccess(ResponseEvent $event): void
     {
         if (!$this->debug) {
             return;
@@ -257,7 +217,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     }
 
 
-    public function finishEvent($key)
+    public function finishEvent($key): void
     {
         $this->calls[$key]['stopWatchEvent']->stop();
         unset($this->calls[$key]['stopWatchEvent']);
@@ -265,22 +225,19 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     public function buildCurlCommand(Request $request): string
     {
-        $command = 'curl -i
--X ' . $request->getRealMethod();
+        $command = 'curl -i -X ' . $request->getRealMethod();
         foreach ($request->headers->all() as $headerName => $headerValues) {
             foreach ($headerValues as $headerValue) {
-                $command .= "
--H \"$headerName: " . (string)$headerValue . "\"";
+                $command .= " -H \"$headerName: " . $headerValue . "\"";
             }
         }
 
         if (in_array($request->getRealMethod(), ['POST', 'PUT', 'PATCH']) && !empty($request->getContent())) {
-            $command .= '
---data "' . addcslashes($request->getContent(), '"') . '"';
+            $command .= ' --data "' . addcslashes($request->getContent(), '"') . '"';
         }
 
-        $command .= '
-"' . $request->getSchemeAndHttpHost() . $request->getRequestUri() . '"';
+        $command .= ' "' . $request->getSchemeAndHttpHost() . $request->getRequestUri() . '"';
+
         return str_replace("\n", " \\\n", $command);
     }
 
@@ -299,9 +256,9 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return $command . $curl;
     }
 
-    public function fetchTransferInfos(array $call)
+    public function fetchTransferInfos(array $call): array
     {
-        $call['stop'] = isset($call['stop']) ? $call['stop'] : 0;
+        $call['stop'] = $call['stop'] ?? 0;
 
         $timing = array(
             'start'      => $call['start'],
@@ -319,7 +276,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return $timing;
     }
 
-    public function fetchRequestInfos(Request $request)
+    public function fetchRequestInfos(Request $request): array
     {
         $normalizers = array(new RequestNormalizer());
         $encoders = array(new JsonEncoder());
@@ -337,22 +294,19 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         parse_str($data['queryString'], $data['query']);
         $data['contentType'] = $request->headers->get('content-type');
         $data['cookies'] = $request->cookies->all();
+
         return $data;
     }
 
-    /**
-     * @param Response $response
-     * @return mixed
-     */
-    public function fetchResponseInfos(Response $response)
+    public function fetchResponseInfos(Response $response): array
     {
         $data = [
             'statusCode' => $response->getStatusCode(),
         ];
 
         $parts = explode("\r\n\r\n", (string)$response, 2);
-        $data['headers'] = isset($parts[0]) ? $parts[0] : "";
-        $data['body'] = isset($parts[1]) ? $parts[1] : "";
+        $data['headers'] = $parts[0] ?? "";
+        $data['body'] = $parts[1] ?? "";
         $data['headers'] = explode("\r\n", $data['headers']);
         $data['contentType'] = $response->headers->get('content-type');
         $cookies = $response->headers->getCookies();
@@ -377,9 +331,9 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return $data;
     }
 
-    public function fetchErrorInfos(\Throwable $error)
+    public function fetchErrorInfos(\Throwable $error): array
     {
-        return array(
+        return [
             'class'         => get_class($error),
             'message'       => $error->getMessage(),
             'code'          => $error->getCode(),
@@ -387,13 +341,10 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
             'line'          => $error->getLine(),
             'trace'         => $error->getTraceAsString(),
             'previous'      => $error->getPrevious() ? $this->fetchErrorInfos($error->getPrevious()) : array(),
-        );
+        ];
     }
 
-    /**
-     * @return int
-     */
-    public function countRequests()
+    public function countRequests(): int
     {
         return $this->get('countRequests', 0);
     }
@@ -401,47 +352,48 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     /**
      * @return int
      */
-    public function countErrors()
+    public function countErrors(): int
     {
         return $this->get('countErrors', 0);
     }
 
-    /**
-     * @return int
-     */
-    public function getTotalTime()
+    public function getTotalTime(): float
     {
         $t = 0;
-        foreach ($this->data['calls'] as $key => $value) {
+        foreach ($this->data['calls'] as $value) {
             $t += $value['time']['total'];
         }
         return $t;
     }
 
 
-    public function getCalls()
+    public function getCalls(): array
     {
         return array_map(array($this, 'filterCall'), $this->data['calls']);
     }
 
 
-    public function countSuccessfullRequest()
+    /**
+     * @deprecated Use countSuccessfulRequest instead
+     */
+    public function countSuccessfullRequest(): int
+    {
+        return $this->countSuccessfulRequest();
+    }
+
+    public function countSuccessfulRequest(): int
     {
         return $this->countRequests() - $this->countErrors();
     }
 
 
-    /**
-     * [getHosts description]
-     * @return array [description]
-     */
-    public function getHosts()
+    public function getHosts(): array
     {
-        $hosts = array();
+        $hosts = [];
 
         foreach ($this->data['calls'] as $value) {
             $host = md5($value['request']['schemeAndHttpHost']);
-            $hosts[$host] = isset($hosts[$host]) ? $hosts[$host] : array();
+            $hosts[$host] = $hosts[$host] ?? [];
             $hosts[$host][] = $value['request']['schemeAndHttpHost'];
         }
 
@@ -457,9 +409,8 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     /**
      * Current calls stack contains http client errors 4XX
-     * @return int
      */
-    public function getClientErrorsCount()
+    public function getClientErrorsCount(): int
     {
         return count($this->getClientErrors());
     }
@@ -467,11 +418,10 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     /**
      * Test if current calls stack contains http client errors 4XX
-     * @return bool
      */
-    public function hasClientErrors()
+    public function hasClientErrors(): bool
     {
-        return (bool)$this->getClientErrorsCount();
+        return $this->getClientErrorsCount() > 0;
     }
 
 
@@ -479,36 +429,30 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      * Get all HTTP 4XX client errors calls
      * @return array[]
      */
-    public function getClientErrors()
+    public function getClientErrors(): array
     {
         return array_filter($this->getCalls(), static function ($call) {
-            if (
-                $call['response']
+            return is_array($call['response'])
                 && array_key_exists('statusCode', $call['response'])
                 && $call['response']['statusCode'] < 500
-                && $call['response']['statusCode'] >= 400
-            ) {
-                return true;
-            }
+                && $call['response']['statusCode'] >= 400;
         });
     }
 
     /**
      * current calls stack contains http server errors 5XX
-     * @return int
      */
-    public function getServerErrorsCount()
+    public function getServerErrorsCount(): int
     {
         return count($this->getServerErrors());
     }
 
     /**
      * Test if current calls stack contains http server errors 5XX
-     * @return bool
      */
-    public function hasServerErrors()
+    public function hasServerErrors(): bool
     {
-        return (bool)$this->getServerErrorsCount();
+        return $this->getServerErrorsCount() > 0;
     }
 
 
@@ -516,34 +460,21 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
      * Get all HTTP 5XX server errors calls
      * @return array[]
      */
-    public function getServerErrors()
+    public function getServerErrors(): array
     {
         return array_filter($this->getCalls(), static function ($call) {
-            if (is_array($call['response']) && array_key_exists('statusCode', $call['response']) && $call['response']['statusCode'] >= 500) {
-                return true;
-            }
+            return is_array($call['response'])
+                && array_key_exists('statusCode', $call['response'])
+                && $call['response']['statusCode'] >= 500;
         });
     }
 
-
-    /**
-     * Gets the Stopwatch component.
-     *
-     * @return StopWatch
-     */
-    public function getStopwatch()
+    public function getStopwatch(): null|Stopwatch
     {
         return $this->stopwatch;
     }
 
-    /**
-     * Sets the Stopwatch component.
-     *
-     * @param StopWatch $stopwatch the stopwatch
-     *
-     * @return self
-     */
-    public function setStopwatch(StopWatch $stopwatch)
+    public function setStopwatch(StopWatch $stopwatch): self
     {
         $this->stopwatch = $stopwatch;
 
@@ -551,11 +482,9 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     }
 
     /**
-     * Parse additionnal infos for request/response results, like auth mechanism
-     * @param array $call call info
-     * @return array filtered call info
+     * Parse additional infos for request/response results, like auth mechanism
      */
-    protected function filterCall(array $call)
+    protected function filterCall(array $call): array
     {
         $call['auth'] = !empty($call['auth']) ? $call['auth'] : [];
         $call['request']['jwt'] = $call['response']['jwt'] = false;
@@ -584,16 +513,12 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     /**
      * @param string[] $headers
-     * @return array|null null if no jwt, infos otherwise [
-     *  'encoded' => $m[1],
-     *  'decoded' => [
-     *    "header"    => $jwtHeader,
-     *    "payload"   => $jwtPayload,
-     *    "signature" => $jwtSignature,
-     *  ],
-     * ]
+     * @return null|array{
+     *     encoded: string,
+     *     decoded: array{header: string|null, payload: string|null, signature: string|null}
+     * }
      */
-    protected function fetchJwtInfosFromHeaders(array $headers)
+    protected function fetchJwtInfosFromHeaders(array $headers): null|array
     {
         $jwt = null;
 
@@ -602,9 +527,9 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
                 continue;
             }
             $parts = explode('.', $m[1]);
-            $jwtHeader = isset($parts[0]) ? $parts[0] : null;
-            $jwtPayload = isset($parts[1]) ? $parts[1] : null;
-            $jwtSignature = isset($parts[2]) ? $parts[2] : null;
+            $jwtHeader = $parts[0] ?? null;
+            $jwtPayload = $parts[1] ?? null;
+            $jwtSignature = $parts[2] ?? null;
 
             $jwt = [
                 'encoded' => $m[1],
@@ -621,12 +546,8 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     /**
      * Decode a string with URL-safe Base64.
-     *
-     * @param string $input A Base64 encoded string
-     *
-     * @return string A decoded string
      */
-    public function urlsafeB64Decode($input)
+    public function urlsafeB64Decode(string $input): string
     {
         $remainder = strlen($input) % 4;
         if ($remainder) {
@@ -635,23 +556,12 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         }
         try {
             return base64_decode(strtr($input, '-_', '+/'));
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return "";
         }
     }
-    /**
-     * Encode a string with URL-safe Base64.
-     *
-     * @param string $input The string you want encoded
-     *
-     * @return string The base64 encode of what you passed in
-     */
-    public function urlsafeB64Encode($input)
-    {
-        return str_replace('=', '', strtr(base64_encode($input), '+/', '-_'));
-    }
 
-    public function reset()
+    public function reset(): void
     {
         $this->data = [];
         $this->calls = [];
@@ -659,11 +569,6 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         $this->stopwatch->reset();
     }
 
-    /**
-     * Set blackfire properties
-     * @param $config array of items that can be used to set blackfire config
-     * @return void
-     */
     public function setBlackfireConfig(array $config): void
     {
         $this->blackfireClientId = $config['client_id'] ?? '';

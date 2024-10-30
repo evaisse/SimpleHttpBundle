@@ -1,8 +1,14 @@
-
-
-
-<h5>Data (<a onclick="window.simple_http_data = {{ dataDecoded.data|json_encode  }}; console.log('window.simple_http_data', simple_http_data)" href="##">put result to js console</a>)</h5>
-
-
-
-{{ dump(dataDecoded.data) }}
+<table>
+    <thead>
+        <tr>
+            <th scope="col">Data (<a onclick="window.simple_http_data = {{ dataDecoded.data|json_encode  }}; console.log('window.simple_http_data', simple_http_data)" href="##">put result to js console</a>)</th>
+        </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>
+            {{ dump(dataDecoded.data) }}
+        </td>
+    </tr>
+    </tbody>
+</table>
