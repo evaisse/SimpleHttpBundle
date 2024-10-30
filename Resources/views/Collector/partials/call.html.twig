@@ -99,17 +99,17 @@
                     {% include '@SimpleHttp/Collector/partials/data.html.twig' with {'dataDecoded': dataDecoded} only %}
                 </div>
             {% endif %}
-            <div class="tab-content--raw">
-                {{ dump(call) }}
+            <div class="tab-content-raw">
+                {% include '@SimpleHttp/Collector/partials/raw.html.twig' with {'call': call} only %}
             </div>
             {%  if call.curlCommand is defined %}
-                <div class="tab-content--curl">
+                <div class="tab-content-curl">
                     <div class="active" style="display:block;">
                         <table>
                             <tbody>
                             <tr>
                                 <td>
-                                    <pre>{{ call.curlCommand | raw }}</pre>
+                                    <pre style="white-space: pre-line">{{ call.blackfireCommand | raw }}</pre>
                                 </td>
                             </tr>
                             </tbody>
@@ -118,13 +118,13 @@
                 </div>
             {% endif %}
             {%  if call.blackfireCommand is defined %}
-                <div class="tab-content--curl">
+                <div class="tab-content-blackfire">
                     <div class="active" style="display:block;">
                         <table>
                             <tbody>
                             <tr>
                                 <td>
-                                    <pre>{{ call.blackfireCommand | raw }}</pre>
+                                    <pre style="white-space: pre-line">{{ call.blackfireCommand | raw }}</pre>
                                 </td>
                             </tr>
                             </tbody>
