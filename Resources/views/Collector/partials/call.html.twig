@@ -105,11 +105,11 @@
             {%  if call.curlCommand is defined %}
                 <div class="tab-content-curl">
                     <div class="active" style="display:block;">
-                        <table>
+                        <table style="table-layout: fixed">
                             <tbody>
                             <tr>
-                                <td>
-                                    <pre style="white-space: pre-line; word-break: break-word;">{{ call.curlCommand | raw }}</pre>
+                                <td class="full-width" style="overflow-wrap: break-word">
+                                    <pre style="white-space: pre-line">{{ call.curlCommand | raw }}</pre>
                                 </td>
                             </tr>
                             </tbody>
@@ -120,11 +120,11 @@
             {%  if call.blackfireCommand is defined %}
                 <div class="tab-content-blackfire">
                     <div class="active" style="display:block;">
-                        <table>
+                        <table style="table-layout: fixed">
                             <tbody>
                             <tr>
-                                <td>
-                                    <pre style="white-space: pre-line; word-break: break-word;">{{ call.blackfireCommand | raw }}</pre>
+                                <td class="full-width" style="overflow-wrap: break-word">
+                                    <pre style="white-space: pre-line">{{ call.blackfireCommand | raw }}</pre>
                                 </td>
                             </tr>
                             </tbody>
