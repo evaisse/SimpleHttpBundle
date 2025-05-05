@@ -2,6 +2,6 @@ parameters:
     ignoreErrors:
         - '#.*Serializer.*extends @final class.*#'
     excludePaths:
-        - 'vendor'
-        - 'build'
+        - vendor/**
+        - build/**
     reportUnmatchedIgnoredErrors: false
