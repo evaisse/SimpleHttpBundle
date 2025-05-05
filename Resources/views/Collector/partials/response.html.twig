@@ -2,21 +2,23 @@
 
     <h5>Body</h5>
 
-    <table>
+    <table style="table-layout: fixed">
         <tbody>
-            <tr>
-                <td>{{ response.body }}</td>
-            </tr>
+        <tr>
+            <td class="full-width" style="overflow-wrap: break-word">
+                <pre>{{ response.body }}</pre>
+            </td>
+        </tr>
         </tbody>
     </table>
 
     <h5>Headers</h5>
 
-    <table>
+    <table style="table-layout: fixed">
         <tbody>
         {% for header in response.headers %}
             <tr>
-                <td>
+                <td class="full-width" style="overflow-wrap: break-word">
                     {{ header }}
                 </td>
             </tr>

@@ -2,18 +2,18 @@
 
 namespace evaisse\SimpleHttpBundle\Twig;
 
+use Symfony\Component\BrowserKit\Exception\JsonException;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Error\LoaderError;
-use Twig\Extension\ExtensionInterface;
+use Twig\Extension\AbstractExtension;
 use Twig\Loader\LoaderInterface;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-class Extension implements ExtensionInterface
+class Extension extends AbstractExtension
 {
     public function __construct(protected LoaderInterface $loader)
     {
-        $this->loader = $loader;
     }
 
     /**
@@ -50,16 +50,11 @@ class Extension implements ExtensionInterface
         ];
     }
 
-    /**
-     * @param int|float $number
-     * @param int       $decimals
-     * @return string
-     */
-    public function numberFormat($number, $decimals = 0): string
+    public function numberFormat(int|float $number, int $decimals = 0): string
     {
         static $locale;
 
-        $locale = $locale ? $locale : localeconv();
+        $locale = $locale ?: localeconv();
 
         return number_format($number, $decimals, $locale['decimal_point'], $locale['thousands_sep']);
     }
@@ -72,9 +67,9 @@ class Extension implements ExtensionInterface
     {
         if ($ms >= 1) {
             return $this->numberFormat($ms, 1) .  ' s';
-        } else {
-            return $this->numberFormat($ms * 1000) . " ms";
         }
+
+        return $this->numberFormat($ms * 1000) . " ms";
     }
 
     /**
@@ -86,15 +81,11 @@ class Extension implements ExtensionInterface
         return md5($str);
     }
 
-    /**
-     * @param $file
-     * @return string
-     */
-    public function assetInclude($file): string
+    public function assetInclude(string $file): string
     {
         try {
             return $this->loader->getSourceContext($file)->getCode();
-        } catch (LoaderError $e) {
+        } catch (LoaderError) {
             return '';
         }
     }
@@ -103,10 +94,13 @@ class Extension implements ExtensionInterface
      * @param int|array $codeOrResponse response data or just an http code
      * @return string
      */
-    public function formatHttpCode($codeOrResponse): string
+    public function formatHttpCode(int|array $codeOrResponse): string
     {
         $d = $this->fetchInfosFromCodeOrResponse($codeOrResponse);
-        return '<span class="http-status badge '.$d['level'].' '.($d['fromCache']?'http-cache-hit':'').'"><abbr title="' . htmlentities($d['text']) . '">'.$d['code'].($d['fromCache']?' <small>+cached</small>':'').'</abbr></span>';
+        return '<span class="http-status badge ' . $d['level'] . ' ' .
+            ($d['fromCache'] ? 'http-cache-hit' : '') . '"><abbr title="' .
+            htmlentities($d['text']) . '">' . $d['code'] . ($d['fromCache'] ? ' <small>+cached</small>' : '') .
+            '</abbr></span>';
     }
 
 
@@ -114,96 +108,75 @@ class Extension implements ExtensionInterface
      * @param int|array $codeOrResponse response data or just an http code
      * @return string
      */
-    public function formatHttpCodeAsSfBadge($codeOrResponse): string
+    public function formatHttpCodeAsSfBadge(int|array $codeOrResponse): string
     {
         $d = $this->fetchInfosFromCodeOrResponse($codeOrResponse);
-        return '<span class="http-status sf-toolbar-status sf-toolbar-status-' . $d['color'].' '.($d['fromCache']?'http-cache-hit':'').'">'
-              .'<abbr style="border:none" title="' . htmlentities($d['text']) . '">'.$d['code'].($d['fromCache']?'<small>+cache</small>':'').'</abbr>'
-              .'</span>';
+        return '<span class="http-status sf-toolbar-status sf-toolbar-status-' . $d['color'] . ' ' .
+            ($d['fromCache'] ? 'http-cache-hit' : '') . '">'
+            . '<abbr style="border:none" title="' . htmlentities($d['text']) . '">' . $d['code'] .
+            ($d['fromCache'] ? '<small>+cache</small>' : '') . '</abbr>'
+            . '</span>';
     }
 
-    /**
-     * @param $code
-     * @param $contentType
-     * @return string
-     */
-    public function format($code, $contentType)
+    public function format(string $code, string $contentType): string
     {
         $class = array('hljs');
-        if (strpos($contentType, 'application/json') !== false) {
+        if (str_contains($contentType, 'application/json')) {
             $class[] = 'json';
             $code = @$this->formatJson($code);
-        } else if (strpos($contentType, 'application/xml') !== false) {
+        } elseif (str_contains($contentType, 'application/xml')) {
             $class[] = 'xml';
             $code = @$this->formatXml($code);
         } else {
             $class[] = 'html';
         }
 
-        return '<pre class="' . join(' ', $class) . '">' . htmlentities($code) . '</pre>';
+        return '<pre class="' . implode(' ', $class) . '">' . htmlentities($code) . '</pre>';
     }
 
-    /**
-     * @param $xml
-     * @return string
-     */
-    public function formatXml($xml)
+    public function formatXml(string $xml): string
     {
         $domxml = new \DOMDocument('1.0');
         $domxml->preserveWhiteSpace = false;
         $domxml->formatOutput = true;
         $domxml->loadXML($xml);
+
         return $domxml->saveXML();
     }
 
-    /**
-     * @param $html
-     * @return mixed
-     */
-    public function formatHtml($html)
-    {
-        return $html;
-    }
-
-    /**
-     * @param $json
-     * @return string
-     */
-    public function formatJson($json)
+    public function formatJson(string $json): string
     {
         $result = '';
         $level = 0;
         $in_quotes = false;
         $in_escape = false;
-        $ends_line_level = NULL;
+        $ends_line_level = null;
         $json_length = strlen($json);
-        
+
         for ($i = 0; $i < $json_length; $i++) {
             $char = $json[$i];
-            $new_line_level = NULL;
+            $new_line_level = null;
             $post = "";
-            if ($ends_line_level !== NULL) {
+            if ($ends_line_level !== null) {
                 $new_line_level = $ends_line_level;
-                $ends_line_level = NULL;
+                $ends_line_level = null;
             }
             if ($in_escape) {
                 $in_escape = false;
-            } 
-            else if ($char === '"') {
+            } elseif ($char === '"') {
                 $in_quotes = !$in_quotes;
-            } 
-            else if (!$in_quotes) {
+            } elseif (!$in_quotes) {
                 switch ($char) {
                     case '}':
                     case ']':
                         $level--;
-                        $ends_line_level = NULL;
+                        $ends_line_level = null;
                         $new_line_level = $level;
                         break;
-
                     case '{':
                     case '[':
                         $level++;
+                        // intentional no break
                     case ',':
                         $ends_line_level = $level;
                         break;
@@ -218,19 +191,19 @@ class Extension implements ExtensionInterface
                     case "\r":
                         $char = "";
                         $ends_line_level = $new_line_level;
-                        $new_line_level = NULL;
+                        $new_line_level = null;
                         break;
                 }
-            } 
-            else if ($char === '\\') {
+            } elseif ($char === '\\') {
                 $in_escape = true;
             }
-            if ($new_line_level !== NULL) {
-                $result.= "\n" . str_repeat("    ", $new_line_level);
+            if ($new_line_level !== null) {
+                $result .= "\n" . str_repeat("    ", $new_line_level);
             }
-            $result.= $char . $post;
+
+            $result .= $char . $post;
         }
-        
+
         return $result;
     }
 
@@ -239,27 +212,27 @@ class Extension implements ExtensionInterface
      * @param int|array $codeOrResponse response data or just an http code
      * @return array infos "fromCache", "text", "color"
      */
-    protected function fetchInfosFromCodeOrResponse($codeOrResponse)
+    protected function fetchInfosFromCodeOrResponse(int|array $codeOrResponse): array
     {
         $fromCache = false;
         if (is_array($codeOrResponse)) {
             $response = $codeOrResponse;
-            $code = array_key_exists('statusCode', $response)?$response['statusCode']:'N/A';
+            $code = array_key_exists('statusCode', $response) ? $response['statusCode'] : 'N/A';
             $fromCache = !empty($response['fromHttpCache']);
         } else {
-            $code = (int)$codeOrResponse;
+            $code = $codeOrResponse;
         }
 
-        if ($code >= 500) {
+        if ($code === 'N/A' || $code >= 500) {
             $cls = "red";
             $level = "error";
-        } else if ($code >= 400) {
+        } elseif ($code >= 400) {
             $cls = "yellow";
             $level = "warning";
-        } else if ($code >= 300) {
+        } elseif ($code >= 300) {
             $cls = 'blue';
             $level = 'info';
-        } else if ($code >= 200) {
+        } elseif ($code >= 200) {
             $cls = "green";
             $level = "success";
         } else {
@@ -267,7 +240,7 @@ class Extension implements ExtensionInterface
             $level = 'default';
         }
 
-        $statusText = Response::$statusTexts[$code];
+        $statusText = $code === 'N/A' ? 'N/A' : Response::$statusTexts[$code];
 
         return [
             'fromCache' => $fromCache,
@@ -282,7 +255,7 @@ class Extension implements ExtensionInterface
      * @param array $response
      * @return array
      */
-    public function decodeBody(array $response)
+    public function decodeBody(array $response): array
     {
         if (array_key_exists('headers', $response)) {
             foreach ($response['headers'] as $h) {
@@ -294,38 +267,7 @@ class Extension implements ExtensionInterface
                 }
             }
         }
-        return [];
-    }
 
-    /**
-     * @inheritDoc
-     */
-    public function getTokenParsers(): array
-    {
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getNodeVisitors(): array
-    {
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getTests(): array
-    {
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getOperators(): array
-    {
         return [];
     }
 }
