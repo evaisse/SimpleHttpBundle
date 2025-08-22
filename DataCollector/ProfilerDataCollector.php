@@ -11,6 +11,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Stopwatch\Stopwatch;
@@ -278,7 +279,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     public function fetchRequestInfos(Request $request): array
     {
-        $normalizers = array(new RequestNormalizer());
+        $normalizers = array(new RequestNormalizer(), new ObjectNormalizer());
         $encoders = array(new JsonEncoder());
         $serializer = new Serializer($normalizers, $encoders);
 
