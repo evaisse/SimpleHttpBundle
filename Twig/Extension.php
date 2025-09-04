@@ -240,7 +240,7 @@ class Extension extends AbstractExtension
             $level = 'default';
         }
 
-        $statusText = $code === 'N/A' ? 'N/A' : Response::$statusTexts[$code];
+        $statusText = $code === 'N/A' ? 'N/A' : Response::$statusTexts[$code] ?? 'N/A';
 
         return [
             'fromCache' => $fromCache,
