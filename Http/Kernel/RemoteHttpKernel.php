@@ -37,7 +37,7 @@ class RemoteHttpKernel implements HttpKernelInterface
 
     private $lastCurlRequest;
 
-    public function __construct(RequestGenerator $generator = null)
+    public function __construct(?RequestGenerator $generator = null)
     {
         $this->generator = $generator;
     }

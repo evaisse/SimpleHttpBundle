@@ -41,10 +41,10 @@ class Helper
     }
 
     /**
-     * @param SessionInterface $session session to store the cookies
+     * @param SessionInterface|null $session session to store the cookies
      * @return SessionCookieJar
      */
-    public function createCookieJar(SessionInterface $session = null): SessionCookieJar
+    public function createCookieJar(?SessionInterface $session = null): SessionCookieJar
     {
         return new SessionCookieJar($session);
     }
@@ -58,7 +58,7 @@ class Helper
      * @param Kernel|null $client http client proxy to use
      * @return Helper given service list
      */
-    public function execute(array $servicesList, SessionCookieJar $cookieJar = null, Kernel $client = null): static
+    public function execute(array $servicesList, ?SessionCookieJar $cookieJar = null, Kernel $client = null): static
     {
         $httpClient = $client ? $client : $this->httpKernel;
 
