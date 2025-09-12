@@ -71,7 +71,7 @@ class Kernel extends RemoteHttpKernel
      * @param EventDispatcherInterface $eventDispatcher
      * @param RequestGenerator|null $generator Optionnal generator to construct curlrequest
      */
-    public function __construct(EventDispatcherInterface $eventDispatcher, RequestGenerator $generator = null)
+    public function __construct(EventDispatcherInterface $eventDispatcher, ?RequestGenerator $generator = null)
     {
         $this->setEventDispatcher($eventDispatcher);
         parent::__construct($generator);
@@ -354,13 +354,13 @@ class Kernel extends RemoteHttpKernel
      *
      * @param string $filename realpath to file
      * @param string $mimetype mime content type
-     * @param string $postname base name for file
+     * @param string|null $postname base name for file
      *
      * @throws \InvalidArgumentException
      *
      * @return mixed|string|CURLFile if version >= 5.5, CURLFile instance will be return, otherwise a string resource
      */
-    protected function createCurlFile(string $filename, string $mimetype, string $postname = null): mixed
+    protected function createCurlFile(string $filename, string $mimetype, ?string $postname = null): mixed
     {
         if (!realpath($filename) && is_file($filename)) {
             throw new \InvalidArgumentException('invalid given filepath : ' . $filename);

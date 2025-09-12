@@ -32,7 +32,7 @@ class SessionCookieJar extends CookieJar
      * @param SessionInterface $session Session storage to persist cookieJar
      * @param string $cookieJarName A key in which will be stored the cookie jar
      */
-    function __construct(SessionInterface $session = null, $cookieJarName = "_simple_http.cookiejar")
+    function __construct(?SessionInterface $session = null, $cookieJarName = "_simple_http.cookiejar")
     {
         $session = $session ? $session : new Session(new MockArraySessionStorage());
         $this->setSession($session);

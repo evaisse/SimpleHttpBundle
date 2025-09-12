@@ -127,7 +127,7 @@ class Statement
      *
      * @param Request $request An http request object to send
      */
-    public function __construct(Request $request, EventDispatcherInterface $eventDispatcher, Kernel $httpKernel = null)
+    public function __construct(Request $request, EventDispatcherInterface $eventDispatcher, ?Kernel $httpKernel = null)
     {
         $this->setRequest($request);
         $this->deferred = new Deferred();
@@ -327,7 +327,7 @@ class Statement
      * @throws Error
      * @throws Exception
      */
-    public function execute(Kernel $httpKernel = null)
+    public function execute(?Kernel $httpKernel = null)
     {
         $this->sent = true;
         $http = $httpKernel ? $httpKernel : $this->httpKernel;

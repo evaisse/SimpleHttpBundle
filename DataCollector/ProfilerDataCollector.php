@@ -15,6 +15,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Stopwatch\Stopwatch;
+use Throwable;
 
 /*
  * @author Emmanuel VAISSE
@@ -53,7 +54,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
     {
     }
 
-    public function collect(Request $request, Response $response, \Throwable $exception = null): void
+    public function collect(Request $request, Response $response, ?Throwable $exception = null): void
     {
         $this->data = array(
             'countRequests'              => count($this->calls),
@@ -332,7 +333,7 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
         return $data;
     }
 
-    public function fetchErrorInfos(\Throwable $error): array
+    public function fetchErrorInfos(Throwable $error): array
     {
         return [
             'class'         => get_class($error),

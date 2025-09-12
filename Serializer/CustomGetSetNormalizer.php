@@ -15,7 +15,7 @@ class CustomGetSetNormalizer extends GetSetMethodNormalizer
     /**
      * {@inheritdoc}
      */
-    public function normalize(mixed $object, string $format = null, array $context = [])
+    public function normalize(mixed $object, ?string $format = null, array $context = [])
     {
         if ($object instanceof \Throwable) {
             return $this->normalizeThrowable($object);
