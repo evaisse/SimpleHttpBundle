@@ -427,7 +427,11 @@ class Statement
      */
     public function onFinish(callable $callable)
     {
-        $this->getPromise()->always($callable);
+        if (method_exists(object_or_class: $this->getPromise(), method: 'finally')) {
+            $this->getPromise()->finally($callable);
+        } else {
+            $this->getPromise()->always($callable);
+        }
         return $this;
     }
 

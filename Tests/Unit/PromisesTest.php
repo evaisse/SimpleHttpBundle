@@ -8,6 +8,7 @@
 
 namespace evaisse\SimpleHttpBundle\Tests\Unit;
 
+use React\Promise\Promise;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PromisesTest extends AbstractTests
@@ -37,11 +38,14 @@ class PromisesTest extends AbstractTests
 
         $events = new \ArrayObject();
 
+        $finallyMethod = method_exists(object_or_class: Promise::class, method: 'always') ? 'always' : 'finally';
+        $catchMethod = method_exists(object_or_class: Promise::class, method: 'catch') ? 'catch' : 'otherwise';
+
         $stmt->getPromise()->then(function () use ($events) {
             $events[] = 'success';
-        })->otherwise(function () use ($events) {
+        })->$catchMethod(function () use ($events) {
             $events[] = 'error';
-        })->done(function () use ($events) {
+        })->$finallyMethod(function () use ($events) {
             $events[] = 'done';
         });
 

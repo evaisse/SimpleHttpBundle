@@ -11,7 +11,7 @@ jobs:
           - 8080:80
     strategy:
       matrix:
-        php-versions: [ '8.0', '8.1' ]
+        php-versions: [ '8.0', '8.1', '8.2', '8.3', '8.4' ]
         composer-options: [ '--prefer-lowest', '']
     runs-on: ubuntu-latest
     steps:
