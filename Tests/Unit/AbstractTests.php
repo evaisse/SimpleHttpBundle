@@ -24,6 +24,9 @@ class AbstractTests extends TestCase
     }
 
 
+    /**
+     * @return array{0: Helper, 1: Kernel}
+     */
     protected function createContext()
     {
         $eventDispatcher = new EventDispatcher();
