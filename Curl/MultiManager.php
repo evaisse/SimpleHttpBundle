@@ -57,7 +57,8 @@ class MultiManager implements CurlRequest
      * @param boolean $blocking Whether the execution should block until finished or wait until
      *                          the destructor is called to block
      */
-    public function __construct(EventDispatcherInterface $dispatcher=null,$blocking=true) {
+    public function __construct(?EventDispatcherInterface $dispatcher = null, $blocking = true)
+    {
         $this->dispatcher = $dispatcher;
         $this->handle = curl_multi_init();
         $this->blocking = $blocking;
