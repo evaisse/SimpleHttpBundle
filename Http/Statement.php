@@ -1,4 +1,5 @@
 <?php
+
 /**
  * A statement that prepare a request and execute them.
  * The statement contains request, response and errors
@@ -7,26 +8,28 @@
  * Date: 29/05/15
  * Time: 14:21
  */
+
 namespace evaisse\SimpleHttpBundle\Http;
 
-
 use evaisse\SimpleHttpBundle\Http\Exception\RequestNotSentException;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use React\Promise\Deferred;
 use React\Promise\Promise;
-
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Throwable;
 
-class Statement
+class Statement implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /** @var Kernel */
     protected $httpKernel;
-    
+
     /**
      * $request : Service Request
      *
@@ -38,7 +41,7 @@ class Statement
     /**
      * $error : Error
      *
-     * @var Error
+     * @var HttpException
      * @access protected
      */
     protected $error;
@@ -122,7 +125,7 @@ class Statement
     {
         $this->httpKernel = $httpKernel;
     }
-    
+
     /**
      *
      * @param Request $request An http request object to send
@@ -134,6 +137,12 @@ class Statement
         $this->promise = $this->deferred->promise();
         $this->eventDispatcher = $eventDispatcher;
         $this->httpKernel = $httpKernel;
+
+        if (function_exists('\React\Promise\set_rejection_handler')) {
+            \React\Promise\set_rejection_handler(fn(Throwable $e) => $this->logger?->warning(
+                'Unhandled promise rejection with ' . $e->getMessage(),
+            ));
+        }
     }
 
 
@@ -259,7 +268,6 @@ class Statement
                 $json = (string) $json;
             } else {
                 $json = json_encode(null);
-
             }
             $this->request->setContent($json);
         }
@@ -374,7 +382,8 @@ class Statement
             $file->getRealPath(),
             $clientName,
             $file->getMimeType(),
-            0);
+            0
+        );
 
         $this->getRequest()->files->set($key, $file);
     }
@@ -447,9 +456,9 @@ class Statement
     }
 
     /**
-     * @param string	$key	The key
-     * @param string|array	$values	The value or an array of values
-     * @param bool	$replace	Whether to replace the actual value or not (true by default)
+     * @param string $key The key
+     * @param string|array $values The value or an array of values
+     * @param bool $replace Whether to replace the actual value or not (true by default)
      *
      * @return self
      */
@@ -458,5 +467,4 @@ class Statement
         $this->request->headers->set($key, $values, $replace);
         return $this;
     }
-
 }
