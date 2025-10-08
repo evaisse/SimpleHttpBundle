@@ -10,8 +10,8 @@
         <td>Request</td>
         <td>
             {% if call.request and call.request.jwt|default(false) %}
-                {{ dump(call.request.jwt.decoded.header|json_decode) }}
-                {{ dump(call.request.jwt.decoded.payload|json_decode) }}
+                {{ dump(call.request.jwt.decoded.header|simple_json_decode) }}
+                {{ dump(call.request.jwt.decoded.payload|simple_json_decode) }}
             {% endif %}
         </td>
     </tr>
@@ -19,8 +19,8 @@
         <td>Response</td>
         <td>
             {% if call.response and call.response.jwt|default(false) %}
-                {{ dump(call.response.jwt.decoded.header|json_decode) }}
-                {{ dump(call.response.jwt.decoded.payload|json_decode) }}
+                {{ dump(call.response.jwt.decoded.header|simple_json_decode) }}
+                {{ dump(call.response.jwt.decoded.payload|simple_json_decode) }}
             {% endif %}
         </td>
     </tr>
