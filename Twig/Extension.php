@@ -33,10 +33,11 @@ class Extension extends AbstractExtension
             new TwigFilter('simple_http_beautify', array($this, 'format'), $safe),
             new TwigFilter('simple_http_format_http_code', array($this, 'formatHttpCode'), $safe),
             new TwigFilter('simple_http_format_http_code_as_badge', array($this, 'formatHttpCodeAsSfBadge'), $safe),
-            new TwigFilter('simple_http_md5', array($this, 'md5')),
+            new TwigFilter('simple_http_md5', 'md5'),
             new TwigFilter('simple_http_include_asset', array($this, 'assetInclude'), $safe),
             new TwigFilter('simple_http_format_ms', array($this, 'formatMilliseconds')),
             new TwigFilter('simple_http_format_num', array($this, 'numberFormat')),
+            new TwigFilter('simple_json_decode', 'json_decode'),
         ];
     }
 
@@ -70,15 +71,6 @@ class Extension extends AbstractExtension
         }
 
         return $this->numberFormat($ms * 1000) . " ms";
-    }
-
-    /**
-     * @param $str
-     * @return string
-     */
-    public function md5($str): string
-    {
-        return md5($str);
     }
 
     public function assetInclude(string $file): string
