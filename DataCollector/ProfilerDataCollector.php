@@ -3,7 +3,6 @@
 namespace evaisse\SimpleHttpBundle\DataCollector;
 
 use evaisse\SimpleHttpBundle\Http\StatementEventMap;
-use evaisse\SimpleHttpBundle\Serializer\RequestNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
@@ -11,6 +10,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -280,7 +281,11 @@ class ProfilerDataCollector extends DataCollector implements EventSubscriberInte
 
     public function fetchRequestInfos(Request $request): array
     {
-        $normalizers = array(new RequestNormalizer(), new ObjectNormalizer());
+        $normalizers = array(new GetSetMethodNormalizer(defaultContext: [
+            AbstractNormalizer::IGNORED_ATTRIBUTES => [
+                'session',
+            ]
+        ]), new ObjectNormalizer());
         $encoders = array(new JsonEncoder());
         $serializer = new Serializer($normalizers, $encoders);
 
