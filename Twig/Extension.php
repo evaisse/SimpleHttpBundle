@@ -16,14 +16,10 @@ class Extension extends AbstractExtension
     {
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return 'simple_http_extension';
     }
-
 
     public function getFilters(): array
     {
@@ -40,7 +36,6 @@ class Extension extends AbstractExtension
             new TwigFilter('simple_json_decode', 'json_decode'),
         ];
     }
-
 
     public function getFunctions(): array
     {
@@ -60,11 +55,7 @@ class Extension extends AbstractExtension
         return number_format($number, $decimals, $locale['decimal_point'], $locale['thousands_sep']);
     }
 
-    /**
-     * @param $ms
-     * @return string
-     */
-    public function formatMilliseconds($ms): string
+    public function formatMilliseconds(float|int $ms): string
     {
         if ($ms >= 1) {
             return $this->numberFormat($ms, 1) .  ' s';

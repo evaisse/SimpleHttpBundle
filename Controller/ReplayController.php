@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: sroussel
- * Date: 03/02/2016
- * Time: 16:30
- */
 
 namespace evaisse\SimpleHttpBundle\Controller;
 
@@ -20,22 +14,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ReplayController extends AbstractController
 {
-    /** @var Helper $serviceHelper */
-    protected $serviceHelper;
-
-    /**
-     * @param Helper $serviceHelper
-     */
-    public function __construct(Helper $serviceHelper)
+    public function __construct(protected Helper $serviceHelper)
     {
-        $this->serviceHelper = $serviceHelper;
     }
 
-    /**
-     * @Route("/http-replay", name="simple_http.replay_request")
-     * @param Request $request
-     * @return Response
-     */
+    #[Route('/http-replay', name: 'simple_http.replay_request')]
     public function replayRequestAction(Request $request): Response
     {
         $request = json_decode($request->request->get('request'));

@@ -14,27 +14,10 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class Helper
 {
-    /** @var Kernel */
-    protected $httpKernel;
-
-    /** @var EventDispatcherInterface */
-    protected $eventDispatcher;
-
-    /**
-     * Helper constructor.
-     * @param Kernel $httpKernel
-     * @param EventDispatcherInterface $eventDispatcher
-     */
-    public function __construct(Kernel $httpKernel, EventDispatcherInterface $eventDispatcher)
+    public function __construct(protected Kernel $httpKernel, protected EventDispatcherInterface $eventDispatcher)
     {
-        $this->httpKernel = $httpKernel;
-        $this->eventDispatcher = $eventDispatcher;
     }
 
-    /**
-     *
-     * @return CookieJar
-     */
     public function getDefaultCookieJar(): SessionCookieJar|CookieJar
     {
         return $this->createCookieJar();
@@ -60,12 +43,10 @@ class Helper
      */
     public function execute(array $servicesList, ?SessionCookieJar $cookieJar = null, ?Kernel $client = null): static
     {
-        $httpClient = $client ? $client : $this->httpKernel;
+        $client = $client ?: $this->httpKernel;
 
-        /*
-            Fetch Cookie jar from session
-         */
-        $cookieJar = $cookieJar ? $cookieJar : $this->getDefaultCookieJar();
+        /** Fetch Cookie jar from session */
+        $cookieJar = $cookieJar ?: $this->getDefaultCookieJar();
 
         foreach ($servicesList as $service) {
             $sessionCookies = $cookieJar->allValues($service->getRequest()->getUri());
@@ -74,13 +55,10 @@ class Helper
             }
         }
 
-        $httpClient->execute($servicesList);
+        $client->execute($servicesList);
 
-        /*
-            Persist cookies
-         */
+        /** Persist cookies */
         foreach ($servicesList as $service) {
-
             if (!$service->getResponse()) {
                 continue;
             }
@@ -246,6 +224,4 @@ class Helper
     {
         return $this->fire('DELETE', $url, $parameters);
     }
-
-
 }
