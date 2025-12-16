@@ -4,26 +4,26 @@
 
 <table>
     <tbody>
-        <tr>
-            <td>
-                {% if sfDebugLink %}
-                    <a style="float: right;display: inline-block;" href="{{ sfDebugLink }}" target="_blank">
-                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAgElEQVQYV5XQMQpCQQxF0fNX4G60stFGdyBYuSE3InwQBG20URDclPKKkSAfxXST3FxepvO9nm3c/QDHOGAU8IxZWXhggkB7bHAMGP0clwI3aN36DawRAvVY4VYzxljBHba444pp4CFjve8t+Rtc4vTxVYtc22LFmEeaQ5XlSLwAJVAaAqoDe/cAAAAASUVORK5CYII=" />
-                        Symfony External debug link
-                    </a>
-                {% endif %}
-                {% if debugLink %}
-                    <a style="float: right;display: inline-block;margin-left: 1em;" href="{{ debugLink }}" target="_blank">
-                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAgElEQVQYV5XQMQpCQQxF0fNX4G60stFGdyBYuSE3InwQBG20URDclPKKkSAfxXST3FxepvO9nm3c/QDHOGAU8IxZWXhggkB7bHAMGP0clwI3aN36DawRAvVY4VYzxljBHba444pp4CFjve8t+Rtc4vTxVYtc22LFmEeaQ5XlSLwAJVAaAqoDe/cAAAAASUVORK5CYII=" />
-                        External debug link
-                    </a>
-                {% endif %}
+    <tr>
+        <td>
+            {% if sfDebugLink %}
+                <a style="float: right;display: inline-block;" href="{{ sfDebugLink }}" target="_blank">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAgElEQVQYV5XQMQpCQQxF0fNX4G60stFGdyBYuSE3InwQBG20URDclPKKkSAfxXST3FxepvO9nm3c/QDHOGAU8IxZWXhggkB7bHAMGP0clwI3aN36DawRAvVY4VYzxljBHba444pp4CFjve8t+Rtc4vTxVYtc22LFmEeaQ5XlSLwAJVAaAqoDe/cAAAAASUVORK5CYII=" />
+                    Symfony External debug link
+                </a>
+            {% endif %}
+            {% if debugLink %}
+                <a style="float: right;display: inline-block;margin-left: 1em;" href="{{ debugLink }}" target="_blank">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAgElEQVQYV5XQMQpCQQxF0fNX4G60stFGdyBYuSE3InwQBG20URDclPKKkSAfxXST3FxepvO9nm3c/QDHOGAU8IxZWXhggkB7bHAMGP0clwI3aN36DawRAvVY4VYzxljBHba444pp4CFjve8t+Rtc4vTxVYtc22LFmEeaQ5XlSLwAJVAaAqoDe/cAAAAASUVORK5CYII=" />
+                    External debug link
+                </a>
+            {% endif %}
 
-                Duration total {{ time.total|simple_http_format_ms }},
-        
-                wait {{ time.connection|simple_http_format_ms }} ({{ connection_percent|number_format(0) }}%),
-                process {{ (time.total - time.connection)|simple_http_format_ms }} ({{ process_percent|number_format(0) }}%)
-            </td>
-        </tr>
+            Duration total {{ '%0.2f'|format(time.total * 1000) ~ 'ms' }},
+
+            wait {{ '%0.2f'|format(time.connection * 1000) ~ 'ms' }} ({{ connection_percent|number_format(0) }}%),
+            process {{ '%0.2f'|format((time.total - time.connection) * 1000) ~ 'ms' }} ({{ process_percent|number_format(0) }}%)
+        </td>
+    </tr>
     </tbody>
 </table>

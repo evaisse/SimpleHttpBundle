@@ -1,78 +1,22 @@
 {% extends '@WebProfiler/Profiler/layout.html.twig' %}
 
-{% macro css_custom_status_styles() %}
-
-    <style>
-        .simplehttpprofiler-status-count .sf-toolbar-value {
-            border-radius: 1px;
-            padding: 0 5px;
-            display: inline-block;
-            line-height: 22px;
-        }
-
-        #menu-profiler .selected .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-red,
-        .sf-toolbar-block:hover .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-red {
-            background: rgb(176, 65, 62);
-        }
-        }
-
-        .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-red {
-            background: rgb(125, 46, 44);
-        }
-
-        #menu-profiler .selected .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-yellow,
-        .sf-toolbar-block:hover .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-yellow {
-            background: rgb(164, 105, 23);
-        }
-
-        .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-yellow {
-            background: rgb(125, 80, 18);
-        }
-
-        #menu-profiler .selected .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-green,
-        .sf-toolbar-block:hover .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-green {
-            background: rgb(80, 127, 91);
-        }
-
-        .simplehttpprofiler-status-count .sf-toolbar-value.sf-toolbar-status-green {
-            background: rgb(58, 86, 65);
-        }
-
-    </style>
-{% endmacro %}
-
-
-
 {% block toolbar %}
+    {% set icon %}
+        <svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="#AAAAAA">
+            <path d="M4,16a7,7,0,0,1,7-7h8.36l-1.52.39-1.26,1.26a2,2,0,1,0,2.83,2.83l5-5a2,2,0,0,0,0-2.83l-5-5a2,2,0,0,0-2.83,2.83l1.17,1.17L19.3,5H11A11,11,0,0,0,2.78,23.31a2,2,0,0,0,3-2.66A7,7,0,0,1,4,16Z"/>
+            <path d="M29.18,8.64a2,2,0,0,0-3,2.68A7,7,0,0,1,21,23H13l1.24-.42,1.16-1.16a2,2,0,0,0-2.83-2.83l-5,5a2,2,0,0,0,0,2.83l5,5a2,2,0,0,0,2.83-2.83l-1.22-1.22L13,27h8A11,11,0,0,0,29.18,8.64Z"/>
+        </svg>
 
-	{% set icon %}
-
-        {% import _self as customMacro %}
-        {{ customMacro.css_custom_status_styles() }}
-
-		<span class="icon"><img alt="" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgZGF0YS1uYW1lPSJMYXllciAxIiBpZD0iTGF5ZXJfMSIgdmlld0JveD0iMCAwIDMyIDMyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojQUFBO308L3N0eWxlPjwvZGVmcz48dGl0bGUvPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTQsMTZhNyw3LDAsMCwxLDctN2g4LjM2bC0xLjUyLjM5LTEuMjYsMS4yNmEyLDIsMCwxLDAsMi44MywyLjgzbDUtNWEyLDIsMCwwLDAsMC0yLjgzbC01LTVhMiwyLDAsMCwwLTIuODMsMi44M2wxLjE3LDEuMTdMMTkuMyw1SDExQTExLDExLDAsMCwwLDIuNzgsMjMuMzFhMiwyLDAsMCwwLDMtMi42NkE3LDcsMCwwLDEsNCwxNloiLz48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yOS4xOCw4LjY0YTIsMiwwLDAsMC0zLDIuNjhBNyw3LDAsMCwxLDIxLDIzSDEzbDEuMjQtLjQyLDEuMTYtMS4xNmEyLDIsMCwwLDAtMi44My0yLjgzbC01LDVhMiwyLDAsMCwwLDAsMi44M2w1LDVhMiwyLDAsMCwwLDIuODMtMi44M2wtMS4yMi0xLjIyTDEzLDI3aDhBMTEsMTEsMCwwLDAsMjkuMTgsOC42NFoiLz48L3N2Zz4=" /></span>
-
-        <span class="simplehttpprofiler-status-count">
-            {% if collector.hasServerErrors %}
-                <span class="sf-toolbar-value sf-toolbar-status-red">{{ collector.serverErrorsCount }}</span>
-            {% endif %}
-            {% if collector.hasClientErrors %}
-                <span class="sf-toolbar-value sf-toolbar-status-yellow">{{ collector.clientErrorsCount }}</span>
-            {% endif %}
-            {% if collector.countSuccessfullRequest %}
-                <span class="sf-toolbar-value sf-toolbar-status-green">{{ collector.countSuccessfullRequest }}</span>
-            {% endif %}
-        </span>
-
-        <span class="sf-toolbar-value">{{ collector.totalTime|simple_http_format_ms }}</span>
-
-
-	{% endset %}
+        <span class="sf-toolbar-value">{{ collector.countRequests }}</span>
+        <span class="sf-toolbar-info-piece-additional-detail">
+                <span class="sf-toolbar-label">in</span>
+                <span class="sf-toolbar-value">{{ '%0.2f'|format(collector.totalTime) }}</span>
+                <span class="sf-toolbar-label">s</span>
+            </span>
+    {% endset %}
 
     {% set text %}
-
         {% for index, call in collector.calls %}
-
             <div class="sf-toolbar-info-piece">
                 <span style="display: table-cell">
                     {% if call.response %}
@@ -84,18 +28,18 @@
 
                 <a style="display: table-cell"
                    href="{{ path('_profiler', { 'token': token, 'panel': 'simplehttpprofiler' }) }}#request{{ index }}">
-                   <span>{{ call.request.method }} {{ call.request.requestUri }}</span>
+                    <span>{{ call.request.method }} {{ call.request.requestUri }}</span>
                 </a>
 
 
             </div>
 
             <div class="sf-toolbar-info-piece">
-                <b style="font-weight: normal">{{ call.time.total|simple_http_format_ms }}</b>
+                <b style="font-weight: normal">{{ '%0.2f'|format(call.time.total * 1000) ~ 'ms' }}</b>
                 <b>
                     {{ call.request.schemeAndHttpHost }}
                     {% if call.debugLink %}
-                    -
+                        -
                         <a style="text-transform: uppercase;
                                   font-variant: small-caps;
                                   display: inline-block;
@@ -150,66 +94,30 @@
 {% endblock %}
 
 {% block menu %}
-    <span class="label">
-		<span class="icon"><img alt="" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgZGF0YS1uYW1lPSJMYXllciAxIiBpZD0iTGF5ZXJfMSIgdmlld0JveD0iMCAwIDMyIDMyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojQUFBO308L3N0eWxlPjwvZGVmcz48dGl0bGUvPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTQsMTZhNyw3LDAsMCwxLDctN2g4LjM2bC0xLjUyLjM5LTEuMjYsMS4yNmEyLDIsMCwxLDAsMi44MywyLjgzbDUtNWEyLDIsMCwwLDAsMC0yLjgzbC01LTVhMiwyLDAsMCwwLTIuODMsMi44M2wxLjE3LDEuMTdMMTkuMyw1SDExQTExLDExLDAsMCwwLDIuNzgsMjMuMzFhMiwyLDAsMCwwLDMtMi42NkE3LDcsMCwwLDEsNCwxNloiLz48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yOS4xOCw4LjY0YTIsMiwwLDAsMC0zLDIuNjhBNyw3LDAsMCwxLDIxLDIzSDEzbDEuMjQtLjQyLDEuMTYtMS4xNmEyLDIsMCwwLDAtMi44My0yLjgzbC01LDVhMiwyLDAsMCwwLDAsMi44M2w1LDVhMiwyLDAsMCwwLDIuODMtMi44M2wtMS4yMi0xLjIyTDEzLDI3aDhBMTEsMTEsMCwwLDAsMjkuMTgsOC42NFoiLz48L3N2Zz4=" /></span>
+    <span class="label {% if collector.hasServerErrors %}label-status-error{% elseif collector.hasClientErrors %}label-status-warning{% endif %}">
+        <span class="icon">
+            <svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="#AAAAAA">
+                <path d="M4,16a7,7,0,0,1,7-7h8.36l-1.52.39-1.26,1.26a2,2,0,1,0,2.83,2.83l5-5a2,2,0,0,0,0-2.83l-5-5a2,2,0,0,0-2.83,2.83l1.17,1.17L19.3,5H11A11,11,0,0,0,2.78,23.31a2,2,0,0,0,3-2.66A7,7,0,0,1,4,16Z"/>
+                <path d="M29.18,8.64a2,2,0,0,0-3,2.68A7,7,0,0,1,21,23H13l1.24-.42,1.16-1.16a2,2,0,0,0-2.83-2.83l-5,5a2,2,0,0,0,0,2.83l5,5a2,2,0,0,0,2.83-2.83l-1.22-1.22L13,27h8A11,11,0,0,0,29.18,8.64Z"/>
+            </svg>
+        </span>
 
         <strong>HTTP</strong>
 
-        {% import _self as customMacro %}
-        {{ customMacro.css_custom_status_styles() }}
-
-        <span class="count simplehttpprofiler-status-count" style="background: transparent">
-            {% if collector.hasServerErrors %}
-                <b class="sf-toolbar-value sf-toolbar-status-red">{{ collector.serverErrorsCount }}</b>
-            {% endif %}
-            {% if collector.hasClientErrors %}
-                <b class="sf-toolbar-value sf-toolbar-status-yellow">{{ collector.clientErrorsCount }}</b>
-            {% endif %}
-            {% if collector.countSuccessfullRequest %}
-                <b class="sf-toolbar-value sf-toolbar-status-green">{{ collector.countSuccessfullRequest }}</b>
-            {% endif %}
-
-            <span>{{ collector.totalTime|simple_http_format_ms }}</span>
+        <span class="count">
+            {{ collector.countRequests }} - {{ '%0.2f'|format(collector.totalTime * 1000) ~ 'ms' }}
         </span>
-
     </span>
 {% endblock %}
 
 {% block head %}
-
     {{ parent() }}
-
 
     <link rel="stylesheet" href="{{ asset('bundles/simplehttp/libs/highlightjs/highlightjs-8.5.css') }}" />
     <link rel="stylesheet" href="{{ asset('bundles/simplehttp/simple-http-bundle.css') }}" />
-
-
 {% endblock %}
 
-
-
-
 {% block panel %}
-
-
-    <style>
-        .http-call__title__method {
-            display: inline-block;
-            vertical-align: top;
-        }
-
-        .http-call__path {
-            text-overflow: ellipsis;
-            width: 85%;
-            white-space: nowrap;
-            display: inline-block;
-            overflow-x: hidden;
-            text-decoration: none;
-            border-bottom: 0;
-        }
-    </style>
-
-
     <table>
         <tr>
             <th width="120">
@@ -225,16 +133,12 @@
         </tr>
     </table>
 
-
     {% for index, call in collector.calls %}
         <a name="request{{ index }}"></a>
         {% include '@SimpleHttp/Collector/partials/call.html.twig' with { 'call': call } %}
     {% endfor %}
 
-
     <script type="text/javascript" src="{{ asset('bundles/simplehttp/libs/jquery/jquery-1.12.1.js') }}"></script>
     <script type="text/javascript" src="{{ asset('bundles/simplehttp/libs/highlightjs/highlightjs-8.5.js') }}"></script>
     <script type="text/javascript" src="{{ asset('bundles/simplehttp/simple-http-bundle.js') }}"></script>
-
-
 {% endblock %}

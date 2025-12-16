@@ -238,7 +238,6 @@ button[data-simple-http-replay] img.rotating {
     background: none;
 }
 
-
 .simple-http-badge {
     display: inline-block;
     background: #CCC;
@@ -248,10 +247,23 @@ button[data-simple-http-replay] img.rotating {
     color: white;
 }
 
-
-
 .http-call__title__method,
 .http-call__path {
     font-weight: bold;
     color: #222;
+}
+
+.http-call__title__method {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.http-call__path {
+    text-overflow: ellipsis;
+    width: 85%;
+    white-space: nowrap;
+    display: inline-block;
+    overflow-x: hidden;
+    text-decoration: none;
+    border-bottom: 0;
 }

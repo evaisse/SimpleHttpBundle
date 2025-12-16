@@ -2,7 +2,6 @@
 <div id="call-{{ index }}" class="http-call http-call--{{ call.request.method | lower }} {{ call.request.schemeAndHttpHost | simple_http_md5 }}">
 
     <h3 class="http-call__title">
-        {#<span style="float: right"><a href="#" class="replay" data-request="{{ call.request|json_encode }}" data-index="{{ index }}">Replay</a></span>#}
         <span class="http-call__title__method">{{ call.request.method }}</span>
         <span title="{{ call.request.requestUri }}" class="http-call__path">{{ call.request.requestUri }}</span><br/>
         <span class="http-call__title__webhost">{{ call.request.schemeAndHttpHost }}</span>
