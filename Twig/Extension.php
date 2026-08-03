@@ -2,6 +2,7 @@
 
 namespace evaisse\SimpleHttpBundle\Twig;
 
+use evaisse\SimpleHttpBundle\Service\ReplayRequestSignature;
 use Symfony\Component\BrowserKit\Exception\JsonException;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Error\LoaderError;
@@ -12,7 +13,10 @@ use Twig\TwigFunction;
 
 class Extension extends AbstractExtension
 {
-    public function __construct(protected LoaderInterface $loader)
+    public function __construct(
+        protected LoaderInterface $loader,
+        private ?ReplayRequestSignature $replayRequestSignature = null
+    )
     {
     }
 
@@ -43,6 +47,7 @@ class Extension extends AbstractExtension
 
         return [
             new TwigFunction('simple_http_decode_body', array($this, 'decodeBody'), $safe),
+            new TwigFunction('simple_http_replay_token', array($this, 'buildReplayToken')),
         ];
     }
 
@@ -252,5 +257,14 @@ class Extension extends AbstractExtension
         }
 
         return [];
+    }
+
+    public function buildReplayToken(string $token, int $callIndex): string
+    {
+        if (!$this->replayRequestSignature) {
+            return '';
+        }
+
+        return $this->replayRequestSignature->generate($token, $callIndex);
     }
 }
