@@ -5,7 +5,6 @@ namespace evaisse\SimpleHttpBundle\Controller;
 use evaisse\SimpleHttpBundle\Service\Helper;
 use evaisse\SimpleHttpBundle\Service\ReplayRequestResolver;
 use evaisse\SimpleHttpBundle\Service\ReplayRequestSignature;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * Class ReplayController
  * @package evaisse\SimpleHttpBundle\Controller
  */
-class ReplayController extends AbstractController
+class ReplayController
 {
     public function __construct(
         protected Helper $serviceHelper,
