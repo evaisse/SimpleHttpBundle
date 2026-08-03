@@ -4,7 +4,13 @@ SimpleHttpBundle
 
 ### While Still maintained, I recommand you to replace this bundle with the [symfony/http-client](https://github.com/symfony/http-client) with has better support and a handy plug-in support.
 
-A symfony2/3/4/5 http client bundle built on the httpfoundation component (instead of guzzle), using cURL as engine.
+A Symfony 5.4/6.x HTTP client bundle built on the HttpFoundation component (instead of guzzle), using cURL as engine.
+
+Requirements
+======
+
+- PHP 8.1+
+- Symfony 5.4 or 6.x
 
 [![Coverage Status](https://coveralls.io/repos/evaisse/SimpleHttpBundle/badge.svg?branch=master)](https://coveralls.io/r/evaisse/SimpleHttpBundle?branch=master)
 
@@ -78,6 +84,8 @@ or
 
 
 You can now resend an http call directly from the profiler debug panel
+
+Replay requests are now resolved server-side from the profiler storage. The browser only sends the profiler token and request index, not the serialized request payload.
   
 
 Panels details
@@ -198,6 +206,5 @@ $http->execute([
     $stmt
 ]);
 ```
-
 
 
