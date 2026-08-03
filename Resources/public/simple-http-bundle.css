@@ -196,7 +196,7 @@ a.http-call__index:hover {
     display: inline;
 }
 
-button[data-simple-http-replay] {
+button[data-simple-http-replay-token] {
     border: 1px solid #CCD;
     background: #EEF;
     color: #777;
@@ -216,13 +216,13 @@ button[data-simple-http-replay] {
 }
 
 
-button[data-simple-http-replay] img {
+button[data-simple-http-replay-token] img {
     float: left;
     zoom: 75%;
     margin-right: 10px;
 }
 
-button[data-simple-http-replay] img.rotating {
+button[data-simple-http-replay-token] img.rotating {
     -webkit-animation: rotating 2s linear infinite;
 }
 

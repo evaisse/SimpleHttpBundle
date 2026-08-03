@@ -2,13 +2,13 @@
  *
  */
 (function ($) {
-    function replayRequest(url, request, callback) {
-        window.console && console.log('Replay request :', request);
-
+    function replayRequest(url, token, callIndex, signature, callback) {
         $.post({
             url: url,
             data: {
-                request: JSON.stringify(request)
+                token: token,
+                callIndex: callIndex,
+                _token: signature
             }
         }).done(function (data, success, xhr) {
             // Wait 1 second to be sure the profiler has been generated and can be accessed
@@ -69,7 +69,7 @@
             filterByHost(event.target.value);
         });
 
-        $(element).find('[data-simple-http-replay]').click(function (replay, i) {
+        $(element).find('[data-simple-http-replay-token]').click(function (replay, i) {
 
             var $panel = $(this).closest('.http-call'),
                 $butt = $(this);
@@ -78,7 +78,12 @@
 
             $butt.prop('disabled', true);
 
-            replayRequest($(this).data('simpleHttpReplayUrl'), $(this).data('simpleHttpReplay'), function (error, block) {
+            replayRequest(
+                $(this).data('simpleHttpReplayUrl'),
+                $(this).data('simpleHttpReplayToken'),
+                $(this).data('simpleHttpReplayIndex'),
+                $(this).data('simpleHttpReplaySignature'),
+                function (error, block) {
                 if (error) {
                     alert('Error on replay request');
                 }
@@ -90,7 +95,8 @@
                     .appendTo($panel.find('.http-call__replay-calls:first'));
                 $(document).trigger('setup', [block]); // init events
                 $buttImg.removeClass('rotating');
-            });
+                }
+            );
 
         });
 
@@ -103,6 +109,5 @@
     $(document).trigger('setup', [document]);
 
 })(jQuery);
-
 
 

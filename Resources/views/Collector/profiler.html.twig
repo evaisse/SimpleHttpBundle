@@ -135,7 +135,7 @@
 
     {% for index, call in collector.calls %}
         <a name="request{{ index }}"></a>
-        {% include '@SimpleHttp/Collector/partials/call.html.twig' with { 'call': call } %}
+        {% include '@SimpleHttp/Collector/partials/call.html.twig' with { 'call': call, 'index': index, 'token': token } %}
     {% endfor %}
 
     <script type="text/javascript" src="{{ asset('bundles/simplehttp/libs/jquery/jquery-1.12.1.js') }}"></script>

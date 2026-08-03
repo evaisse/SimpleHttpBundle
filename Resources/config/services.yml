@@ -5,7 +5,13 @@ services:
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         public: false
 
-    evaisse\SimpleHttpBundle\Controller\ReplayController: ~
+    evaisse\SimpleHttpBundle\Controller\ReplayController:
+        arguments:
+            $debug: '%kernel.debug%'
+    evaisse\SimpleHttpBundle\Service\ReplayRequestResolver: ~
+    evaisse\SimpleHttpBundle\Service\ReplayRequestSignature:
+        arguments:
+            $secret: '%kernel.secret%'
     evaisse\SimpleHttpBundle\Http\Kernel: ~
     evaisse\SimpleHttpBundle\Service\Helper: ~
 
@@ -38,6 +44,7 @@ services:
             - { name: data_collector, template: "@SimpleHttp/Collector/profiler", id: "simplehttpprofiler" }
 
     evaisse\SimpleHttpBundle\Twig\Extension:
-        arguments: ["@twig.loader"]
+        arguments:
+            $loader: "@twig.loader"
         tags:
             - { name: twig.extension }
