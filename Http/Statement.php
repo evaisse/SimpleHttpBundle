@@ -16,6 +16,7 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use React\Promise\Deferred;
 use React\Promise\Promise;
+use React\Promise\PromiseInterface;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -397,7 +398,7 @@ class Statement implements LoggerAwareInterface
      */
     public function onSuccess(callable $callable)
     {
-        $this->getPromise()->then($callable);
+        $this->consumePromise($this->getPromise()->then($callable));
         return $this;
     }
 
@@ -410,7 +411,7 @@ class Statement implements LoggerAwareInterface
      */
     public function onError(callable $callable)
     {
-        $this->getPromise()->then(null, $callable);
+        $this->consumePromise($this->getPromise()->then(null, $callable));
         return $this;
     }
 
@@ -423,7 +424,22 @@ class Statement implements LoggerAwareInterface
      */
     public function onProgress(callable $callable)
     {
-        $this->getPromise()->then(null, null, $callable);
+        $promise = $this->getPromise();
+
+        if (method_exists(object_or_class: $promise, method: 'progress')) {
+            $progressPromise = $promise->progress($callable);
+
+            if ($progressPromise instanceof PromiseInterface) {
+                $this->consumePromise($progressPromise);
+            }
+
+            return $this;
+        }
+
+        $this->logger?->warning(
+            'Statement::onProgress() is ignored because the installed react/promise runtime does not support progress callbacks.'
+        );
+
         return $this;
     }
 
@@ -437,11 +453,27 @@ class Statement implements LoggerAwareInterface
     public function onFinish(callable $callable)
     {
         if (method_exists(object_or_class: $this->getPromise(), method: 'finally')) {
-            $this->getPromise()->finally($callable);
+            $this->consumePromise($this->getPromise()->finally($callable));
         } else {
-            $this->getPromise()->always($callable);
+            $this->consumePromise($this->getPromise()->always($callable));
         }
         return $this;
+    }
+
+    /**
+     * React Promise v3 reports unhandled rejections on discarded child promises.
+     */
+    private function consumePromise(PromiseInterface $promise): void
+    {
+        if (method_exists(object_or_class: $promise, method: 'catch')) {
+            $promise->catch(static function (): void {
+            });
+
+            return;
+        }
+
+        $promise->otherwise(static function (): void {
+        });
     }
 
 
