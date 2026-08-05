@@ -8,6 +8,9 @@ services:
     evaisse\SimpleHttpBundle\Controller\ReplayController:
         arguments:
             $debug: '%kernel.debug%'
+        public: true
+        tags:
+            - { name: controller.service_arguments }
     evaisse\SimpleHttpBundle\Service\ReplayRequestResolver: ~
     evaisse\SimpleHttpBundle\Service\ReplayRequestSignature:
         arguments:
