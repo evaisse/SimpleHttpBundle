@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Class ReplayController
@@ -27,7 +27,7 @@ class ReplayController
     ) {
     }
 
-    #[Route('/http-replay', name: 'simple_http.replay_request', methods: ['POST'])]
+    #[Route('/http-replay', name: 'simple_http.replay_request', methods: [Request::METHOD_POST])]
     public function replayRequestAction(Request $request): Response
     {
         if (!$this->debug || !$this->replayRequestResolver->isAvailable()) {
