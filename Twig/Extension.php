@@ -16,8 +16,7 @@ class Extension extends AbstractExtension
     public function __construct(
         protected LoaderInterface $loader,
         private ?ReplayRequestSignature $replayRequestSignature = null
-    )
-    {
+    ) {
     }
 
     public function getName(): string
