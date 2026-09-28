@@ -8,18 +8,13 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 class ReplayRequestSignature
 {
     public function __construct(
-        private string $secret,
-        private ?CsrfTokenManagerInterface $csrfTokenManager = null
+        private string $secret
     ) {
     }
 
     public function generate(string $token, int $callIndex): string
     {
         $tokenId = $this->buildTokenId($token, $callIndex);
-
-        if ($this->csrfTokenManager) {
-            return $this->csrfTokenManager->getToken($tokenId)->getValue();
-        }
 
         return hash_hmac('sha256', $tokenId, $this->secret);
     }
@@ -31,10 +26,6 @@ class ReplayRequestSignature
         }
 
         $tokenId = $this->buildTokenId($token, $callIndex);
-
-        if ($this->csrfTokenManager) {
-            return $this->csrfTokenManager->isTokenValid(new CsrfToken($tokenId, $submittedToken));
-        }
 
         return hash_equals($this->generate($token, $callIndex), $submittedToken);
     }
